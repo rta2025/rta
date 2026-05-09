@@ -936,12 +936,150 @@ body {
 
 /* ── MISC ── */
 .empty { text-align: center; padding: 36px; color: var(--text-muted); font-size: 0.88rem; }
+
+/* ── FIXTURE ── */
+.fix-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.fix-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.fix-player-header {
+  padding: 12px 16px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  font-weight: 700;
+  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fix-row {
+  display: flex;
+  align-items: center;
+  padding: 9px 16px;
+  border-bottom: 1px solid rgba(36,48,36,0.35);
+  font-size: 0.84rem;
+  gap: 10px;
+}
+
+.fix-row:last-child { border-bottom: none; }
+
+.fix-status-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+}
+
+.fix-done   { background: var(--accent); }
+.fix-todo   { background: var(--text-muted); }
+.fix-result { margin-left: auto; font-family: 'Oswald', sans-serif; font-size: 0.85rem; color: var(--text-dim); }
+
+.fix-legend {
+  display: flex; gap: 20px; flex-wrap: wrap;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+.fix-legend-item { display: flex; align-items: center; gap: 7px; }
+
+/* ── ARCHIVE ── */
+.archive-season {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.archive-season-header {
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  background: var(--surface2);
+  transition: background 0.15s;
+}
+
+.archive-season-header:hover { background: var(--surface3); }
+
+.archive-season-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  color: var(--gold);
+  flex: 1;
+}
+
+.archive-season-meta {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.archive-body { display: none; padding: 16px 20px; }
+.archive-body.open { display: block; }
+
+.archive-mini-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  margin-bottom: 12px;
+}
+
+.archive-mini-table th {
+  padding: 7px 10px;
+  text-align: left;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.archive-mini-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(36,48,36,0.35);
+}
+
+.archive-mini-table tr:last-child td { border-bottom: none; }
 .filter-row { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
 .filter-select { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 7px; font-family: 'Mulish', sans-serif; font-size: 0.82rem; outline: none; cursor: pointer; -webkit-appearance: none; }
 .chip { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; margin-left: 6px; }
 .chip-g { background: rgba(93,201,93,0.15); color: var(--accent); }
 .chip-r { background: rgba(224,85,85,0.12); color: var(--red); }
 </style>
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // ════════════════════════════════════════════════
+  // 🔧 BURAYA KENDİ SUPABASE BİLGİLERİNİ GİR
+  // ════════════════════════════════════════════════
+  const SUPABASE_URL    = "https://owbwkkptimsibwabuozc.supabase.co";       // örn: https://xyzxyz.supabase.co
+  const SUPABASE_ANON   = "sb_publishable_JNAjF1j0CUZRnSL4tUQAeA_yVw1Ug8M";  // Project Settings > API > anon public
+
+  window._sbReady = false;
+  try {
+    const { createClient } = supabase;
+    window._sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+    window._sbReady = true;
+    window.dispatchEvent(new Event('sbReady'));
+  } catch(e) {
+    console.warn('Supabase başlatılamadı:', e);
+  }
+</script>
 </head>
 <body>
 
@@ -995,6 +1133,8 @@ body {
     <button class="nav-btn active" onclick="showPage('puan')">Puan Durumu</button>
     <button class="nav-btn admin-only" id="nav-skor" onclick="showPage('skor')">Skor Gir</button>
     <button class="nav-btn" onclick="showPage('sonuclar')">Sonuçlar</button>
+    <button class="nav-btn" onclick="showPage('fiktur')">Fikstür</button>
+    <button class="nav-btn" onclick="showPage('arsiv')">Arşiv</button>
     <button class="nav-btn" onclick="showPage('istatistik')">İstatistik</button>
     <button class="nav-btn" onclick="showPage('kurallar')">Kurallar</button>
     <button class="nav-btn admin-only" id="nav-yonetim" onclick="showPage('yonetim')">Yönetim</button>
@@ -1275,8 +1415,58 @@ body {
     </p>
     <button class="btn btn-blue" onclick="document.getElementById('pw-modal').classList.add('open')">Şifreyi Değiştir</button>
   </div>
+
+  <div class="sec-title">İlk Kurulum</div>
+  <div class="score-card" style="max-width:520px" id="seed-card">
+    <div class="card-title" style="font-size:1rem">🚀 Oyuncuları Supabase'e Yükle</div>
+    <p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:8px;line-height:1.6">
+      Supabase veritabanı şu an boş. Aşağıdaki butona basarak tüm 36 oyuncuyu tek seferde yükle.<br>
+      <strong style="color:var(--accent)">Bunu sadece bir kere yapman gerekiyor.</strong>
+    </p>
+    <div id="seed-status" style="font-size:0.8rem;color:var(--text-dim);margin-bottom:14px;min-height:20px"></div>
+    <button class="btn btn-green" id="seed-btn" onclick="seedPlayers()">⬆️ 36 Oyuncuyu Supabase'e Yükle</button>
+  </div>
 </div>
 
+
+<!-- ══ FİKSTÜR ══ -->
+<div id="page-fiktur" class="page">
+  <div class="hero" style="margin-bottom:20px">
+    <div class="hero-title" style="font-size:1.5rem">FİKSTÜR</div>
+    <div class="hero-sub">Oynanmamış maçlar lig bazında gösterilir. Her oyuncu diğeriyle en az 1 kez oynamalıdır.</div>
+  </div>
+  <div class="inner-tabs" id="fix-tabs">
+    <button class="inner-tab active" onclick="setFixLeague('super')">Süper Lig</button>
+    <button class="inner-tab" onclick="setFixLeague('l2')">2. Lig</button>
+    <button class="inner-tab" onclick="setFixLeague('l3')">3. Lig</button>
+    <button class="inner-tab" onclick="setFixLeague('l4')">4. Lig</button>
+  </div>
+  <div id="fixture-content"></div>
+</div>
+
+<!-- ══ ARŞİV ══ -->
+<div id="page-arsiv" class="page">
+  <div class="hero" style="margin-bottom:20px">
+    <div class="hero-title" style="font-size:1.5rem">SEZON ARŞİVİ</div>
+    <div class="hero-sub">Geçmiş sezonların puan durumu ve istatistikleri</div>
+  </div>
+
+  <!-- Aktif sezon kaydet butonu (sadece admin) -->
+  <div id="archive-admin-panel" style="display:none;margin-bottom:20px">
+    <div class="score-card" style="padding:20px">
+      <div class="card-title" style="font-size:1rem">📦 Mevcut Sezonu Arşivle</div>
+      <p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:14px;line-height:1.6">
+        Sezon sonunda bu butona bas. Mevcut puan tablosu arşive kaydedilir, maçlar sıfırlanmaz.
+      </p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <input type="text" id="season-name-input" placeholder="Sezon adı: örn. 2026 Bahar" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 13px;border-radius:8px;font-family:'Mulish',sans-serif;font-size:0.88rem;outline:none;min-width:220px">
+        <button class="btn btn-green" onclick="archiveCurrentSeason()">📦 Arşivle</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="archive-list"></div>
+</div>
 </div><!-- /main -->
 
 <div class="toast" id="toast"></div>
@@ -1285,13 +1475,136 @@ body {
 // ═══════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════
-const SK = 'rta_ligi_v2';
+const SK = 'rta_ligi_v2'; // localStorage cache key
 
+// ── Local cache load ──
 function loadState() {
   try { const d = localStorage.getItem(SK); return d ? JSON.parse(d) : null; } catch { return null; }
 }
 
-function saveState() { localStorage.setItem(SK, JSON.stringify(state)); }
+// ── saveState: localStorage + Supabase upsert ──
+async function saveState() {
+  localStorage.setItem(SK, JSON.stringify(state));
+  if (!window._sbReady) return;
+  const sb = window._sb;
+  try {
+    // Upsert meta row (id=1, singleton)
+    await sb.from('meta').upsert({
+      id: 1,
+      next_player_id: state.nextPlayerId,
+      next_match_id:  state.nextMatchId
+    });
+    // Upsert all players
+    if (state.players.length) {
+      await sb.from('players').upsert(
+        state.players.map(p => ({
+          id: p.id, name: p.name, league: p.league
+        }))
+      );
+    }
+    // Upsert all matches
+    if (state.matches.length) {
+      await sb.from('matches').upsert(
+        state.matches.map(m => ({
+          id:           m.id,
+          league:       m.league,
+          winner:       m.winner,
+          loser:        m.loser,
+          match_date:   m.date,
+          score:        m.score,
+          sets_json:    JSON.stringify(m.sets || []),
+          winning_sets: m.winningSets,
+          losing_sets:  m.losingSets,
+          wpts:         m.wpts,
+          lpts:         m.lpts,
+          walkover:     m.walkover || false
+        }))
+      );
+    }
+  } catch(e) { console.warn('Supabase write error:', e); }
+}
+
+// ── deleteMatch from Supabase ──
+async function sbDeleteMatch(id) {
+  if (!window._sbReady) return;
+  try { await window._sb.from('matches').delete().eq('id', id); } catch(e) {}
+}
+
+// ── deletePlayer from Supabase ──
+async function sbDeletePlayer(id) {
+  if (!window._sbReady) return;
+  try {
+    await window._sb.from('matches').delete().or(`winner.eq.${id},loser.eq.${id}`);
+    await window._sb.from('players').delete().eq('id', id);
+  } catch(e) {}
+}
+
+// ── Full load from Supabase ──
+async function loadFromSupabase() {
+  if (!window._sbReady) return false;
+  const sb = window._sb;
+  try {
+    const [{ data: players }, { data: matches }, { data: meta }] = await Promise.all([
+      sb.from('players').select('*').order('id'),
+      sb.from('matches').select('*').order('id'),
+      sb.from('meta').select('*').eq('id', 1).single()
+    ]);
+
+    if (players && players.length) state.players = players;
+    if (matches && matches.length) {
+      state.matches = matches.map(m => ({
+        id:          m.id,
+        league:      m.league,
+        winner:      m.winner,
+        loser:       m.loser,
+        date:        m.match_date,
+        score:       m.score,
+        sets:        (() => { try { return JSON.parse(m.sets_json || '[]'); } catch { return []; } })(),
+        winningSets: m.winning_sets,
+        losingSets:  m.losing_sets,
+        wpts:        m.wpts,
+        lpts:        m.lpts,
+        walkover:    m.walkover
+      }));
+    }
+    if (meta) {
+      state.nextPlayerId = meta.next_player_id || state.nextPlayerId;
+      state.nextMatchId  = meta.next_match_id  || state.nextMatchId;
+    }
+    localStorage.setItem(SK, JSON.stringify(state));
+    return true;
+  } catch(e) { console.warn('Supabase load error:', e); return false; }
+}
+
+// ── Polling (30 saniyede bir Supabase'den çek) ──
+let _pollInterval = null;
+function startSupabaseSync() {
+  if (_pollInterval || !window._sbReady) return;
+
+  // İlk bağlantı başarılıysa yeşil yak
+  setConnected(true);
+
+  // Her 30 saniyede veriyi çek, değişiklik varsa güncelle
+  _pollInterval = setInterval(async () => {
+    const before = JSON.stringify({ p: state.players.length, m: state.matches.length, pts: state.matches.reduce((s,m)=>s+m.wpts,0) });
+    const ok = await loadFromSupabase();
+    if (!ok) { setConnected(false); return; }
+    setConnected(true);
+    const after = JSON.stringify({ p: state.players.length, m: state.matches.length, pts: state.matches.reduce((s,m)=>s+m.wpts,0) });
+    if (before !== after) {
+      renderAll();
+      showSyncBadge();
+    }
+  }, 30000);
+}
+
+function showSyncBadge() {
+  const el = document.getElementById('sync-badge');
+  if (!el) return;
+  el.style.opacity = '1';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.style.opacity = '0'; }, 2000);
+}
 
 const DEFAULT = {
   players: [
@@ -1553,6 +1866,14 @@ function renderAll() {
   ['super','l2','l3','l4'].forEach(renderStanding);
   renderPlayoffs();
   updateKPIs();
+  // Refresh open pages
+  const ap = document.querySelector('.page.active');
+  if (ap) {
+    if (ap.id === 'page-sonuclar')   renderResults();
+    if (ap.id === 'page-fiktur')     renderFixture();
+    if (ap.id === 'page-arsiv')      renderArchive();
+    if (ap.id === 'page-istatistik') renderStats();
+  }
 }
 
 function updateKPIs() {
@@ -1751,6 +2072,7 @@ function renderResults() {
 
 function deleteMatch(id) {
   state.matches = state.matches.filter(m => m.id !== id);
+  sbDeleteMatch(id);
   saveState(); renderAll(); renderResults();
   showToast('Maç silindi', 'err');
 }
@@ -1898,6 +2220,7 @@ function deletePlayer(id) {
   if (!confirm('Oyuncu ve tüm maçları silinecek!')) return;
   state.players = state.players.filter(p=>p.id!==id);
   state.matches = state.matches.filter(m=>m.winner!==id && m.loser!==id);
+  sbDeletePlayer(id);
   saveState(); renderAll(); renderAdminTable();
   showToast('Oyuncu silindi', 'err');
 }
@@ -1950,6 +2273,62 @@ function importData(input) {
     } catch { showToast('Geçersiz dosya!', 'err'); }
   };
   reader.readAsText(file);
+}
+
+// ═══════════════════════════════════════════════════
+// SEED — İlk kurulumda oyuncuları Supabase'e yükle
+// ═══════════════════════════════════════════════════
+async function seedPlayers() {
+  if (!window._sbReady) {
+    showToast('Supabase bağlantısı yok! Config ayarlarını kontrol et.', 'err');
+    return;
+  }
+  const btn = document.getElementById('seed-btn');
+  const status = document.getElementById('seed-status');
+  btn.disabled = true;
+  btn.textContent = '⏳ Yükleniyor...';
+
+  try {
+    const sb = window._sb;
+
+    // Check if players already exist
+    const { data: existing } = await sb.from('players').select('id').limit(1);
+    if (existing && existing.length > 0) {
+      status.innerHTML = '<span style="color:var(--accent)">✅ Oyuncular zaten Supabase'de mevcut!</span>';
+      btn.textContent = '✅ Zaten yüklü';
+      return;
+    }
+
+    // Upsert all players
+    const { error: pe } = await sb.from('players').upsert(
+      state.players.map(p => ({ id: p.id, name: p.name, league: p.league }))
+    );
+    if (pe) throw pe;
+
+    // Upsert meta
+    const { error: me } = await sb.from('meta').upsert({
+      id: 1,
+      next_player_id: state.nextPlayerId,
+      next_match_id: state.nextMatchId
+    });
+    if (me) throw me;
+
+    status.innerHTML = `<span style="color:var(--accent)">✅ ${state.players.length} oyuncu başarıyla Supabase'e yüklendi!</span>`;
+    btn.textContent = '✅ Yüklendi';
+    showToast(`✅ ${state.players.length} oyuncu yüklendi!`);
+
+    // Hide seed card after success
+    setTimeout(() => {
+      const card = document.getElementById('seed-card');
+      if (card) card.style.display = 'none';
+    }, 3000);
+
+  } catch(e) {
+    status.innerHTML = `<span style="color:var(--red)">❌ Hata: ${e.message || e}</span>`;
+    btn.disabled = false;
+    btn.textContent = '⬆️ Tekrar Dene';
+    showToast('Yükleme hatası! Supabase config'ini kontrol et.', 'err');
+  }
 }
 
 // ═══════════════════════════════════════════════════
@@ -2049,10 +2428,236 @@ function changePassword() {
 }
 
 // ═══════════════════════════════════════════════════
+// FİKSTÜR
+// ═══════════════════════════════════════════════════
+let _fixLeague = 'super';
+
+function setFixLeague(lg) {
+  _fixLeague = lg;
+  document.querySelectorAll('#fix-tabs .inner-tab').forEach((b, i) =>
+    b.classList.toggle('active', ['super','l2','l3','l4'][i] === lg));
+  renderFixture();
+}
+
+function renderFixture() {
+  const lg = _fixLeague;
+  const players = state.players.filter(p => p.league === lg);
+  const el = document.getElementById('fixture-content');
+
+  if (!players.length) {
+    el.innerHTML = '<div class="empty">Bu ligde oyuncu yok.</div>';
+    return;
+  }
+
+  // Build played pairs set
+  const played = new Set();
+  state.matches.filter(m => m.league === lg).forEach(m => {
+    const key = [Math.min(m.winner, m.loser), Math.max(m.winner, m.loser)].join('-');
+    played.add(key);
+  });
+
+  // Stats per player
+  let totalPairs = 0, donePairs = 0;
+  players.forEach(p => {
+    players.forEach(q => {
+      if (p.id >= q.id) return;
+      totalPairs++;
+      const key = `${Math.min(p.id,q.id)}-${Math.max(p.id,q.id)}`;
+      if (played.has(key)) donePairs++;
+    });
+  });
+
+  const pct = totalPairs ? Math.round(donePairs / totalPairs * 100) : 0;
+
+  // Progress bar
+  let html = `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="font-size:0.85rem;font-weight:600">Tamamlanma Durumu</span>
+        <span style="font-family:'Oswald',sans-serif;font-size:1.1rem;color:var(--accent)">${donePairs} / ${totalPairs} maç</span>
+      </div>
+      <div style="background:var(--surface3);border-radius:20px;height:8px;overflow:hidden">
+        <div style="background:var(--accent);height:100%;width:${pct}%;transition:width 0.5s;border-radius:20px"></div>
+      </div>
+      <div style="font-size:0.75rem;color:var(--text-dim);margin-top:6px">%${pct} tamamlandı</div>
+    </div>
+    <div class="fix-legend">
+      <div class="fix-legend-item"><span class="fix-status-dot fix-done"></span>Oynandı</div>
+      <div class="fix-legend-item"><span class="fix-status-dot fix-todo"></span>Oynanmadı</div>
+    </div>
+    <div class="fix-grid">`;
+
+  players.forEach(p => {
+    const opponents = players.filter(q => q.id !== p.id);
+    const rows = opponents.map(q => {
+      const key = `${Math.min(p.id,q.id)}-${Math.max(p.id,q.id)}`;
+      const isDone = played.has(key);
+
+      // Find match score if played
+      let scoreStr = '';
+      if (isDone) {
+        const m = state.matches.find(m => m.league === lg &&
+          ((m.winner === p.id && m.loser === q.id) ||
+           (m.winner === q.id && m.loser === p.id)));
+        if (m) {
+          const won = m.winner === p.id;
+          scoreStr = `<span style="color:${won?'var(--accent)':'var(--red)'}">${won?'G':'M'} ${m.score}</span>`;
+        }
+      }
+
+      const [bg, fg] = avColor(q.name);
+      return `<div class="fix-row">
+        <span class="fix-status-dot ${isDone ? 'fix-done' : 'fix-todo'}"></span>
+        <span class="av" style="background:${bg};color:${fg};width:24px;height:24px;font-size:0.62rem">${initials(q.name)}</span>
+        <span style="${isDone ? 'color:var(--text-dim)' : ''}">${q.name}</span>
+        <span class="fix-result">${scoreStr}</span>
+      </div>`;
+    }).join('');
+
+    const [pbg, pfg] = avColor(p.name);
+    const playerDone = opponents.filter(q => {
+      const key = `${Math.min(p.id,q.id)}-${Math.max(p.id,q.id)}`;
+      return played.has(key);
+    }).length;
+
+    html += `<div class="fix-card">
+      <div class="fix-player-header">
+        <span class="av" style="background:${pbg};color:${pfg};width:28px;height:28px;font-size:0.7rem">${initials(p.name)}</span>
+        ${p.name}
+        <span style="margin-left:auto;font-size:0.72rem;color:var(--text-dim)">${playerDone}/${opponents.length}</span>
+      </div>
+      ${rows}
+    </div>`;
+  });
+
+  html += '</div>';
+  el.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════
+// ARŞİV
+// ═══════════════════════════════════════════════════
+const ARCHIVE_KEY = 'rta_archive_v1';
+
+function loadArchive() {
+  try { return JSON.parse(localStorage.getItem(ARCHIVE_KEY) || '[]'); } catch { return []; }
+}
+
+function saveArchive(data) {
+  localStorage.setItem(ARCHIVE_KEY, JSON.stringify(data));
+}
+
+function archiveCurrentSeason() {
+  const nameInput = document.getElementById('season-name-input');
+  const name = nameInput.value.trim();
+  if (!name) { showToast('Sezon adını girin!', 'err'); return; }
+
+  const archive = loadArchive();
+  const snapshot = {
+    id: Date.now(),
+    name,
+    date: new Date().toLocaleDateString('tr-TR'),
+    leagues: {}
+  };
+
+  ['super','l2','l3','l4'].forEach(lg => {
+    snapshot.leagues[lg] = getStandings(lg).map((p, i) => ({
+      rank: i + 1,
+      name: p.name,
+      mp: p.mp,
+      mw: p.mw,
+      ml: p.ml,
+      pts: p.pts
+    }));
+  });
+
+  snapshot.totalMatches = state.matches.length;
+  archive.unshift(snapshot);
+  saveArchive(archive);
+  nameInput.value = '';
+  renderArchive();
+  showToast(`✅ "${name}" arşivlendi!`);
+}
+
+function deleteArchiveSeason(id) {
+  if (!confirm('Bu sezon arşivi silinecek!')) return;
+  const archive = loadArchive().filter(s => s.id !== id);
+  saveArchive(archive);
+  renderArchive();
+  showToast('Sezon silindi', 'err');
+}
+
+function renderArchive() {
+  const isAdmin = isLoggedIn();
+  const panel = document.getElementById('archive-admin-panel');
+  if (panel) panel.style.display = isAdmin ? 'block' : 'none';
+
+  const archive = loadArchive();
+  const el = document.getElementById('archive-list');
+  if (!el) return;
+
+  if (!archive.length) {
+    el.innerHTML = `<div class="empty" style="padding:60px">
+      📦 Henüz arşivlenmiş sezon yok.<br>
+      <span style="font-size:0.78rem;margin-top:8px;display:block">Sezon sonunda yönetici panelinden mevcut sezonu arşivleyebilirsiniz.</span>
+    </div>`;
+    return;
+  }
+
+  const ligNames = {super:'Süper Lig', l2:'2. Lig', l3:'3. Lig', l4:'4. Lig'};
+  const ligClass = {super:'super', l2:'l2', l3:'l3', l4:'l4'};
+
+  el.innerHTML = archive.map(season => {
+    const ligRows = Object.entries(season.leagues).map(([lg, players]) => {
+      if (!players.length) return '';
+      const rows = players.slice(0, 5).map(p =>
+        `<tr>
+          <td style="color:var(--text-muted)">${p.rank}</td>
+          <td style="font-weight:600">${p.name}</td>
+          <td>${p.mp}</td>
+          <td style="color:var(--accent);font-weight:700">${p.pts}</td>
+        </tr>`
+      ).join('');
+
+      return `
+        <div style="margin-bottom:16px">
+          <div style="font-family:'Oswald',sans-serif;font-size:0.85rem;letter-spacing:1.5px;
+            color:var(--${lg === 'super' ? 'gold' : lg === 'l2' ? 'silver' : lg === 'l3' ? 'bronze' : 'text-dim'});
+            margin-bottom:8px">${ligNames[lg]} — İlk 5</div>
+          <table class="archive-mini-table">
+            <thead><tr><th>#</th><th>Oyuncu</th><th>Maç</th><th>Puan</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+          ${players.length > 5 ? `<div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px">+${players.length-5} oyuncu daha</div>` : ''}
+        </div>`;
+    }).join('');
+
+    const deleteBtn = isAdmin
+      ? `<button class="btn btn-sm" onclick="deleteArchiveSeason(${season.id})" style="margin-left:12px">Sil</button>`
+      : '';
+
+    return `<div class="archive-season">
+      <div class="archive-season-header" onclick="this.nextElementSibling.classList.toggle('open')">
+        <div>
+          <div class="archive-season-title">🏆 ${season.name}</div>
+          <div class="archive-season-meta">${season.date} • ${season.totalMatches} maç oynandı</div>
+        </div>
+        <span style="color:var(--text-muted);font-size:1.2rem">▼</span>
+        ${deleteBtn}
+      </div>
+      <div class="archive-body">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px">
+          ${ligRows}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════════════
 function showPage(name) {
-  // guard: non-admins can't reach skor or yonetim
   if (!isLoggedIn() && (name === 'skor' || name === 'yonetim')) {
     showToast('Bu sayfa sadece yöneticilere açık.', 'err');
     return;
@@ -2060,12 +2665,14 @@ function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
 
-  const pages = ['puan','skor','sonuclar','istatistik','kurallar','yonetim'];
+  const pages = ['puan','skor','sonuclar','fiktur','arsiv','istatistik','kurallar','yonetim'];
   document.querySelectorAll('.nav-btn').forEach((b, i) =>
     b.classList.toggle('active', pages[i] === name));
 
   if (name === 'skor')       { updatePlayerDropdowns(); document.getElementById('mdate').value = new Date().toISOString().split('T')[0]; }
   if (name === 'sonuclar')   { renderResults(); }
+  if (name === 'fiktur')     { renderFixture(); }
+  if (name === 'arsiv')      { renderArchive(); }
   if (name === 'istatistik') { renderStats(); }
   if (name === 'yonetim')    { renderAdminTable(); }
 }
@@ -2109,15 +2716,94 @@ document.getElementById('pw-modal').addEventListener('click', function(e) {
   if (e.target === this) this.classList.remove('open');
 });
 
-// Never show overlay on load — it's triggered manually via header button
-document.getElementById('login-overlay').style.display = 'none';
+// ── Sync status badge ──
+const syncBadge = document.createElement('div');
+syncBadge.id = 'sync-badge';
+syncBadge.innerHTML = '🔄 Güncellendi';
 
-if (isLoggedIn()) {
-  setAdminUI(true);
-} else {
-  setAdminUI(false);
+// Manuel yenile butonu (header'a eklenecek)
+const refreshBtn = document.createElement('button');
+refreshBtn.id = 'manual-refresh-btn';
+refreshBtn.title = 'Şimdi güncelle';
+refreshBtn.innerHTML = '🔄';
+refreshBtn.style.cssText = `
+  background: rgba(26,122,26,0.12);
+  border: 1px solid rgba(93,201,93,0.2);
+  color: var(--accent);
+  width: 32px; height: 32px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.18s;
+  flex-shrink: 0;
+`;
+refreshBtn.onmouseenter = () => refreshBtn.style.background = 'rgba(26,122,26,0.25)';
+refreshBtn.onmouseleave = () => refreshBtn.style.background = 'rgba(26,122,26,0.12)';
+refreshBtn.onclick = async () => {
+  refreshBtn.innerHTML = '⏳';
+  refreshBtn.disabled = true;
+  const ok = await loadFromSupabase();
+  if (ok) { renderAll(); showSyncBadge(); setConnected(true); }
+  else setConnected(false);
+  refreshBtn.innerHTML = '🔄';
+  refreshBtn.disabled = false;
+};
+document.querySelector('.header').appendChild(refreshBtn);
+syncBadge.style.cssText = `
+  position:fixed; bottom:24px; left:24px;
+  background:#1a7a1a; color:white;
+  padding:8px 16px; border-radius:8px;
+  font-size:0.8rem; font-weight:700;
+  opacity:0; transition:opacity 0.4s;
+  z-index:998; pointer-events:none;
+`;
+document.body.appendChild(syncBadge);
+
+// ── Connection indicator dot in header ──
+const connDot = document.createElement('div');
+connDot.id = 'conn-dot';
+connDot.title = 'Supabase — 30 saniyede bir otomatik güncellenir';
+connDot.style.cssText = `
+  width:8px; height:8px; border-radius:50%;
+  background:#888; flex-shrink:0;
+  transition: background 0.3s;
+  margin-left:4px;
+`;
+document.querySelector('.brand').after(connDot);
+
+function setConnected(ok) {
+  const d = document.getElementById('conn-dot');
+  if (!d) return;
+  d.style.background = ok ? '#5dc95d' : '#e05555';
+  d.title = ok ? '🟢 Supabase bağlı — 30 sn'de bir güncellenir' : '🔴 Supabase bağlantısı yok — config ayarlarını kontrol et';
 }
+
+// ── Start ──
+document.getElementById('login-overlay').style.display = 'none';
+if (isLoggedIn()) { setAdminUI(true); } else { setAdminUI(false); }
+
+// 1) Render instantly from localStorage cache
 renderAll();
+
+// 2) Then load fresh from Supabase and start realtime sync
+async function initSupabase() {
+  if (!window._sbReady) { setConnected(false); return; }
+  setConnected(false); // show orange/grey while connecting
+  const loaded = await loadFromSupabase();
+  if (loaded) {
+    renderAll();
+    setConnected(true);
+  }
+  startSupabaseSync();
+}
+
+if (window._sbReady) {
+  initSupabase();
+} else {
+  window.addEventListener('sbReady', initSupabase);
+  setTimeout(() => { if (!window._sbReady) setConnected(false); }, 5000);
+}
 </script>
 </body>
 </html>
