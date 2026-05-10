@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -1070,7 +1069,7 @@ body {
   // ════════════════════════════════════════════════
   const SUPABASE_URL    = "https://owbwkkptimsibwabuozc.supabase.co";       // örn: https://xyzxyz.supabase.co
   const SUPABASE_ANON   = "sb_publishable_JNAjF1j0CUZRnSL4tUQAeA_yVw1Ug8M";  // Project Settings > API > anon public
-
+  const SUPABASE_SERVICE = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93Yndra3B0aW1zaWJ3YWJ1b3pjIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODI2MTA3MSwiZXhwIjoyMDkzODM3MDcxfQ.06p-KJ_mPMm6PKfr9XEDpvnvzYQCVLwMcDneHRJ8PyE";
   window._sbReady = false;
   try {
     const { createClient } = supabase;
@@ -1487,7 +1486,7 @@ function loadState() {
 async function saveState() {
   localStorage.setItem(SK, JSON.stringify(state));
   if (!window._sbReady) return;
-  const sb = window._sb;
+  const sb = window._sbAdmin;
   try {
     // Upsert meta row (id=1, singleton)
     await sb.from('meta').upsert({
