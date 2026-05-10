@@ -1061,6 +1061,34 @@ border-bottom: 1px solid rgba(36,48,36,0.35);
 .chip { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; margin-left: 6px; }
 .chip-g { background: rgba(93,201,93,0.15); color: var(–accent); }
 .chip-r { background: rgba(224,85,85,0.12); color: var(–red); }
+
+/* ── Form Serisi ── */
+.form-series { display:inline-flex; gap:2px; margin-left:4px; vertical-align:middle; }
+.form-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.form-dot.w { background:#5dc95d; }
+.form-dot.l { background:#e05555; }
+
+/* ── Sıra Değişimi ── */
+.rank-change { font-size:10px; font-weight:600; margin-left:3px; }
+.rank-change.up   { color:#5dc95d; }
+.rank-change.down { color:#e05555; }
+.rank-change.same { color:var(–text-dim); }
+
+/* ── Head to Head ── */
+.h2h-selectors { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+.h2h-selectors select { flex:1; min-width:120px; }
+.h2h-result { background:var(–surface2); border-radius:10px; padding:16px; margin-bottom:10px; }
+.h2h-score { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.h2h-player { text-align:center; flex:1; }
+.h2h-player .h2h-name { font-size:13px; font-weight:600; color:var(–text); margin-bottom:4px; }
+.h2h-player .h2h-wins { font-size:28px; font-weight:700; color:var(–accent); }
+.h2h-player.loser .h2h-wins { color:var(–text-dim); }
+.h2h-vs { font-size:12px; color:var(–text-dim); padding:0 12px; }
+.h2h-matches { display:flex; flex-direction:column; gap:6px; margin-top:10px; }
+.h2h-match { background:var(–surface3); border-radius:6px; padding:8px 12px; font-size:12px; display:flex; justify-content:space-between; align-items:center; }
+.h2h-match-winner { color:var(–accent); font-weight:600; }
+.h2h-match-date { color:var(–text-dim); }
+.h2h-empty { text-align:center; color:var(–text-dim); padding:24px; font-size:13px; }
 </style>
 
 <!-- Supabase SDK -->
@@ -1306,6 +1334,7 @@ border-bottom: 1px solid rgba(36,48,36,0.35);
   <div class="inner-tabs">
     <button class="inner-tab active" onclick="showStatTab('genel')">Genel İstatistik</button>
     <button class="inner-tab" onclick="showStatTab('oyuncu')">Oyuncu Detay</button>
+    <button class="inner-tab" onclick="showStatTab('h2h')">🆚 H2H</button>
   </div>
 
   <div id="stat-genel">
@@ -1330,6 +1359,15 @@ border-bottom: 1px solid rgba(36,48,36,0.35);
       </select>
     </div>
     <div id="player-detail-box"></div>
+  </div>
+
+  <div id="stat-h2h" style="display:none">
+    <div style="margin-bottom:12px;color:var(--text-dim);font-size:13px">İki oyuncu seçerek aralarındaki geçmiş maçları görün.</div>
+    <div class="h2h-selectors">
+      <select id="h2h-p1" onchange="renderH2H()"><option value="">— Oyuncu 1 —</option></select>
+      <select id="h2h-p2" onchange="renderH2H()"><option value="">— Oyuncu 2 —</option></select>
+    </div>
+    <div id="h2h-result"><div class="h2h-empty">İki oyuncu seçin</div></div>
   </div>
 </div>
 
@@ -1801,11 +1839,11 @@ function renderStanding(code) {
     const setAvg = p.sl > 0 ? (p.sw/p.sl).toFixed(2) : p.sw > 0 ? '∞' : '—';
 
     return `<tr class="${zoneClass}">
-      <td><span class="rank-num ${rankCls}">${i+1}</span></td>
+      <td><span class="rank-num ${rankCls}">${i+1}</span>${getRankChange(p.id, i+1)}</td>
       <td><span class="pname">
         <span class="av" style="background:${bg};color:${fg}">${initials(p.name)}</span>
         ${p.name}${zi}
-      </span></td>
+      </span>${formSeriesHtml(p.id)}</td>
       <td class="center">${p.mp}</td>
       <td class="center">
         <span class="tag tag-win">${p.mw}G</span>
@@ -2014,6 +2052,7 @@ function submitMatch() {
   });
 
   saveState();
+  savePrevRanks();
   renderAll();
   showToast(`✅ ${playerName(winner)} kazandı! (${wpts} puan)`);
   ['s1a','s1b','s2a','s2b','s3a','s3b'].forEach(id => document.getElementById(id).value='');
@@ -2090,14 +2129,13 @@ function renderResults() {
       </div>
       <div class="match-meta">
         ${m.date}
-        ${isLoggedIn() ? `<br><button class="btn btn-sm" onclick="deleteMatch(${m.id})">Sil</button>` : ""}
+        <br><button class="btn btn-sm" onclick="deleteMatch(${m.id})">Sil</button>
       </div>
     </div>`;
   }).join('');
 }
 
 function deleteMatch(id) {
-  if (!isLoggedIn()) { showToast("Bu işlem için yönetici girişi gerekli.", "err"); return; }
   state.matches = state.matches.filter(m => m.id !== id);
   sbDeleteMatch(id);
   saveState(); renderAll(); renderResults();
@@ -2207,10 +2245,119 @@ function renderPlayerDetail() {
 }
 
 function showStatTab(name) {
-  document.getElementById('stat-genel').style.display = name==='genel'?'block':'none';
-  document.getElementById('stat-oyuncu').style.display = name==='oyuncu'?'block':'none';
-  document.querySelectorAll('.inner-tab').forEach((b,i)=>b.classList.toggle('active',['genel','oyuncu'][i]===name));
+  document.getElementById('stat-genel').style.display  = name==='genel'  ? 'block' : 'none';
+  document.getElementById('stat-oyuncu').style.display = name==='oyuncu' ? 'block' : 'none';
+  document.getElementById('stat-h2h').style.display    = name==='h2h'    ? 'block' : 'none';
+  document.querySelectorAll('#page-istatistik .inner-tab').forEach((b,i)=>b.classList.toggle('active',['genel','oyuncu','h2h'][i]===name));
   if (name==='genel') renderStats();
+  if (name==='h2h') populateH2HDropdowns();
+}
+
+// ═══════════════════════════════════════════════════
+// FORM SERİSİ & SIRA DEĞİŞİMİ & HEAD-TO-HEAD
+// ═══════════════════════════════════════════════════
+
+// Son 5 maçın G/M serisi (en yeni solda)
+function getFormSeries(playerId) {
+  const matches = state.matches
+    .filter(m => m.winner === playerId || m.loser === playerId)
+    .sort((a,b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 5);
+  return matches.map(m => m.winner === playerId ? 'w' : 'l');
+}
+
+function formSeriesHtml(playerId) {
+  const series = getFormSeries(playerId);
+  if (series.length === 0) return '';
+  const dots = series.map(r => `<span class="form-dot ${r}" title="${r==='w'?'Galibiyet':'Mağlubiyet'}"></span>`).join('');
+  return `<span class="form-series">${dots}</span>`;
+}
+
+// Önceki sıralamayı localStorage'da sakla, farkı hesapla
+const PREV_RANK_KEY = 'rta_prev_ranks';
+
+function savePrevRanks() {
+  const ranks = {};
+  ['super','l2','l3','l4'].forEach(code => {
+    getStandings(code).forEach((p, i) => { ranks[p.id] = i + 1; });
+  });
+  localStorage.setItem(PREV_RANK_KEY, JSON.stringify(ranks));
+}
+
+function getRankChange(playerId, currentRank) {
+  try {
+    const prev = JSON.parse(localStorage.getItem(PREV_RANK_KEY) || '{}');
+    const prevRank = prev[playerId];
+    if (!prevRank || prevRank === currentRank) return '<span class="rank-change same">–</span>';
+    const diff = prevRank - currentRank;
+    if (diff > 0) return `<span class="rank-change up">▲${diff}</span>`;
+    return `<span class="rank-change down">▼${Math.abs(diff)}</span>`;
+  } catch(e) { return ''; }
+}
+
+// HEAD-TO-HEAD
+function populateH2HDropdowns() {
+  const players = [...state.players].sort((a,b) => a.name.localeCompare(b.name));
+  const opts = players.map(p => `<option value="${p.id}">${p.name} (${leagueName(p.league)})</option>`).join('');
+  ['h2h-p1','h2h-p2'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">— Oyuncu Seçin —</option>' + opts;
+    sel.value = cur;
+  });
+  renderH2H();
+}
+
+function renderH2H() {
+  const p1id = parseInt(document.getElementById('h2h-p1')?.value);
+  const p2id = parseInt(document.getElementById('h2h-p2')?.value);
+  const box = document.getElementById('h2h-result');
+  if (!box) return;
+  if (!p1id || !p2id || p1id === p2id) {
+    box.innerHTML = '<div class="h2h-empty">İki farklı oyuncu seçin</div>'; return;
+  }
+  const p1 = state.players.find(p => p.id === p1id);
+  const p2 = state.players.find(p => p.id === p2id);
+  const matches = state.matches.filter(m =>
+    (m.winner === p1id && m.loser === p2id) ||
+    (m.winner === p2id && m.loser === p1id)
+  ).sort((a,b) => new Date(b.date) - new Date(a.date));
+
+  if (matches.length === 0) {
+    box.innerHTML = '<div class="h2h-empty">Bu iki oyuncu henüz karşılaşmamış</div>'; return;
+  }
+
+  const p1wins = matches.filter(m => m.winner === p1id).length;
+  const p2wins = matches.filter(m => m.winner === p2id).length;
+  const p1leader = p1wins > p2wins;
+  const p2leader = p2wins > p1wins;
+
+  const matchRows = matches.map(m => {
+    const winner = state.players.find(p => p.id === m.winner);
+    return `<div class="h2h-match">
+      <span class="h2h-match-winner">${winner?.name || '?'} kazandı</span>
+      <span style="color:var(--text-dim);font-size:11px">${m.score || ''}</span>
+      <span class="h2h-match-date">${m.date || ''}</span>
+    </div>`;
+  }).join('');
+
+  box.innerHTML = `
+    <div class="h2h-result">
+      <div class="h2h-score">
+        <div class="h2h-player ${p2leader?'loser':''}">
+          <div class="h2h-name">${p1?.name || '?'}</div>
+          <div class="h2h-wins">${p1wins}</div>
+        </div>
+        <div class="h2h-vs">GALIBIYET</div>
+        <div class="h2h-player ${p1leader?'loser':''}">
+          <div class="h2h-name">${p2?.name || '?'}</div>
+          <div class="h2h-wins">${p2wins}</div>
+        </div>
+      </div>
+      <div style="text-align:center;color:var(--text-dim);font-size:12px;margin-bottom:8px">${matches.length} maç oynandı</div>
+      <div class="h2h-matches">${matchRows}</div>
+    </div>`;
 }
 
 // ═══════════════════════════════════════════════════
@@ -2244,7 +2391,6 @@ function movePlayer() {
 }
 
 function deletePlayer(id) {
-  if (!isLoggedIn()) { showToast('Bu işlem için yönetici girişi gerekli.', 'err'); return; }
   if (!confirm('Oyuncu ve tüm maçları silinecek!')) return;
   state.players = state.players.filter(p=>p.id!==id);
   state.matches = state.matches.filter(m=>m.winner!==id && m.loser!==id);
