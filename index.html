@@ -2090,14 +2090,14 @@ function renderResults() {
       </div>
       <div class="match-meta">
         ${m.date}
-        ${isLoggedIn() ? `<br><button class="btn btn-sm" onclick="deleteMatch(${m.id})">Sil</button>` : ''}
+        ${isLoggedIn() ? `<br><button class="btn btn-sm" onclick="deleteMatch(${m.id})">Sil</button>` : ""}
       </div>
     </div>`;
   }).join('');
 }
 
 function deleteMatch(id) {
-  if (!isLoggedIn()) { showToast('Bu işlem için yönetici girişi gerekli.', 'err'); return; }
+  if (!isLoggedIn()) { showToast("Bu işlem için yönetici girişi gerekli.", "err"); return; }
   state.matches = state.matches.filter(m => m.id !== id);
   sbDeleteMatch(id);
   saveState(); renderAll(); renderResults();
