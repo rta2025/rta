@@ -254,17 +254,9 @@ border-collapse: collapse;
 .league-block { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
 @media(max-width: 600px) {
-  .standings th, .standings td { padding: 9px 8px; font-size: 0.72rem; }
-  /* Gal%, Set Av., Oyun sütunlarını gizle - kritik değil */
-  .standings th:nth-child(5),
-  .standings td:nth-child(5),
-  .standings th:nth-child(6),
-  .standings td:nth-child(6),
-  .standings th:nth-child(7),
-  .standings td:nth-child(7) { display: none; }
-  /* Oyuncu adı taşmasın */
-  .pname { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
-  .form-series { display: none; } /* Mobilde form noktalarını gizle - yer tasarrufu */
+  .standings th, .standings td { padding: 9px 7px; font-size: 0.7rem; white-space: nowrap; }
+  .pname { max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-flex; align-items: center; gap: 5px; }
+  .form-series { display: none; }
 }
 
 
