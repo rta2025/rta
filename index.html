@@ -1073,7 +1073,8 @@ body {
   window._sbReady = false;
   try {
     const { createClient } = supabase;
-    window._sb = createClient(SUPABASE_URL, SUPABASE_ANON);
+    window._sb      = createClient(SUPABASE_URL, SUPABASE_ANON);    // okuma (herkese açık)
+    window._sbAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE);  // yazma (sadece admin)
     window._sbReady = true;
     window.dispatchEvent(new Event('sbReady'));
   } catch(e) {
@@ -1527,15 +1528,15 @@ async function saveState() {
 // ── deleteMatch from Supabase ──
 async function sbDeleteMatch(id) {
   if (!window._sbReady) return;
-  try { await window._sb.from('matches').delete().eq('id', id); } catch(e) {}
+  try { await window._sbAdmin.from('matches').delete().eq('id', id); } catch(e) {}
 }
 
 // ── deletePlayer from Supabase ──
 async function sbDeletePlayer(id) {
   if (!window._sbReady) return;
   try {
-    await window._sb.from('matches').delete().or(`winner.eq.${id},loser.eq.${id}`);
-    await window._sb.from('players').delete().eq('id', id);
+    await window._sbAdmin.from('matches').delete().or(`winner.eq.${id},loser.eq.${id}`);
+    await window._sbAdmin.from('players').delete().eq('id', id);
   } catch(e) {}
 }
 
