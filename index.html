@@ -250,6 +250,24 @@ width: 100%;
 border-collapse: collapse;
 }
 
+/* Mobil: tablo yatay kaydırılabilir */
+.league-block { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+@media(max-width: 600px) {
+  .standings th, .standings td { padding: 9px 8px; font-size: 0.72rem; }
+  /* Gal%, Set Av., Oyun sütunlarını gizle - kritik değil */
+  .standings th:nth-child(5),
+  .standings td:nth-child(5),
+  .standings th:nth-child(6),
+  .standings td:nth-child(6),
+  .standings th:nth-child(7),
+  .standings td:nth-child(7) { display: none; }
+  /* Oyuncu adı taşmasın */
+  .pname { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+  .form-series { display: none; } /* Mobilde form noktalarını gizle - yer tasarrufu */
+}
+
+
 .standings th {
 padding: 9px 14px;
 text-align: left;
@@ -1089,6 +1107,91 @@ border-bottom: 1px solid rgba(36,48,36,0.35);
 .h2h-match-winner { color:var(--accent); font-weight:600; }
 .h2h-match-date { color:var(--text-dim); }
 .h2h-empty { text-align:center; color:var(--text-dim); padding:24px; font-size:13px; }
+
+/* ── Sezon Sayacı ── */
+.season-countdown {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 6px 14px; font-size: 12px;
+  color: var(--text-dim); cursor: default;
+}
+.season-countdown .cd-num {
+  font-family: 'Oswald', sans-serif; font-size: 16px;
+  font-weight: 600; color: var(--accent);
+}
+.season-countdown .cd-label { font-size: 10px; color: var(--text-muted); }
+.cd-unit { text-align: center; }
+
+/* ── Oyuncu Profil Kartı Modal ── */
+.profile-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7); z-index: 2000;
+  align-items: center; justify-content: center; padding: 16px;
+}
+.profile-overlay.open { display: flex; }
+.profile-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; padding: 24px; width: 100%; max-width: 360px;
+  position: relative; max-height: 90vh; overflow-y: auto;
+}
+.profile-close {
+  position: absolute; top: 12px; right: 14px;
+  background: none; border: none; color: var(--text-dim);
+  font-size: 20px; cursor: pointer; line-height: 1;
+}
+.profile-close:hover { color: var(--text); }
+.profile-avatar {
+  width: 56px; height: 56px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Oswald', sans-serif; font-size: 20px; font-weight: 700;
+  margin: 0 auto 12px;
+}
+.profile-name {
+  text-align: center; font-family: 'Oswald', sans-serif;
+  font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 4px;
+}
+.profile-league {
+  text-align: center; font-size: 12px; color: var(--text-dim); margin-bottom: 20px;
+}
+.profile-stats {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px; margin-bottom: 20px;
+}
+.profile-stat {
+  background: var(--surface2); border-radius: 10px;
+  padding: 10px 6px; text-align: center;
+}
+.profile-stat .ps-val {
+  font-family: 'Oswald', sans-serif; font-size: 20px;
+  font-weight: 600; color: var(--accent); display: block;
+}
+.profile-stat .ps-lbl {
+  font-size: 10px; color: var(--text-dim); margin-top: 2px; display: block;
+}
+.profile-section-title {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.05em;
+  text-transform: uppercase; color: var(--text-muted);
+  margin-bottom: 10px; margin-top: 16px;
+}
+.profile-form { display: flex; gap: 5px; margin-bottom: 16px; }
+.profile-form-dot {
+  width: 28px; height: 28px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700;
+}
+.profile-form-dot.w { background: rgba(93,201,93,0.2); color: #5dc95d; }
+.profile-form-dot.l { background: rgba(224,85,85,0.2); color: #e05555; }
+.profile-rival {
+  background: var(--surface2); border-radius: 8px; padding: 10px 12px;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 13px; margin-bottom: 6px;
+}
+.profile-rival .pr-name { color: var(--text); }
+.profile-rival .pr-score { font-weight: 600; }
+.pr-score.win { color: var(--accent); }
+.pr-score.loss { color: var(--red); }
+.pname-clickable { cursor: pointer; }
+.pname-clickable:hover .av { box-shadow: 0 0 0 2px var(--accent); }
 </style>
 
 <!-- Supabase SDK -->
@@ -1166,6 +1269,7 @@ border-bottom: 1px solid rgba(36,48,36,0.35);
       <div class="sub">Rize Tenis Akademisi</div>
     </div>
   </a>
+  <div class="season-countdown" id="season-countdown" title="Sezon bitiş tarihi"></div>
   <nav class="nav">
     <button class="nav-btn active" onclick="showPage('puan')">Puan Durumu</button>
     <button class="nav-btn admin-only" id="nav-skor" onclick="showPage('skor')">Skor Gir</button>
@@ -1180,6 +1284,14 @@ border-bottom: 1px solid rgba(36,48,36,0.35);
   <button class="logout-btn" id="logout-btn" onclick="doLogout()">Çıkış</button>
   <button class="login-trigger-btn" id="login-trigger-btn" onclick="openLoginOverlay()">🔐 Yönetici Girişi</button>
 </header>
+
+<!-- ── Oyuncu Profil Kartı ── -->
+<div class="profile-overlay" id="profile-overlay" onclick="if(event.target===this)closeProfile()">
+  <div class="profile-card" id="profile-card">
+    <button class="profile-close" onclick="closeProfile()">✕</button>
+    <div id="profile-content"></div>
+  </div>
+</div>
 
 <div class="main">
 
@@ -1840,7 +1952,7 @@ function renderStanding(code) {
 
     return `<tr class="${zoneClass}">
       <td><span class="rank-num ${rankCls}">${i+1}</span>${getRankChange(p.id, i+1)}</td>
-      <td><span class="pname">
+      <td><span class="pname pname-clickable" onclick="openProfile(${p.id})">
         <span class="av" style="background:${bg};color:${fg}">${initials(p.name)}</span>
         ${p.name}${zi}
       </span>${formSeriesHtml(p.id)}</td>
@@ -2255,6 +2367,116 @@ function showStatTab(name) {
 }
 
 // ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
+// SEZON SAYACI
+// ═══════════════════════════════════════════════════
+function initCountdown() {
+  // Sezon bitiş tarihini buradan ayarlayın (YIL, AY-1, GÜN)
+  const SEASON_END = new Date(2026, 6, 31); // 31 Temmuz 2026
+
+  function update() {
+    const el = document.getElementById('season-countdown');
+    if (!el) return;
+    const now = new Date();
+    const diff = SEASON_END - now;
+    if (diff <= 0) {
+      el.innerHTML = '<span style="color:var(--red)">Sezon sona erdi</span>';
+      return;
+    }
+    const days  = Math.floor(diff / 86400000);
+    const hours = Math.floor((diff % 86400000) / 3600000);
+    const mins  = Math.floor((diff % 3600000)  / 60000);
+    el.innerHTML = `
+      <span>🏁</span>
+      <div class="cd-unit"><span class="cd-num">${days}</span><span class="cd-label">GÜN</span></div>
+      <span style="color:var(--border)">:</span>
+      <div class="cd-unit"><span class="cd-num">${String(hours).padStart(2,'0')}</span><span class="cd-label">SAAT</span></div>
+      <span style="color:var(--border)">:</span>
+      <div class="cd-unit"><span class="cd-num">${String(mins).padStart(2,'0')}</span><span class="cd-label">DAK</span></div>
+    `;
+  }
+  update();
+  setInterval(update, 60000);
+}
+
+// ═══════════════════════════════════════════════════
+// OYUNCU PROFİL KARTI
+// ═══════════════════════════════════════════════════
+function openProfile(playerId) {
+  const player = state.players.find(p => p.id === playerId);
+  if (!player) return;
+
+  const matches = state.matches.filter(m => m.winner === playerId || m.loser === playerId);
+  const wins    = matches.filter(m => m.winner === playerId).length;
+  const losses  = matches.filter(m => m.loser  === playerId).length;
+  const winPct  = matches.length > 0 ? Math.round(wins / matches.length * 100) : 0;
+  const pts     = matches.reduce((s, m) => s + (m.winner === playerId ? (m.wpts||0) : (m.lpts||0)), 0);
+
+  // Form serisi (son 5, büyük noktalar)
+  const form = matches
+    .sort((a,b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 5)
+    .map(m => m.winner === playerId ? 'w' : 'l');
+
+  const formHtml = form.length
+    ? form.map(r => `<div class="profile-form-dot ${r}">${r==='w'?'G':'M'}</div>`).join('')
+    : '<span style="color:var(--text-muted);font-size:13px">Henüz maç yok</span>';
+
+  // Rakip istatistikleri
+  const rivalMap = {};
+  matches.forEach(m => {
+    const rivalId = m.winner === playerId ? m.loser : m.winner;
+    if (!rivalMap[rivalId]) rivalMap[rivalId] = { w: 0, l: 0 };
+    if (m.winner === playerId) rivalMap[rivalId].w++;
+    else rivalMap[rivalId].l++;
+  });
+
+  const rivals = Object.entries(rivalMap)
+    .map(([id, rec]) => ({ id: parseInt(id), ...rec, total: rec.w + rec.l }))
+    .sort((a,b) => b.total - a.total)
+    .slice(0, 4);
+
+  const rivalsHtml = rivals.length
+    ? rivals.map(r => {
+        const name = playerName(r.id);
+        const cls  = r.w >= r.l ? 'win' : 'loss';
+        return `<div class="profile-rival">
+          <span class="pr-name">${name}</span>
+          <span class="pr-score ${cls}">${r.w}G – ${r.l}M</span>
+        </div>`;
+      }).join('')
+    : '<span style="color:var(--text-muted);font-size:13px">Henüz rakip yok</span>';
+
+  const [bg, fg] = avColor(player.name);
+  const lgName   = leagueName(player.league);
+
+  document.getElementById('profile-content').innerHTML = `
+    <div class="profile-avatar" style="background:${bg};color:${fg}">${initials(player.name)}</div>
+    <div class="profile-name">${player.name}</div>
+    <div class="profile-league">${lgName}</div>
+    <div class="profile-stats">
+      <div class="profile-stat"><span class="ps-val">${matches.length}</span><span class="ps-lbl">Maç</span></div>
+      <div class="profile-stat"><span class="ps-val">${winPct}%</span><span class="ps-lbl">Galibiyet</span></div>
+      <div class="profile-stat"><span class="ps-val">${pts}</span><span class="ps-lbl">Puan</span></div>
+    </div>
+    <div class="profile-section-title">Son 5 Maç</div>
+    <div class="profile-form">${formHtml}</div>
+    <div class="profile-section-title">Rakipler</div>
+    ${rivalsHtml}
+  `;
+
+  document.getElementById('profile-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeProfile() {
+  document.getElementById('profile-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Escape tuşuyla kapat
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeProfile(); });
+
 // FORM SERİSİ & SIRA DEĞİŞİMİ & HEAD-TO-HEAD
 // ═══════════════════════════════════════════════════
 
@@ -2961,6 +3183,7 @@ if (isLoggedIn()) { setAdminUI(true); } else { setAdminUI(false); }
 
 // 1) Render instantly from localStorage cache
 renderAll();
+initCountdown();
 
 // 2) Then load fresh from Supabase and start realtime sync
 async function initSupabase() {
@@ -2972,6 +3195,27 @@ async function initSupabase() {
     setConnected(true);
   }
   startSupabaseSync();
+  startRealtimeSync();
+}
+
+// ── Supabase Realtime ──
+function startRealtimeSync() {
+  if (!window._sbReady) return;
+  try {
+    window._sb
+      .channel('rta-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'matches' }, async () => {
+        await loadFromSupabase();
+        renderAll();
+        showSyncBadge();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'players' }, async () => {
+        await loadFromSupabase();
+        renderAll();
+        showSyncBadge();
+      })
+      .subscribe();
+  } catch(e) { console.warn('Realtime başlatılamadı:', e); }
 }
 
 if (window._sbReady) {
