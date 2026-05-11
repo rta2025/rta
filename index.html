@@ -1209,6 +1209,21 @@ border-bottom: 1px solid rgba(36,48,36,0.35);
 .pr-score.loss { color: var(--red); }
 .pname-clickable { cursor: pointer; }
 .pname-clickable:hover .av { box-shadow: 0 0 0 2px var(--accent); }
+
+/* ── Oyuncu Rozetleri ── */
+.player-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 4px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.badge-fire   { background: rgba(255,100,0,0.15); color: #ff6400; border: 1px solid rgba(255,100,0,0.3); }
+.badge-sleep  { background: rgba(120,120,120,0.15); color: #888; border: 1px solid rgba(120,120,120,0.3); }
+.badge-active { background: rgba(93,201,93,0.15); color: #5dc95d; border: 1px solid rgba(93,201,93,0.3); }
 </style>
 
 <!-- Supabase SDK -->
@@ -1972,7 +1987,7 @@ function renderStanding(code) {
       <td><span class="pname pname-clickable" onclick="openProfile(${p.id})">
         <span class="av" style="background:${bg};color:${fg}">${initials(p.name)}</span>
         ${p.name}${zi}
-      </span>${formSeriesHtml(p.id)}</td>
+      </span>${formSeriesHtml(p.id)}${getPlayerBadge(p.id)}</td>
       <td class="center">${p.mp}</td>
       <td class="center">
         <span class="tag tag-win">${p.mw}G</span>
@@ -2470,7 +2485,7 @@ function openProfile(playerId) {
   document.getElementById('profile-content').innerHTML = `
     <div class="profile-avatar" style="background:${bg};color:${fg}">${initials(player.name)}</div>
     <div class="profile-name">${player.name}</div>
-    <div class="profile-league">${lgName}</div>
+    <div class="profile-league">${lgName} ${getPlayerBadge(playerId)}</div>
     <div class="profile-stats">
       <div class="profile-stat"><span class="ps-val">${matches.length}</span><span class="ps-lbl">Maç</span></div>
       <div class="profile-stat"><span class="ps-val">${winPct}%</span><span class="ps-lbl">Galibiyet</span></div>
@@ -2493,6 +2508,34 @@ function closeProfile() {
 
 // Escape tuşuyla kapat
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeProfile(); });
+
+// ── Oyuncu Rozeti ──
+function getPlayerBadge(playerId) {
+  const now = new Date();
+  const matches = state.matches
+    .filter(m => m.winner === playerId || m.loser === playerId)
+    .sort((a,b) => new Date(b.date) - new Date(a.date));
+
+  if (matches.length === 0) return '';
+
+  // 🔥 Galibiyet serisi (3+)
+  let streak = 0;
+  for (const m of matches) {
+    if (m.winner === playerId) streak++;
+    else break;
+  }
+  if (streak >= 3) return `<span class="player-badge badge-fire">🔥 ${streak} seri</span>`;
+
+  // ⚡ Son 7 günde 3+ maç
+  const last7 = matches.filter(m => (now - new Date(m.date)) / 86400000 <= 7);
+  if (last7.length >= 3) return `<span class="player-badge badge-active">⚡ ${last7.length} maç/hafta</span>`;
+
+  // 😴 10+ gündür maç yok
+  const daysSince = (now - new Date(matches[0].date)) / 86400000;
+  if (daysSince >= 10) return `<span class="player-badge badge-sleep">😴 ${Math.floor(daysSince)} gün</span>`;
+
+  return '';
+}
 
 // FORM SERİSİ & SIRA DEĞİŞİMİ & HEAD-TO-HEAD
 // ═══════════════════════════════════════════════════
