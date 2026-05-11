@@ -5,6 +5,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RTA Ligi – Rize Tenis Akademisi</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a7a1a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RTA Ligi">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Mulish:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -2518,21 +2523,21 @@ function getPlayerBadge(playerId) {
 
   if (matches.length === 0) return '';
 
-  // 🔥 Galibiyet serisi (3+)
+  // 🔥 Galibiyet serisi (2+)
   let streak = 0;
   for (const m of matches) {
     if (m.winner === playerId) streak++;
     else break;
   }
-  if (streak >= 3) return `<span class="player-badge badge-fire">🔥 ${streak} seri</span>`;
+  if (streak >= 2) return `<span class="player-badge badge-fire">🔥 ${streak} seri</span>`;
 
-  // ⚡ Son 7 günde 3+ maç
+  // ⚡ Son 7 günde 2+ maç
   const last7 = matches.filter(m => (now - new Date(m.date)) / 86400000 <= 7);
-  if (last7.length >= 3) return `<span class="player-badge badge-active">⚡ ${last7.length} maç/hafta</span>`;
+  if (last7.length >= 2) return `<span class="player-badge badge-active">⚡ ${last7.length} maç/hafta</span>`;
 
-  // 😴 10+ gündür maç yok
+  // 😴 7+ gündür maç yok
   const daysSince = (now - new Date(matches[0].date)) / 86400000;
-  if (daysSince >= 10) return `<span class="player-badge badge-sleep">😴 ${Math.floor(daysSince)} gün</span>`;
+  if (daysSince >= 7) return `<span class="player-badge badge-sleep">😴 ${Math.floor(daysSince)} gün</span>`;
 
   return '';
 }
@@ -3283,6 +3288,13 @@ if (window._sbReady) {
 } else {
   window.addEventListener('sbReady', initSupabase);
   setTimeout(() => { if (!window._sbReady) setConnected(false); }, 5000);
+}
+
+// ── PWA Service Worker ──
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/rta/sw.js').catch(() => {});
+  });
 }
 </script>
 
