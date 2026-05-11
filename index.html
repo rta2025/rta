@@ -58,6 +58,31 @@ z-index: 200;
 box-shadow: 0 2px 20px rgba(0,0,0,0.6);
 }
 
+@media(max-width: 768px) {
+  .header {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 10px 16px 0;
+    gap: 8px;
+  }
+  .brand { padding-bottom: 4px; }
+  .season-countdown { margin-left: auto; }
+  .nav {
+    order: 3;
+    width: 100%;
+    margin-left: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 8px;
+    gap: 2px;
+    border-top: 1px solid var(--border);
+    padding-top: 6px;
+  }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav-btn { padding: 7px 12px; font-size: 0.78rem; flex-shrink: 0; }
+}
+
 .brand {
 display: flex;
 align-items: center;
