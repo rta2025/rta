@@ -2153,11 +2153,11 @@ function renderPlayoffs() {
   `;
 }
 
-function renderAll() {
+function renderAll(fromSupabase = false) {
   ['super','l2','l3','l4'].forEach(renderStanding);
   renderPlayoffs();
   updateKPIs();
-  renderHomeSections();
+  if (fromSupabase) renderHomeSections();
   // Refresh open pages
   const ap = document.querySelector('.page.active');
   if (ap) {
@@ -2367,7 +2367,7 @@ function deleteMatch(id) {
   if (!isLoggedIn()) { showToast("Bu işlem için yönetici girişi gerekli.", "err"); return; }
   state.matches = state.matches.filter(m => m.id !== id);
   sbDeleteMatch(id);
-  saveState(); renderAll(); renderResults();
+  saveState(); renderAll(true); renderResults();
   showToast('Maç silindi', 'err');
 }
 
@@ -2866,7 +2866,7 @@ function addPlayer() {
   }
   state.players.push({id: state.nextPlayerId++, name, league});
   document.getElementById('np-name').value = '';
-  saveState(); renderAll(); renderAdminTable();
+  saveState(); renderAll(true); renderAdminTable();
   showToast(`✅ ${name} eklendi (${leagueName(league)})`);
 }
 
@@ -2880,7 +2880,7 @@ function movePlayer() {
   }
   const old = p.league;
   p.league = newLg;
-  saveState(); renderAll(); renderAdminTable();
+  saveState(); renderAll(true); renderAdminTable();
   showToast(`✅ ${p.name}: ${leagueName(old)} → ${leagueName(newLg)}`);
 }
 
@@ -2890,7 +2890,7 @@ function deletePlayer(id) {
   state.players = state.players.filter(p=>p.id!==id);
   state.matches = state.matches.filter(m=>m.winner!==id && m.loser!==id);
   sbDeletePlayer(id);
-  saveState(); renderAll(); renderAdminTable();
+  saveState(); renderAll(true); renderAdminTable();
   showToast('Oyuncu silindi', 'err');
 }
 
@@ -2937,7 +2937,7 @@ function importData(input) {
       const data = JSON.parse(e.target.result);
       if (!data.players || !data.matches) throw new Error();
       state = data;
-      saveState(); renderAll(); renderAdminTable();
+      saveState(); renderAll(true); renderAdminTable();
       showToast('✅ Veri içe aktarıldı!');
     } catch { showToast('Geçersiz dosya!', 'err'); }
   };
@@ -3413,7 +3413,7 @@ refreshBtn.onclick = async () => {
   refreshBtn.innerHTML = '⏳';
   refreshBtn.disabled = true;
   const ok = await loadFromSupabase();
-  if (ok) { renderAll(); showSyncBadge(); setConnected(true); }
+  if (ok) { renderAll(true); showSyncBadge(); setConnected(true); }
   else setConnected(false);
   refreshBtn.innerHTML = '🔄';
   refreshBtn.disabled = false;
@@ -3462,7 +3462,7 @@ async function initSupabase() {
   setConnected(false); // show orange/grey while connecting
   const loaded = await loadFromSupabase();
   if (loaded) {
-    renderAll();
+    renderAll(true);
     setConnected(true);
   }
   startSupabaseSync();
@@ -3477,12 +3477,12 @@ function startRealtimeSync() {
       .channel('rta-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'matches' }, async () => {
         await loadFromSupabase();
-        renderAll();
+        renderAll(true);
         showSyncBadge();
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'players' }, async () => {
         await loadFromSupabase();
-        renderAll();
+        renderAll(true);
         showSyncBadge();
       })
       .subscribe();
