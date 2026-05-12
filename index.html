@@ -1243,7 +1243,11 @@ border-bottom: 1px solid rgba(36,48,36,0.35);
 .lm-left  { text-align: right; }
 .lm-right { text-align: left; }
 .lm-score { text-align: center; font-family: 'Oswald', sans-serif; font-size: 13px; color: var(--text); white-space: nowrap; }
-.lm-date  { text-align: center; font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+.lm-win-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #5dc95d; margin-right: 6px; flex-shrink: 0;
+}
 
 /* Haftanın Maçı */
 .featured-match {
@@ -2507,7 +2511,7 @@ function renderLastMatches() {
     const wName = playerName(m.winner);
     const lName = playerName(m.loser);
     return `<div class="last-match-row">
-      <div class="lm-player winner lm-left">${wName}</div>
+      <div class="lm-player winner lm-left"><span class="lm-win-badge">G</span>${wName}</div>
       <div>
         <div class="lm-score">${m.score || `${m.winningSets}-${m.losingSets}`}</div>
         <div class="lm-date">${m.date || ''}</div>
