@@ -1229,6 +1229,71 @@ border-bottom: 1px solid rgba(36,48,36,0.35);
 .badge-fire   { background: rgba(255,100,0,0.15); color: #ff6400; border: 1px solid rgba(255,100,0,0.3); }
 .badge-sleep  { background: rgba(120,120,120,0.15); color: #888; border: 1px solid rgba(120,120,120,0.3); }
 .badge-active { background: rgba(93,201,93,0.15); color: #5dc95d; border: 1px solid rgba(93,201,93,0.3); }
+
+/* ── Son Maçlar & Haftanın Maçı ── */
+.home-section { margin-bottom: 28px; }
+.last-matches { display: flex; flex-direction: column; gap: 8px; }
+.last-match-row {
+  background: var(--surface2); border-radius: 10px; padding: 12px 14px;
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px;
+}
+.lm-player { font-size: 13px; font-weight: 500; }
+.lm-player.winner { color: var(--accent); }
+.lm-player.loser  { color: var(--text-dim); }
+.lm-left  { text-align: right; }
+.lm-right { text-align: left; }
+.lm-score { text-align: center; font-family: 'Oswald', sans-serif; font-size: 13px; color: var(--text); white-space: nowrap; }
+.lm-date  { text-align: center; font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+/* Haftanın Maçı */
+.featured-match {
+  background: linear-gradient(135deg, var(--surface2) 0%, var(--surface3) 100%);
+  border: 1px solid var(--green); border-radius: 14px; padding: 20px;
+  text-align: center; position: relative; overflow: hidden;
+}
+.featured-match::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at top, rgba(26,122,26,0.08) 0%, transparent 70%);
+}
+.featured-badge {
+  display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--gold); background: rgba(176,140,60,0.15);
+  border: 1px solid rgba(176,140,60,0.3); border-radius: 4px;
+  padding: 3px 8px; margin-bottom: 14px;
+}
+.featured-players {
+  display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 10px;
+}
+.featured-player { text-align: center; flex: 1; }
+.featured-av {
+  width: 48px; height: 48px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Oswald', sans-serif; font-size: 16px; font-weight: 700;
+  margin: 0 auto 6px;
+}
+.featured-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.featured-name.winner { color: var(--accent); }
+.featured-vs { font-family: 'Oswald', sans-serif; font-size: 11px; color: var(--text-muted); }
+.featured-score { font-family: 'Oswald', sans-serif; font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.featured-meta { font-size: 11px; color: var(--text-dim); }
+
+/* Haftanın Oyuncusu */
+.player-of-week {
+  background: linear-gradient(135deg, var(--surface2) 0%, var(--surface3) 100%);
+  border: 1px solid var(--gold); border-radius: 14px; padding: 18px;
+  display: flex; align-items: center; gap: 16px;
+}
+.pow-avatar {
+  width: 56px; height: 56px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Oswald', sans-serif; font-size: 20px; font-weight: 700;
+  border: 2px solid var(--gold);
+}
+.pow-info { flex: 1; }
+.pow-badge { font-size: 10px; font-weight: 700; letter-spacing: 1px; color: var(--gold); text-transform: uppercase; margin-bottom: 4px; }
+.pow-name { font-family: 'Oswald', sans-serif; font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.pow-stats { font-size: 12px; color: var(--text-dim); }
+.pow-league { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 </style>
 
 <!-- Supabase SDK -->
@@ -1346,6 +1411,15 @@ border-bottom: 1px solid rgba(36,48,36,0.35);
       <div class="kpi"><div class="kpi-val">4</div><div class="kpi-label">Aktif Lig</div></div>
     </div>
   </div>
+
+  <!-- HAFTANIN OYUNCUSU -->
+  <div class="home-section" id="pow-section"></div>
+
+  <!-- HAFTANIN MAÇI -->
+  <div class="home-section" id="featured-match-section"></div>
+
+  <!-- SON MAÇLAR -->
+  <div class="home-section" id="last-matches-section"></div>
 
   <!-- PLAYOFF ZONE (if relevant matches) -->
 
@@ -1912,9 +1986,13 @@ function getStandings(league) {
     if (b.pts !== a.pts) return b.pts - a.pts;
     if (b.mw !== a.mw) return b.mw - a.mw;
     // set averaj
-    const aAvg = a.sl ? a.sw/a.sl : a.sw;
-    const bAvg = b.sl ? b.sw/b.sl : b.sw;
-    return bAvg - aAvg;
+    const aSetAvg = a.sl ? a.sw/a.sl : a.sw;
+    const bSetAvg = b.sl ? b.sw/b.sl : b.sw;
+    if (Math.abs(bSetAvg - aSetAvg) > 0.001) return bSetAvg - aSetAvg;
+    // oyun averaj (kazanılan oyun / kaybedilen oyun)
+    const aGameAvg = a.gl ? a.gw/a.gl : a.gw;
+    const bGameAvg = b.gl ? b.gw/b.gl : b.gw;
+    return bGameAvg - aGameAvg;
   });
 }
 
@@ -2079,6 +2157,7 @@ function renderAll() {
   ['super','l2','l3','l4'].forEach(renderStanding);
   renderPlayoffs();
   updateKPIs();
+  renderHomeSections();
   // Refresh open pages
   const ap = document.querySelector('.page.active');
   if (ap) {
@@ -2405,6 +2484,133 @@ function showStatTab(name) {
 
 // ═══════════════════════════════════════════════════
 // ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
+// ANA SAYFA — Son Maçlar, Haftanın Maçı, Haftanın Oyuncusu
+// ═══════════════════════════════════════════════════
+
+function renderHomeSections() {
+  renderLastMatches();
+  renderFeaturedMatch();
+  renderPlayerOfWeek();
+}
+
+// Son 5 maç
+function renderLastMatches() {
+  const el = document.getElementById('last-matches-section');
+  if (!el) return;
+  const recent = [...state.matches]
+    .sort((a,b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 5);
+  if (!recent.length) { el.innerHTML = ''; return; }
+
+  const rows = recent.map(m => {
+    const wName = playerName(m.winner);
+    const lName = playerName(m.loser);
+    return `<div class="last-match-row">
+      <div class="lm-player winner lm-left">${wName}</div>
+      <div>
+        <div class="lm-score">${m.score || `${m.winningSets}-${m.losingSets}`}</div>
+        <div class="lm-date">${m.date || ''}</div>
+      </div>
+      <div class="lm-player loser lm-right">${lName}</div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="sec-title">🕐 Son Maçlar</div>
+    <div class="last-matches">${rows}</div>`;
+}
+
+// Haftanın maçı — en çekişmeli (3 set oynanan veya puan farkı en az)
+function renderFeaturedMatch() {
+  const el = document.getElementById('featured-match-section');
+  if (!el) return;
+
+  const now = new Date();
+  const weekAgo = new Date(now - 7 * 86400000);
+  const recent = state.matches.filter(m => new Date(m.date) >= weekAgo);
+  if (!recent.length) { el.innerHTML = ''; return; }
+
+  // 3 set oynanana öncelik ver, yoksa puan farkı en az olanı al
+  const threeSet = recent.filter(m => m.sets && m.sets.length === 3);
+  const pool = threeSet.length ? threeSet : recent;
+  const featured = pool.reduce((best, m) => {
+    const diff = Math.abs((m.wpts || 0) - (m.lpts || 0));
+    const bestDiff = Math.abs((best.wpts || 0) - (best.lpts || 0));
+    return diff < bestDiff ? m : best;
+  });
+
+  const w = state.players.find(p => p.id === featured.winner);
+  const l = state.players.find(p => p.id === featured.loser);
+  if (!w || !l) { el.innerHTML = ''; return; }
+
+  const [wBg, wFg] = avColor(w.name);
+  const [lBg, lFg] = avColor(l.name);
+  const sets3 = featured.sets?.length === 3 ? '• 3 Set' : '';
+
+  el.innerHTML = `
+    <div class="sec-title">🏆 Haftanın Maçı</div>
+    <div class="featured-match">
+      <div class="featured-badge">⭐ Öne Çıkan Maç</div>
+      <div class="featured-players">
+        <div class="featured-player">
+          <div class="featured-av" style="background:${wBg};color:${wFg}">${initials(w.name)}</div>
+          <div class="featured-name winner">${w.name}</div>
+        </div>
+        <div class="featured-vs">VS</div>
+        <div class="featured-player">
+          <div class="featured-av" style="background:${lBg};color:${lFg}">${initials(l.name)}</div>
+          <div class="featured-name">${l.name}</div>
+        </div>
+      </div>
+      <div class="featured-score">${featured.score || ''}</div>
+      <div class="featured-meta">${featured.date || ''} ${sets3}</div>
+    </div>`;
+}
+
+// Haftanın oyuncusu — son 7 günde en yüksek galibiyet %
+function renderPlayerOfWeek() {
+  const el = document.getElementById('pow-section');
+  if (!el) return;
+
+  const now = new Date();
+  const weekAgo = new Date(now - 7 * 86400000);
+  const recent = state.matches.filter(m => new Date(m.date) >= weekAgo);
+  if (recent.length < 2) { el.innerHTML = ''; return; }
+
+  const stats = {};
+  recent.forEach(m => {
+    if (!stats[m.winner]) stats[m.winner] = { w: 0, l: 0, pts: 0 };
+    if (!stats[m.loser])  stats[m.loser]  = { w: 0, l: 0, pts: 0 };
+    stats[m.winner].w++;
+    stats[m.winner].pts += m.wpts || 0;
+    stats[m.loser].l++;
+    stats[m.loser].pts += m.lpts || 0;
+  });
+
+  const best = Object.entries(stats)
+    .map(([id, s]) => ({ id: parseInt(id), ...s, total: s.w + s.l, pct: s.w / (s.w + s.l) }))
+    .filter(s => s.total >= 1)
+    .sort((a,b) => b.pct - a.pct || b.pts - a.pts)[0];
+
+  if (!best) { el.innerHTML = ''; return; }
+
+  const p = state.players.find(pl => pl.id === best.id);
+  if (!p) { el.innerHTML = ''; return; }
+
+  const [bg, fg] = avColor(p.name);
+  el.innerHTML = `
+    <div class="player-of-week">
+      <div class="pow-avatar" style="background:${bg};color:${fg}">${initials(p.name)}</div>
+      <div class="pow-info">
+        <div class="pow-badge">🌟 Haftanın Oyuncusu</div>
+        <div class="pow-name">${p.name}</div>
+        <div class="pow-stats">${best.w}G ${best.l}M • ${best.pts} puan • %${Math.round(best.pct*100)} galibiyet</div>
+        <div class="pow-league">${leagueName(p.league)}</div>
+      </div>
+    </div>`;
+}
+
 // SEZON SAYACI
 // ═══════════════════════════════════════════════════
 function initCountdown() {
@@ -2529,15 +2735,15 @@ function getPlayerBadge(playerId) {
     if (m.winner === playerId) streak++;
     else break;
   }
-  if (streak >= 2) return `<span class="player-badge badge-fire">🔥 ${streak} seri</span>`;
+  if (streak >= 3) return `<span class="player-badge badge-fire">🔥 ${streak} seri</span>`;
 
   // ⚡ Son 7 günde 2+ maç
   const last7 = matches.filter(m => (now - new Date(m.date)) / 86400000 <= 7);
-  if (last7.length >= 2) return `<span class="player-badge badge-active">⚡ ${last7.length} maç/hafta</span>`;
+  if (last7.length >= 3) return `<span class="player-badge badge-active">⚡ ${last7.length} maç/hafta</span>`;
 
   // 😴 7+ gündür maç yok
   const daysSince = (now - new Date(matches[0].date)) / 86400000;
-  if (daysSince >= 7) return `<span class="player-badge badge-sleep">😴 ${Math.floor(daysSince)} gün</span>`;
+  if (daysSince >= 10) return `<span class="player-badge badge-sleep">😴 ${Math.floor(daysSince)} gün</span>`;
 
   return '';
 }
