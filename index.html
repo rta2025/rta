@@ -2511,7 +2511,7 @@ function renderLastMatches() {
     const wName = playerName(m.winner);
     const lName = playerName(m.loser);
     return `<div class="last-match-row">
-      <div class="lm-player winner lm-left"><span class="lm-win-badge">G</span>${wName}</div>
+      <div class="lm-player winner lm-left"><span class="lm-win-badge"></span>${wName}</div>
       <div>
         <div class="lm-score">${m.score || `${m.winningSets}-${m.losingSets}`}</div>
         <div class="lm-date">${m.date || ''}</div>
