@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -38,29 +37,29 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; }
 
 body {
-font-family: ‘Mulish’, sans-serif;
-background: var(--bg);
-color: var(--text);
-min-height: 100vh;
-font-size: 14px;
+  font-family: 'Mulish', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
 }
 
 /* ── HEADER ── */
 .header {
-background: linear-gradient(180deg, #0d120d 0%, #0b0e0b 100%);
-border-bottom: 1px solid var(--border);
-padding: 0 24px;
-display: flex;
-align-items: center;
-gap: 20px;
-height: 62px;
-position: sticky;
-top: 0;
-z-index: 200;
-box-shadow: 0 2px 20px rgba(0,0,0,0.6);
+  background: linear-gradient(180deg, #0d120d 0%, #0b0e0b 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  height: 62px;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.6);
 }
 
 @media(max-width: 768px) {
@@ -89,59 +88,59 @@ box-shadow: 0 2px 20px rgba(0,0,0,0.6);
 }
 
 .brand {
-display: flex;
-align-items: center;
-gap: 12px;
-text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
 }
 
 .brand-icon {
-width: 38px;
-height: 38px;
-background: var(--green);
-border-radius: 10px;
-display: flex;
-align-items: center;
-justify-content: center;
-font-size: 1.3rem;
+  width: 38px;
+  height: 38px;
+  background: var(--green);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
 }
 
 .brand-text .name {
-font-family: ‘Oswald’, sans-serif;
-font-size: 1.15rem;
-font-weight: 700;
-color: var(--accent);
-letter-spacing: 2px;
-line-height: 1;
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 2px;
+  line-height: 1;
 }
 
 .brand-text .sub {
-font-size: 0.68rem;
-color: var(--text-dim);
-letter-spacing: 1.5px;
-text-transform: uppercase;
-margin-top: 1px;
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-top: 1px;
 }
 
 .nav {
-display: flex;
-gap: 2px;
-margin-left: auto;
+  display: flex;
+  gap: 2px;
+  margin-left: auto;
 }
 
 .nav-btn {
-background: none;
-border: none;
-color: var(--text-dim);
-padding: 8px 16px;
-border-radius: 6px;
-cursor: pointer;
-font-family: ‘Mulish’, sans-serif;
-font-size: 0.82rem;
-font-weight: 600;
-letter-spacing: 0.3px;
-transition: all 0.18s;
-white-space: nowrap;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Mulish', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  transition: all 0.18s;
+  white-space: nowrap;
 }
 
 .nav-btn:hover { color: var(--text); background: var(--surface2); }
@@ -155,105 +154,105 @@ white-space: nowrap;
 
 /* ── HERO ── */
 .hero {
-background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%);
-border: 1px solid var(--border);
-border-radius: 16px;
-padding: 32px;
-margin-bottom: 24px;
-position: relative;
-overflow: hidden;
+  background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
 }
 
 .hero::before {
-content: ‘🎾’;
-position: absolute;
-right: 32px;
-top: 50%;
-transform: translateY(-50%);
-font-size: 6rem;
-opacity: 0.06;
-pointer-events: none;
+  content: '🎾';
+  position: absolute;
+  right: 32px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 6rem;
+  opacity: 0.06;
+  pointer-events: none;
 }
 
 .hero-title {
-font-family: ‘Oswald’, sans-serif;
-font-size: 2.2rem;
-font-weight: 700;
-letter-spacing: 3px;
-color: var(--accent);
-margin-bottom: 6px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--accent);
+  margin-bottom: 6px;
 }
 
 .hero-sub { color: var(--text-dim); font-size: 0.88rem; letter-spacing: 0.5px; margin-bottom: 20px; }
 
 .kpis {
-display: grid;
-grid-template-columns: repeat(4, 1fr);
-gap: 14px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
 }
 
 @media(max-width:700px){
-.kpis { grid-template-columns: repeat(2,1fr); }
-.hero-title { font-size: 1.5rem; }
-.nav-btn { padding: 7px 10px; font-size: 0.76rem; }
+  .kpis { grid-template-columns: repeat(2,1fr); }
+  .hero-title { font-size: 1.5rem; }
+  .nav-btn { padding: 7px 10px; font-size: 0.76rem; }
 }
 
 .kpi {
-background: var(--surface3);
-border: 1px solid var(--border);
-border-radius: 10px;
-padding: 14px 16px;
-text-align: center;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  text-align: center;
 }
 
 .kpi-val {
-font-family: ‘Oswald’, sans-serif;
-font-size: 2rem;
-color: var(--accent);
-line-height: 1;
-margin-bottom: 3px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 2rem;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 3px;
 }
 
 .kpi-label { font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.8px; }
 
 /* ── SECTION TITLE ── */
 .sec-title {
-font-family: ‘Oswald’, sans-serif;
-font-size: 0.85rem;
-letter-spacing: 2.5px;
-color: var(--text-muted);
-text-transform: uppercase;
-margin-bottom: 14px;
-margin-top: 28px;
-display: flex;
-align-items: center;
-gap: 10px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 2.5px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  margin-top: 28px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.sec-title::after { content: ‘’; flex: 1; height: 1px; background: var(--border); }
+.sec-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
 /* ── LEAGUE BLOCKS ── */
 .league-block {
-background: var(--surface);
-border: 1px solid var(--border);
-border-radius: 14px;
-margin-bottom: 20px;
-overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  margin-bottom: 20px;
+  overflow: hidden;
 }
 
 .league-header {
-padding: 16px 20px;
-display: flex;
-align-items: center;
-gap: 12px;
-border-bottom: 1px solid var(--border);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--border);
 }
 
 .league-badge {
-font-family: ‘Oswald’, sans-serif;
-font-size: 1.25rem;
-font-weight: 700;
-letter-spacing: 1px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 1px;
 }
 
 .league-badge.super { color: var(--super); }
@@ -266,18 +265,18 @@ letter-spacing: 1px;
 .league-info .desc { font-size: 0.75rem; color: var(--text-dim); margin-top: 1px; }
 
 .league-count {
-font-size: 0.78rem;
-color: var(--text-dim);
-background: var(--surface2);
-padding: 4px 12px;
-border-radius: 20px;
-border: 1px solid var(--border);
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  background: var(--surface2);
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
 }
 
 /* Standings table */
 .standings {
-width: 100%;
-border-collapse: collapse;
+  width: 100%;
+  border-collapse: collapse;
 }
 
 /* Mobil: tablo yatay kaydırılabilir */
@@ -289,27 +288,26 @@ border-collapse: collapse;
   .form-series { display: none; }
 }
 
-
 .standings th {
-padding: 9px 14px;
-text-align: left;
-font-size: 0.7rem;
-text-transform: uppercase;
-letter-spacing: 0.8px;
-color: var(--text-muted);
-font-weight: 700;
-border-bottom: 1px solid var(--border);
-background: var(--surface2);
+  padding: 9px 14px;
+  text-align: left;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  font-weight: 700;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
 }
 
 .standings th.right, .standings td.right { text-align: right; }
 .standings th.center, .standings td.center { text-align: center; }
 
 .standings td {
-padding: 11px 14px;
-border-bottom: 1px solid rgba(36,48,36,0.5);
-vertical-align: middle;
-transition: background 0.15s;
+  padding: 11px 14px;
+  border-bottom: 1px solid rgba(36,48,36,0.5);
+  vertical-align: middle;
+  transition: background 0.15s;
 }
 
 .standings tr:last-child td { border-bottom: none; }
@@ -321,12 +319,12 @@ transition: background 0.15s;
 .zone-rel td { background: rgba(58,26,26,0.35) !important; }
 
 .rank-num {
-font-family: ‘Oswald’, sans-serif;
-font-size: 1.1rem;
-color: var(--text-muted);
-min-width: 24px;
-display: inline-block;
-text-align: center;
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  min-width: 24px;
+  display: inline-block;
+  text-align: center;
 }
 
 .rank-num.r1 { color: var(--gold); }
@@ -334,30 +332,30 @@ text-align: center;
 .rank-num.r3 { color: var(--bronze); }
 
 .pname {
-font-weight: 600;
-font-size: 0.9rem;
-display: flex;
-align-items: center;
-gap: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .av {
-width: 30px; height: 30px;
-border-radius: 50%;
-display: inline-flex;
-align-items: center;
-justify-content: center;
-font-size: 0.7rem;
-font-weight: 700;
-flex-shrink: 0;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  flex-shrink: 0;
 }
 
 .zone-icon {
-width: 7px; height: 7px;
-border-radius: 50%;
-display: inline-block;
-margin-left: 4px;
-flex-shrink: 0;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-left: 4px;
+  flex-shrink: 0;
 }
 
 .zi-up { background: var(--accent); }
@@ -365,19 +363,19 @@ flex-shrink: 0;
 .zi-dn { background: var(--red); }
 
 .pts-cell {
-font-family: ‘Oswald’, sans-serif;
-font-size: 1.1rem;
-color: var(--accent);
-font-weight: 600;
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.1rem;
+  color: var(--accent);
+  font-weight: 600;
 }
 
 .tag {
-display: inline-block;
-padding: 2px 8px;
-border-radius: 4px;
-font-size: 0.68rem;
-font-weight: 700;
-letter-spacing: 0.5px;
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
 .tag-win { background: rgba(93,201,93,0.15); color: var(--accent); }
@@ -385,119 +383,119 @@ letter-spacing: 0.5px;
 
 /* Zone legend */
 .zone-legend {
-display: flex;
-gap: 20px;
-padding: 10px 16px;
-border-top: 1px solid var(--border);
-font-size: 0.72rem;
-color: var(--text-dim);
-flex-wrap: wrap;
+  display: flex;
+  gap: 20px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  flex-wrap: wrap;
 }
 
 .zl-item { display: flex; align-items: center; gap: 6px; }
 
 /* ── SCORE FORM ── */
 .score-card {
-background: var(--surface);
-border: 1px solid var(--border);
-border-radius: 14px;
-padding: 28px;
-margin-bottom: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 28px;
+  margin-bottom: 20px;
 }
 
 .card-title {
-font-family: ‘Oswald’, sans-serif;
-font-size: 1.2rem;
-letter-spacing: 2px;
-color: var(--accent);
-margin-bottom: 22px;
-display: flex;
-align-items: center;
-gap: 10px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+  color: var(--accent);
+  margin-bottom: 22px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
 .form-grid3 { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: end; margin-bottom: 20px; }
 
 @media(max-width:600px){
-.form-grid { grid-template-columns: 1fr; }
-.form-grid3 { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+  .form-grid3 { grid-template-columns: 1fr; }
 }
 
 .fgroup { display: flex; flex-direction: column; gap: 5px; }
 
 .fgroup label {
-font-size: 0.7rem;
-text-transform: uppercase;
-letter-spacing: 0.8px;
-color: var(--text-dim);
-font-weight: 700;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-dim);
+  font-weight: 700;
 }
 
 .fgroup select, .fgroup input[type=text], .fgroup input[type=date] {
-background: var(--surface2);
-border: 1px solid var(--border);
-color: var(--text);
-padding: 10px 13px;
-border-radius: 8px;
-font-family: ‘Mulish’, sans-serif;
-font-size: 0.88rem;
-outline: none;
-transition: border-color 0.18s;
--webkit-appearance: none;
-appearance: none;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 10px 13px;
+  border-radius: 8px;
+  font-family: 'Mulish', sans-serif;
+  font-size: 0.88rem;
+  outline: none;
+  transition: border-color 0.18s;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .fgroup select:focus, .fgroup input:focus { border-color: var(--accent); }
 
 .vs-txt {
-font-family: ‘Oswald’, sans-serif;
-font-size: 1.3rem;
-color: var(--gold);
-text-align: center;
-padding-bottom: 10px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.3rem;
+  color: var(--gold);
+  text-align: center;
+  padding-bottom: 10px;
 }
 
 .sets-wrap {
-display: grid;
-grid-template-columns: repeat(3, 1fr);
-gap: 12px;
-margin-bottom: 22px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 22px;
 }
 
 @media(max-width:500px){ .sets-wrap { grid-template-columns: 1fr; } }
 
 .set-box {
-background: var(--surface2);
-border: 1px solid var(--border);
-border-radius: 10px;
-padding: 14px;
-text-align: center;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  text-align: center;
 }
 
 .set-label {
-font-size: 0.68rem;
-text-transform: uppercase;
-letter-spacing: 0.8px;
-color: var(--text-muted);
-font-weight: 700;
-margin-bottom: 10px;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  font-weight: 700;
+  margin-bottom: 10px;
 }
 
 .set-inputs { display: flex; align-items: center; justify-content: center; gap: 8px; }
 
 .sinput {
-width: 50px;
-background: var(--surface3);
-border: 1px solid var(--border);
-color: var(--text);
-padding: 8px 4px;
-border-radius: 7px;
-font-family: ‘Oswald’, sans-serif;
-font-size: 1.4rem;
-text-align: center;
-outline: none;
-transition: border-color 0.18s;
+  width: 50px;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 4px;
+  border-radius: 7px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.4rem;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.18s;
 }
 
 .sinput:focus { border-color: var(--accent); }
@@ -505,80 +503,80 @@ transition: border-color 0.18s;
 .set-sep { color: var(--text-muted); font-size: 1rem; font-weight: 700; }
 
 .point-preview {
-background: var(--surface2);
-border: 1px solid var(--border);
-border-radius: 10px;
-padding: 14px 18px;
-margin-bottom: 20px;
-font-size: 0.85rem;
-display: flex;
-gap: 20px;
-flex-wrap: wrap;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  font-size: 0.85rem;
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
 }
 
 .pp-item { display: flex; flex-direction: column; gap: 3px; }
 .pp-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-muted); font-weight: 700; }
-.pp-val { font-family: ‘Oswald’, sans-serif; font-size: 1.2rem; color: var(--accent); }
+.pp-val { font-family: 'Oswald', sans-serif; font-size: 1.2rem; color: var(--accent); }
 
 .btn {
-border: none;
-cursor: pointer;
-font-family: ‘Mulish’, sans-serif;
-font-weight: 700;
-border-radius: 8px;
-transition: all 0.18s;
-letter-spacing: 0.3px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Mulish', sans-serif;
+  font-weight: 700;
+  border-radius: 8px;
+  transition: all 0.18s;
+  letter-spacing: 0.3px;
 }
 
 .btn-green {
-background: var(--green);
-color: white;
-padding: 12px 28px;
-font-size: 0.9rem;
+  background: var(--green);
+  color: white;
+  padding: 12px 28px;
+  font-size: 0.9rem;
 }
 
 .btn-green:hover { background: var(--green-light); transform: translateY(-1px); }
 
 .btn-sm {
-background: transparent;
-border: 1px solid rgba(224,85,85,0.25);
-color: var(--red);
-padding: 5px 12px;
-font-size: 0.75rem;
+  background: transparent;
+  border: 1px solid rgba(224,85,85,0.25);
+  color: var(--red);
+  padding: 5px 12px;
+  font-size: 0.75rem;
 }
 
 .btn-sm:hover { background: rgba(224,85,85,0.1); }
 
 .btn-blue {
-background: rgba(93,201,93,0.15);
-border: 1px solid rgba(93,201,93,0.25);
-color: var(--accent);
-padding: 8px 18px;
-font-size: 0.82rem;
+  background: rgba(93,201,93,0.15);
+  border: 1px solid rgba(93,201,93,0.25);
+  color: var(--accent);
+  padding: 8px 18px;
+  font-size: 0.82rem;
 }
 
 .btn-blue:hover { background: rgba(93,201,93,0.25); }
 
 /* ── RESULTS ── */
 .match-row {
-background: var(--surface);
-border: 1px solid var(--border);
-border-radius: 10px;
-padding: 13px 18px;
-margin-bottom: 7px;
-display: grid;
-grid-template-columns: 80px 1fr auto auto;
-gap: 16px;
-align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 13px 18px;
+  margin-bottom: 7px;
+  display: grid;
+  grid-template-columns: 80px 1fr auto auto;
+  gap: 16px;
+  align-items: center;
 }
 
 @media(max-width:600px){ .match-row { grid-template-columns: 60px 1fr auto; } }
 
 .match-lig {
-font-family: ‘Oswald’, sans-serif;
-font-size: 0.82rem;
-letter-spacing: 1px;
-font-weight: 600;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.82rem;
+  letter-spacing: 1px;
+  font-weight: 600;
 }
 
 .match-lig.super { color: var(--gold); }
@@ -591,32 +589,32 @@ font-weight: 600;
 .mloser { color: var(--text-dim); font-size: 0.88rem; }
 
 .match-score-txt {
-font-family: ‘Oswald’, sans-serif;
-font-size: 0.9rem;
-color: var(--text);
-letter-spacing: 1px;
-white-space: nowrap;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.9rem;
+  color: var(--text);
+  letter-spacing: 1px;
+  white-space: nowrap;
 }
 
 .match-meta { text-align: right; font-size: 0.72rem; color: var(--text-muted); line-height: 1.8; }
 
 /* ── PLAYER STATS ── */
 .stat-table {
-width: 100%;
-border-collapse: collapse;
-font-size: 0.85rem;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
 }
 
 .stat-table th {
-padding: 9px 12px;
-text-align: left;
-font-size: 0.68rem;
-text-transform: uppercase;
-letter-spacing: 0.8px;
-color: var(--text-muted);
-font-weight: 700;
-border-bottom: 1px solid var(--border);
-background: var(--surface2);
+  padding: 9px 12px;
+  text-align: left;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  font-weight: 700;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
 }
 
 .stat-table td { padding: 10px 12px; border-bottom: 1px solid rgba(36,48,36,0.4); }
@@ -625,33 +623,33 @@ background: var(--surface2);
 
 /* ── RULES ── */
 .rules-container {
-background: var(--surface);
-border: 1px solid var(--border);
-border-radius: 14px;
-padding: 28px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 28px;
 }
 
 .rule-section { margin-bottom: 24px; }
 
 .rule-section-title {
-font-family: ‘Oswald’, sans-serif;
-font-size: 1rem;
-letter-spacing: 1.5px;
-color: var(--gold);
-margin-bottom: 12px;
-display: flex;
-align-items: center;
-gap: 8px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 1.5px;
+  color: var(--gold);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .rule-item {
-padding: 10px 0;
-border-bottom: 1px solid rgba(36,48,36,0.4);
-font-size: 0.87rem;
-line-height: 1.65;
-color: var(--text);
-display: flex;
-gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(36,48,36,0.4);
+  font-size: 0.87rem;
+  line-height: 1.65;
+  color: var(--text);
+  display: flex;
+  gap: 12px;
 }
 
 .rule-item:last-child { border-bottom: none; }
@@ -659,15 +657,15 @@ gap: 12px;
 .rule-icon { color: var(--accent); flex-shrink: 0; margin-top: 2px; }
 
 .pts-table {
-width: 100%;
-border-collapse: collapse;
-margin-top: 8px;
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
 }
 
 .pts-table td { padding: 8px 14px; border-bottom: 1px solid rgba(36,48,36,0.4); font-size: 0.85rem; }
 .pts-table tr:last-child td { border-bottom: none; }
 .pts-table td:first-child { color: var(--text-dim); }
-.pts-table td:last-child { font-family: ‘Oswald’, sans-serif; font-size: 1rem; color: var(--accent); text-align: right; font-weight: 600; }
+.pts-table td:last-child { font-family: 'Oswald', sans-serif; font-size: 1rem; color: var(--accent); text-align: right; font-weight: 600; }
 
 /* ── ADMIN ── */
 .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
@@ -675,27 +673,27 @@ margin-top: 8px;
 
 /* ── PLAYOFF SECTION ── */
 .playoff-card {
-background: var(--surface);
-border: 1px solid rgba(240,192,64,0.3);
-border-radius: 12px;
-padding: 20px;
-margin-bottom: 12px;
+  background: var(--surface);
+  border: 1px solid rgba(240,192,64,0.3);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 12px;
 }
 
 .playoff-title {
-font-family: ‘Oswald’, sans-serif;
-font-size: 0.9rem;
-color: var(--gold);
-letter-spacing: 1.5px;
-margin-bottom: 12px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.9rem;
+  color: var(--gold);
+  letter-spacing: 1.5px;
+  margin-bottom: 12px;
 }
 
 .playoff-match {
-display: flex;
-align-items: center;
-gap: 12px;
-padding: 10px 0;
-border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
 }
 
 .playoff-match:last-child { border-bottom: none; }
@@ -704,48 +702,48 @@ border-bottom: 1px solid var(--border);
 
 /* ── TABS inside page ── */
 .inner-tabs {
-display: flex;
-gap: 4px;
-background: var(--surface2);
-padding: 5px;
-border-radius: 10px;
-margin-bottom: 20px;
-border: 1px solid var(--border);
+  display: flex;
+  gap: 4px;
+  background: var(--surface2);
+  padding: 5px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  border: 1px solid var(--border);
 }
 
 .inner-tab {
-flex: 1;
-padding: 9px;
-border: none;
-background: transparent;
-color: var(--text-dim);
-cursor: pointer;
-border-radius: 7px;
-font-family: ‘Mulish’, sans-serif;
-font-size: 0.82rem;
-font-weight: 700;
-transition: all 0.18s;
-text-align: center;
+  flex: 1;
+  padding: 9px;
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  border-radius: 7px;
+  font-family: 'Mulish', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  transition: all 0.18s;
+  text-align: center;
 }
 
 .inner-tab.active { background: var(--green); color: white; }
 
 /* ── TOAST ── */
 .toast {
-position: fixed;
-bottom: 28px;
-right: 28px;
-background: var(--green);
-color: white;
-padding: 11px 22px;
-border-radius: 8px;
-font-size: 0.88rem;
-font-weight: 600;
-box-shadow: 0 6px 24px rgba(0,0,0,0.5);
-transform: translateY(70px);
-opacity: 0;
-transition: all 0.28s;
-z-index: 999;
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  background: var(--green);
+  color: white;
+  padding: 11px 22px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+  transform: translateY(70px);
+  opacity: 0;
+  transition: all 0.28s;
+  z-index: 999;
 }
 
 .toast.show { transform: translateY(0); opacity: 1; }
@@ -753,174 +751,174 @@ z-index: 999;
 
 /* ── LOGIN OVERLAY ── */
 .login-overlay {
-position: fixed;
-inset: 0;
-background: rgba(8,12,8,0.97);
-display: flex;
-align-items: center;
-justify-content: center;
-z-index: 1000;
-backdrop-filter: blur(6px);
+  position: fixed;
+  inset: 0;
+  background: rgba(8,12,8,0.97);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(6px);
 }
 
 .login-box {
-background: var(--surface);
-border: 1px solid var(--border);
-border-radius: 18px;
-padding: 44px 40px;
-width: 100%;
-max-width: 400px;
-box-shadow: 0 24px 64px rgba(0,0,0,0.7);
-text-align: center;
-animation: loginIn 0.3s ease;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 44px 40px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.7);
+  text-align: center;
+  animation: loginIn 0.3s ease;
 }
 
 @keyframes loginIn {
-from { transform: translateY(24px); opacity: 0; }
-to   { transform: translateY(0);    opacity: 1; }
+  from { transform: translateY(24px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
 }
 
 .login-icon {
-width: 64px; height: 64px;
-background: var(--green);
-border-radius: 18px;
-display: flex; align-items: center; justify-content: center;
-font-size: 2rem;
-margin: 0 auto 20px;
+  width: 64px; height: 64px;
+  background: var(--green);
+  border-radius: 18px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem;
+  margin: 0 auto 20px;
 }
 
 .login-title {
-font-family: ‘Oswald’, sans-serif;
-font-size: 1.5rem;
-letter-spacing: 2px;
-color: var(--accent);
-margin-bottom: 6px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: 2px;
+  color: var(--accent);
+  margin-bottom: 6px;
 }
 
 .login-sub {
-font-size: 0.82rem;
-color: var(--text-dim);
-margin-bottom: 28px;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  margin-bottom: 28px;
 }
 
 .login-input {
-width: 100%;
-background: var(--surface2);
-border: 1px solid var(--border);
-color: var(--text);
-padding: 13px 16px;
-border-radius: 10px;
-font-family: ‘Mulish’, sans-serif;
-font-size: 1rem;
-outline: none;
-text-align: center;
-letter-spacing: 3px;
-margin-bottom: 14px;
-transition: border-color 0.18s;
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 13px 16px;
+  border-radius: 10px;
+  font-family: 'Mulish', sans-serif;
+  font-size: 1rem;
+  outline: none;
+  text-align: center;
+  letter-spacing: 3px;
+  margin-bottom: 14px;
+  transition: border-color 0.18s;
 }
 
 .login-input:focus { border-color: var(--accent); }
 
 .login-btn {
-width: 100%;
-background: var(--green);
-border: none;
-color: white;
-padding: 13px;
-border-radius: 10px;
-font-family: ‘Mulish’, sans-serif;
-font-size: 0.95rem;
-font-weight: 700;
-cursor: pointer;
-letter-spacing: 0.5px;
-transition: all 0.18s;
-margin-bottom: 16px;
+  width: 100%;
+  background: var(--green);
+  border: none;
+  color: white;
+  padding: 13px;
+  border-radius: 10px;
+  font-family: 'Mulish', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  transition: all 0.18s;
+  margin-bottom: 16px;
 }
 
 .login-btn:hover { background: var(--green-light); }
 
 .login-public-btn {
-background: none;
-border: none;
-color: var(--text-dim);
-font-family: ‘Mulish’, sans-serif;
-font-size: 0.82rem;
-cursor: pointer;
-text-decoration: underline;
-text-underline-offset: 3px;
-transition: color 0.15s;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-family: 'Mulish', sans-serif;
+  font-size: 0.82rem;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.15s;
 }
 
 .login-public-btn:hover { color: var(--text); }
 
 .login-error {
-background: rgba(224,85,85,0.12);
-border: 1px solid rgba(224,85,85,0.25);
-color: var(--red);
-padding: 10px 14px;
-border-radius: 8px;
-font-size: 0.82rem;
-margin-bottom: 14px;
-display: none;
+  background: rgba(224,85,85,0.12);
+  border: 1px solid rgba(224,85,85,0.25);
+  color: var(--red);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  margin-bottom: 14px;
+  display: none;
 }
 
 /* ── ADMIN BADGE in header ── */
 .admin-badge {
-display: none;
-align-items: center;
-gap: 8px;
-background: rgba(26,122,26,0.15);
-border: 1px solid rgba(93,201,93,0.2);
-border-radius: 20px;
-padding: 5px 14px 5px 10px;
-font-size: 0.78rem;
-color: var(--accent);
-font-weight: 700;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  background: rgba(26,122,26,0.15);
+  border: 1px solid rgba(93,201,93,0.2);
+  border-radius: 20px;
+  padding: 5px 14px 5px 10px;
+  font-size: 0.78rem;
+  color: var(--accent);
+  font-weight: 700;
 }
 
 .admin-badge.visible { display: flex; }
 
 .admin-dot {
-width: 7px; height: 7px;
-background: var(--accent);
-border-radius: 50%;
-animation: pulse 2s infinite;
+  width: 7px; height: 7px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
 }
 
 @keyframes pulse {
-0%,100% { opacity: 1; }
-50% { opacity: 0.3; }
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.3; }
 }
 
 .logout-btn {
-background: none;
-border: 1px solid rgba(224,85,85,0.25);
-color: var(--red);
-padding: 5px 12px;
-border-radius: 6px;
-cursor: pointer;
-font-family: ‘Mulish’, sans-serif;
-font-size: 0.75rem;
-font-weight: 700;
-transition: all 0.18s;
-display: none;
+  background: none;
+  border: 1px solid rgba(224,85,85,0.25);
+  color: var(--red);
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Mulish', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  transition: all 0.18s;
+  display: none;
 }
 
 .logout-btn.visible { display: block; }
 .logout-btn:hover { background: rgba(224,85,85,0.1); }
 
 .login-trigger-btn {
-background: rgba(26,122,26,0.15);
-border: 1px solid rgba(93,201,93,0.25);
-color: var(--accent);
-padding: 7px 16px;
-border-radius: 7px;
-cursor: pointer;
-font-family: ‘Mulish’, sans-serif;
-font-size: 0.8rem;
-font-weight: 700;
-transition: all 0.18s;
-display: block;
+  background: rgba(26,122,26,0.15);
+  border: 1px solid rgba(93,201,93,0.25);
+  color: var(--accent);
+  padding: 7px 16px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-family: 'Mulish', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  transition: all 0.18s;
+  display: block;
 }
 .login-trigger-btn:hover { background: rgba(26,122,26,0.28); }
 .login-trigger-btn.hidden { display: none; }
@@ -931,48 +929,48 @@ display: block;
 
 /* Change password modal */
 .modal-overlay {
-position: fixed;
-inset: 0;
-background: rgba(8,12,8,0.85);
-display: none;
-align-items: center;
-justify-content: center;
-z-index: 500;
-backdrop-filter: blur(4px);
+  position: fixed;
+  inset: 0;
+  background: rgba(8,12,8,0.85);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  backdrop-filter: blur(4px);
 }
 
 .modal-overlay.open { display: flex; }
 
 .modal-box {
-background: var(--surface);
-border: 1px solid var(--border);
-border-radius: 14px;
-padding: 32px;
-width: 100%;
-max-width: 380px;
-box-shadow: 0 16px 48px rgba(0,0,0,0.6);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 32px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 16px 48px rgba(0,0,0,0.6);
 }
 
 .modal-title {
-font-family: ‘Oswald’, sans-serif;
-font-size: 1.1rem;
-letter-spacing: 1.5px;
-color: var(--accent);
-margin-bottom: 20px;
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 1.5px;
+  color: var(--accent);
+  margin-bottom: 20px;
 }
 
 /* Admin page sections shown only when admin */
 .public-notice {
-background: var(--surface2);
-border: 1px solid var(--border);
-border-radius: 12px;
-padding: 40px;
-text-align: center;
-color: var(--text-dim);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 40px;
+  text-align: center;
+  color: var(--text-dim);
 }
 
 .public-notice-icon { font-size: 2.5rem; margin-bottom: 12px; }
-.public-notice-title { font-family: ‘Oswald’, sans-serif; font-size: 1.1rem; letter-spacing: 1px; color: var(--text); margin-bottom: 8px; }
+.public-notice-title { font-family: 'Oswald', sans-serif; font-size: 1.1rem; letter-spacing: 1px; color: var(--text); margin-bottom: 8px; }
 .public-notice-sub { font-size: 0.85rem; line-height: 1.6; }
 
 /* ── MISC ── */
@@ -980,124 +978,124 @@ color: var(--text-dim);
 
 /* ── FIXTURE ── */
 .fix-grid {
-display: grid;
-grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-gap: 12px;
-margin-bottom: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
 }
 
 .fix-card {
-background: var(--surface);
-border: 1px solid var(--border);
-border-radius: 10px;
-overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
 }
 
 .fix-player-header {
-padding: 12px 16px;
-background: var(--surface2);
-border-bottom: 1px solid var(--border);
-font-weight: 700;
-font-size: 0.88rem;
-display: flex;
-align-items: center;
-gap: 10px;
+  padding: 12px 16px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  font-weight: 700;
+  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .fix-row {
-display: flex;
-align-items: center;
-padding: 9px 16px;
-border-bottom: 1px solid rgba(36,48,36,0.35);
-font-size: 0.84rem;
-gap: 10px;
+  display: flex;
+  align-items: center;
+  padding: 9px 16px;
+  border-bottom: 1px solid rgba(36,48,36,0.35);
+  font-size: 0.84rem;
+  gap: 10px;
 }
 
 .fix-row:last-child { border-bottom: none; }
 
 .fix-status-dot {
-width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
 }
 
 .fix-done   { background: var(--accent); }
 .fix-todo   { background: var(--text-muted); }
-.fix-result { margin-left: auto; font-family: ‘Oswald’, sans-serif; font-size: 0.85rem; color: var(--text-dim); }
+.fix-result { margin-left: auto; font-family: 'Oswald', sans-serif; font-size: 0.85rem; color: var(--text-dim); }
 
 .fix-legend {
-display: flex; gap: 20px; flex-wrap: wrap;
-padding: 12px 16px;
-background: var(--surface);
-border: 1px solid var(--border);
-border-radius: 8px;
-margin-bottom: 16px;
-font-size: 0.78rem;
-color: var(--text-dim);
+  display: flex; gap: 20px; flex-wrap: wrap;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 0.78rem;
+  color: var(--text-dim);
 }
 
 .fix-legend-item { display: flex; align-items: center; gap: 7px; }
 
 /* ── ARCHIVE ── */
 .archive-season {
-background: var(--surface);
-border: 1px solid var(--border);
-border-radius: 12px;
-margin-bottom: 16px;
-overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 16px;
+  overflow: hidden;
 }
 
 .archive-season-header {
-padding: 16px 20px;
-display: flex;
-align-items: center;
-gap: 14px;
-cursor: pointer;
-background: var(--surface2);
-transition: background 0.15s;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  background: var(--surface2);
+  transition: background 0.15s;
 }
 
 .archive-season-header:hover { background: var(--surface3); }
 
 .archive-season-title {
-font-family: ‘Oswald’, sans-serif;
-font-size: 1.1rem;
-letter-spacing: 1px;
-color: var(--gold);
-flex: 1;
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  color: var(--gold);
+  flex: 1;
 }
 
 .archive-season-meta {
-font-size: 0.75rem;
-color: var(--text-dim);
+  font-size: 0.75rem;
+  color: var(--text-dim);
 }
 
 .archive-body { display: none; padding: 16px 20px; }
 .archive-body.open { display: block; }
 
 .archive-mini-table {
-width: 100%;
-border-collapse: collapse;
-font-size: 0.82rem;
-margin-bottom: 12px;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  margin-bottom: 12px;
 }
 
 .archive-mini-table th {
-padding: 7px 10px;
-text-align: left;
-font-size: 0.68rem;
-text-transform: uppercase;
-letter-spacing: 0.8px;
-color: var(--text-muted);
-border-bottom: 1px solid var(--border);
+  padding: 7px 10px;
+  text-align: left;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
 }
 
 .archive-mini-table td {
-padding: 8px 10px;
-border-bottom: 1px solid rgba(36,48,36,0.35);
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(36,48,36,0.35);
 }
 
 .archive-mini-table tr:last-child td { border-bottom: none; }
 .filter-row { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
-.filter-select { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 7px; font-family: ‘Mulish’, sans-serif; font-size: 0.82rem; outline: none; cursor: pointer; -webkit-appearance: none; }
+.filter-select { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 7px; font-family: 'Mulish', sans-serif; font-size: 0.82rem; outline: none; cursor: pointer; -webkit-appearance: none; }
 .chip { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; margin-left: 6px; }
 .chip-g { background: rgba(93,201,93,0.15); color: var(--accent); }
 .chip-r { background: rgba(224,85,85,0.12); color: var(--red); }
@@ -1301,21 +1299,26 @@ border-bottom: 1px solid rgba(36,48,36,0.35);
 </style>
 
 <!-- Supabase SDK -->
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
   // ════════════════════════════════════════════════
   // 🔧 BURAYA KENDİ SUPABASE BİLGİLERİNİ GİR
   // ════════════════════════════════════════════════
-  const SUPABASE_URL    = "https://owbwkkptimsibwabuozc.supabase.co";       // örn: https://xyzxyz.supabase.co
-  const SUPABASE_ANON   = "sb_publishable_JNAjF1j0CUZRnSL4tUQAeA_yVw1Ug8M";  // Project Settings > API > anon public
+  // ⚠️ GÜVENLİK UYARISI:
+  // SUPABASE_SERVICE (service_role) anahtarı RLS'yi bypass eder ve
+  // bu sayfanın kaynak kodu PUBLIC olduğu için herkes erişebilir.
+  // 1) Supabase dashboard'dan bu key'i RESET'le.
+  // 2) Tablolarına RLS politikaları kurup sadece anon key kullan.
+  // ════════════════════════════════════════════════
+  const SUPABASE_URL    = "https://owbwkkptimsibwabuozc.supabase.co";
+  const SUPABASE_ANON   = "sb_publishable_JNAjF1j0CUZRnSL4tUQAeA_yVw1Ug8M";
   const SUPABASE_SERVICE = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93Yndra3B0aW1zaWJ3YWJ1b3pjIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODI2MTA3MSwiZXhwIjoyMDkzODM3MDcxfQ.06p-KJ_mPMm6PKfr9XEDpvnvzYQCVLwMcDneHRJ8PyE";
   window._sbReady = false;
   try {
     const { createClient } = supabase;
-    window._sb      = createClient(SUPABASE_URL, SUPABASE_ANON);    // okuma (herkese açık)
-    window._sbAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE);  // yazma (sadece admin)
+    window._sb      = createClient(SUPABASE_URL, SUPABASE_ANON);
+    window._sbAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE);
     window._sbReady = true;
     window.dispatchEvent(new Event('sbReady'));
   } catch(e) {
@@ -1326,10 +1329,7 @@ border-bottom: 1px solid rgba(36,48,36,0.35);
 </head>
 <body>
 
-<!-- HEADER -->
-
 <!-- LOGIN OVERLAY -->
-
 <div class="login-overlay" id="login-overlay">
   <div class="login-box">
     <div class="login-icon">🎾</div>
@@ -1344,7 +1344,6 @@ border-bottom: 1px solid rgba(36,48,36,0.35);
 </div>
 
 <!-- CHANGE PASSWORD MODAL -->
-
 <div class="modal-overlay" id="pw-modal">
   <div class="modal-box">
     <div class="modal-title">🔑 ŞİFRE DEĞİŞTİR</div>
@@ -1402,7 +1401,6 @@ border-bottom: 1px solid rgba(36,48,36,0.35);
 <div class="main">
 
 <!-- ══ PUAN DURUMU ══ -->
-
 <div id="page-puan" class="page active">
 
   <div class="hero">
@@ -1425,12 +1423,10 @@ border-bottom: 1px solid rgba(36,48,36,0.35);
   <!-- SON MAÇLAR -->
   <div class="home-section" id="last-matches-section"></div>
 
-  <!-- PLAYOFF ZONE (if relevant matches) -->
-
+  <!-- PLAYOFF ZONE -->
   <div id="playoff-section"></div>
 
   <!-- STANDINGS BY LEAGUE -->
-
   <div id="standings-super"></div>
   <div id="standings-l2"></div>
   <div id="standings-l3"></div>
@@ -1439,81 +1435,76 @@ border-bottom: 1px solid rgba(36,48,36,0.35);
 </div>
 
 <!-- ══ SKOR GİR ══ -->
-
 <div id="page-skor" class="page">
   <div class="score-card">
     <div class="card-title">⚡ MAÇ SONUCU GİR</div>
 
-```
-<div class="form-grid">
-  <div class="fgroup">
-    <label>Lig</label>
-    <select id="ml" onchange="updatePlayerDropdowns()">
-      <option value="super">🥇 RTA Süper Ligi</option>
-      <option value="l2">🥈 RTA 2. Ligi</option>
-      <option value="l3">🥉 RTA 3. Ligi</option>
-      <option value="l4">RTA 4. Ligi</option>
-    </select>
-  </div>
-  <div class="fgroup">
-    <label>Tarih</label>
-    <input type="date" id="mdate">
-  </div>
-</div>
-
-<div class="form-grid3">
-  <div class="fgroup">
-    <label>Oyuncu 1 (Ev Sahibi)</label>
-    <select id="mp1" onchange="calcPoints()"></select>
-  </div>
-  <div class="vs-txt">VS</div>
-  <div class="fgroup">
-    <label>Oyuncu 2 (Misafir)</label>
-    <select id="mp2" onchange="calcPoints()"></select>
-  </div>
-</div>
-
-<div class="sec-title" style="margin-top:0">Set Skorları</div>
-<div class="sets-wrap">
-  <div class="set-box">
-    <div class="set-label">1. Set <span style="color:var(--red);font-size:0.65rem;">zorunlu</span></div>
-    <div class="set-inputs">
-      <input type="number" class="sinput" id="s1a" min="0" max="7" placeholder="0" oninput="calcPoints()">
-      <span class="set-sep">–</span>
-      <input type="number" class="sinput" id="s1b" min="0" max="7" placeholder="0" oninput="calcPoints()">
+    <div class="form-grid">
+      <div class="fgroup">
+        <label>Lig</label>
+        <select id="ml" onchange="updatePlayerDropdowns()">
+          <option value="super">🥇 RTA Süper Ligi</option>
+          <option value="l2">🥈 RTA 2. Ligi</option>
+          <option value="l3">🥉 RTA 3. Ligi</option>
+          <option value="l4">RTA 4. Ligi</option>
+        </select>
+      </div>
+      <div class="fgroup">
+        <label>Tarih</label>
+        <input type="date" id="mdate">
+      </div>
     </div>
-  </div>
-  <div class="set-box">
-    <div class="set-label">2. Set <span style="color:var(--red);font-size:0.65rem;">zorunlu</span></div>
-    <div class="set-inputs">
-      <input type="number" class="sinput" id="s2a" min="0" max="7" placeholder="0" oninput="calcPoints()">
-      <span class="set-sep">–</span>
-      <input type="number" class="sinput" id="s2b" min="0" max="7" placeholder="0" oninput="calcPoints()">
+
+    <div class="form-grid3">
+      <div class="fgroup">
+        <label>Oyuncu 1 (Ev Sahibi)</label>
+        <select id="mp1" onchange="calcPoints()"></select>
+      </div>
+      <div class="vs-txt">VS</div>
+      <div class="fgroup">
+        <label>Oyuncu 2 (Misafir)</label>
+        <select id="mp2" onchange="calcPoints()"></select>
+      </div>
     </div>
-  </div>
-  <div class="set-box">
-    <div class="set-label">3. Set / Süper TB <span style="color:var(--text-muted);font-size:0.65rem;">isteğe bağlı</span></div>
-    <div class="set-inputs">
-      <input type="number" class="sinput" id="s3a" min="0" max="7" placeholder="–" oninput="calcPoints()">
-      <span class="set-sep">–</span>
-      <input type="number" class="sinput" id="s3b" min="0" max="7" placeholder="–" oninput="calcPoints()">
+
+    <div class="sec-title" style="margin-top:0">Set Skorları</div>
+    <div class="sets-wrap">
+      <div class="set-box">
+        <div class="set-label">1. Set <span style="color:var(--red);font-size:0.65rem;">zorunlu</span></div>
+        <div class="set-inputs">
+          <input type="number" class="sinput" id="s1a" min="0" max="7" placeholder="0" oninput="calcPoints()">
+          <span class="set-sep">–</span>
+          <input type="number" class="sinput" id="s1b" min="0" max="7" placeholder="0" oninput="calcPoints()">
+        </div>
+      </div>
+      <div class="set-box">
+        <div class="set-label">2. Set <span style="color:var(--red);font-size:0.65rem;">zorunlu</span></div>
+        <div class="set-inputs">
+          <input type="number" class="sinput" id="s2a" min="0" max="7" placeholder="0" oninput="calcPoints()">
+          <span class="set-sep">–</span>
+          <input type="number" class="sinput" id="s2b" min="0" max="7" placeholder="0" oninput="calcPoints()">
+        </div>
+      </div>
+      <div class="set-box">
+        <div class="set-label">3. Set / Süper TB <span style="color:var(--text-muted);font-size:0.65rem;">isteğe bağlı</span></div>
+        <div class="set-inputs">
+          <input type="number" class="sinput" id="s3a" min="0" max="7" placeholder="–" oninput="calcPoints()">
+          <span class="set-sep">–</span>
+          <input type="number" class="sinput" id="s3b" min="0" max="7" placeholder="–" oninput="calcPoints()">
+        </div>
+      </div>
     </div>
-  </div>
-</div>
 
-<div class="point-preview" id="pp">
-  <div class="pp-item"><div class="pp-label">Sonuç</div><div class="pp-val" id="pp-result">—</div></div>
-  <div class="pp-item"><div class="pp-label">Galip Puan</div><div class="pp-val" id="pp-wpts">—</div></div>
-  <div class="pp-item"><div class="pp-label">Mağlup Puan</div><div class="pp-val" id="pp-lpts" style="color:var(--text-dim)">—</div></div>
-</div>
+    <div class="point-preview" id="pp">
+      <div class="pp-item"><div class="pp-label">Sonuç</div><div class="pp-val" id="pp-result">—</div></div>
+      <div class="pp-item"><div class="pp-label">Galip Puan</div><div class="pp-val" id="pp-wpts">—</div></div>
+      <div class="pp-item"><div class="pp-label">Mağlup Puan</div><div class="pp-val" id="pp-lpts" style="color:var(--text-dim)">—</div></div>
+    </div>
 
-<button class="btn btn-green" onclick="submitMatch()">✓ MAÇ SONUCUNU KAYDET</button>
-```
-
+    <button class="btn btn-green" onclick="submitMatch()">✓ MAÇ SONUCUNU KAYDET</button>
   </div>
 
   <!-- HÜKMEN -->
-
   <div class="score-card">
     <div class="card-title">🚫 HÜKMEN MAĞLUBIYET</div>
     <div class="form-grid3">
@@ -1538,7 +1529,6 @@ border-bottom: 1px solid rgba(36,48,36,0.35);
 </div>
 
 <!-- ══ SONUÇLAR ══ -->
-
 <div id="page-sonuclar" class="page">
   <div class="filter-row">
     <select class="filter-select" id="filter-lig" onchange="renderResults()">
@@ -1556,7 +1546,6 @@ border-bottom: 1px solid rgba(36,48,36,0.35);
 </div>
 
 <!-- ══ İSTATİSTİK ══ -->
-
 <div id="page-istatistik" class="page">
   <div class="inner-tabs">
     <button class="inner-tab active" onclick="showStatTab('genel')">Genel İstatistik</button>
@@ -1599,7 +1588,6 @@ border-bottom: 1px solid rgba(36,48,36,0.35);
 </div>
 
 <!-- ══ KURALLAR ══ -->
-
 <div id="page-kurallar" class="page">
   <div class="rules-container">
     <div class="rule-section">
@@ -1636,7 +1624,6 @@ border-bottom: 1px solid rgba(36,48,36,0.35);
 </div>
 
 <!-- ══ YÖNETİM ══ -->
-
 <div id="page-yonetim" class="page">
   <div class="admin-grid">
     <div class="score-card">
@@ -1657,26 +1644,23 @@ border-bottom: 1px solid rgba(36,48,36,0.35);
       <button class="btn btn-green" onclick="addPlayer()">Oyuncu Ekle</button>
     </div>
 
-```
-<div class="score-card">
-  <div class="card-title">🔀 Lig Değiştir</div>
-  <div class="fgroup" style="margin-bottom:12px">
-    <label>Oyuncu</label>
-    <select id="mv-player"></select>
-  </div>
-  <div class="fgroup" style="margin-bottom:16px">
-    <label>Yeni Lig</label>
-    <select id="mv-league">
-      <option value="super">Süper Lig</option>
-      <option value="l2">2. Lig</option>
-      <option value="l3">3. Lig</option>
-      <option value="l4">4. Lig</option>
-    </select>
-  </div>
-  <button class="btn btn-green" onclick="movePlayer()">Lig Değiştir</button>
-</div>
-```
-
+    <div class="score-card">
+      <div class="card-title">🔀 Lig Değiştir</div>
+      <div class="fgroup" style="margin-bottom:12px">
+        <label>Oyuncu</label>
+        <select id="mv-player"></select>
+      </div>
+      <div class="fgroup" style="margin-bottom:16px">
+        <label>Yeni Lig</label>
+        <select id="mv-league">
+          <option value="super">Süper Lig</option>
+          <option value="l2">2. Lig</option>
+          <option value="l3">3. Lig</option>
+          <option value="l4">4. Lig</option>
+        </select>
+      </div>
+      <button class="btn btn-green" onclick="movePlayer()">Lig Değiştir</button>
+    </div>
   </div>
 
   <div class="sec-title">Oyuncu Listesi</div>
@@ -1700,12 +1684,9 @@ border-bottom: 1px solid rgba(36,48,36,0.35);
     <div class="card-title" style="font-size:1rem">🔑 Yönetici Şifresini Değiştir</div>
     <button class="btn btn-blue" onclick="document.getElementById('pw-modal').classList.add('open')">Şifreyi Değiştir</button>
   </div>
-
-
 </div>
 
 <!-- ══ FİKSTÜR ══ -->
-
 <div id="page-fiktur" class="page">
   <div class="hero" style="margin-bottom:20px">
     <div class="hero-title" style="font-size:1.5rem">FİKSTÜR</div>
@@ -1721,14 +1702,11 @@ border-bottom: 1px solid rgba(36,48,36,0.35);
 </div>
 
 <!-- ══ ARŞİV ══ -->
-
 <div id="page-arsiv" class="page">
   <div class="hero" style="margin-bottom:20px">
     <div class="hero-title" style="font-size:1.5rem">SEZON ARŞİVİ</div>
     <div class="hero-sub">Geçmiş sezonların puan durumu ve istatistikleri</div>
   </div>
-
-  <!-- Aktif sezon kaydet butonu (sadece admin) -->
 
   <div id="archive-admin-panel" style="display:none;margin-bottom:20px">
     <div class="score-card" style="padding:20px">
@@ -1753,26 +1731,22 @@ border-bottom: 1px solid rgba(36,48,36,0.35);
 // ═══════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════
-const SK = 'rta_ligi_v2'; // localStorage cache key
+const SK = 'rta_ligi_v2';
 
-// ── Local cache load ──
 function loadState() {
   try { const d = localStorage.getItem(SK); return d ? JSON.parse(d) : null; } catch { return null; }
 }
 
-// ── saveState: localStorage + Supabase upsert ──
 async function saveState() {
   localStorage.setItem(SK, JSON.stringify(state));
   if (!window._sbReady) return;
   const sb = window._sbAdmin;
   try {
-    // Upsert meta row (id=1, singleton)
     await sb.from('meta').upsert({
       id: 1,
       next_player_id: state.nextPlayerId,
       next_match_id:  state.nextMatchId
     });
-    // Upsert all players
     if (state.players.length) {
       await sb.from('players').upsert(
         state.players.map(p => ({
@@ -1780,7 +1754,6 @@ async function saveState() {
         }))
       );
     }
-    // Upsert all matches
     if (state.matches.length) {
       await sb.from('matches').upsert(
         state.matches.map(m => ({
@@ -1802,13 +1775,11 @@ async function saveState() {
   } catch(e) { console.warn('Supabase write error:', e); }
 }
 
-// ── deleteMatch from Supabase ──
 async function sbDeleteMatch(id) {
   if (!window._sbReady) return;
   try { await window._sbAdmin.from('matches').delete().eq('id', id); } catch(e) {}
 }
 
-// ── deletePlayer from Supabase ──
 async function sbDeletePlayer(id) {
   if (!window._sbReady) return;
   try {
@@ -1817,7 +1788,6 @@ async function sbDeletePlayer(id) {
   } catch(e) {}
 }
 
-// ── Full load from Supabase ──
 async function loadFromSupabase() {
   if (!window._sbReady) return false;
   const sb = window._sb;
@@ -1854,15 +1824,10 @@ async function loadFromSupabase() {
   } catch(e) { console.warn('Supabase load error:', e); return false; }
 }
 
-// ── Polling (30 saniyede bir Supabase'den çek) ──
 let _pollInterval = null;
 function startSupabaseSync() {
   if (_pollInterval || !window._sbReady) return;
-
-  // İlk bağlantı başarılıysa yeşil yak
   setConnected(true);
-
-  // Her 30 saniyede veriyi çek, değişiklik varsa güncelle
   _pollInterval = setInterval(async () => {
     const before = JSON.stringify({ p: state.players.length, m: state.matches.length, pts: state.matches.reduce((s,m)=>s+m.wpts,0) });
     const ok = await loadFromSupabase();
@@ -1886,7 +1851,6 @@ function showSyncBadge() {
 
 const DEFAULT = {
   players: [
-    // SÜPER LİG (resmi oyuncular)
     {id:1,name:'Ramazan Demirci',league:'super'},
     {id:2,name:'Furkan Toprak',league:'super'},
     {id:3,name:'Ferhat Tosun',league:'super'},
@@ -1899,7 +1863,6 @@ const DEFAULT = {
     {id:10,name:'Samet Okumuş',league:'super'},
     {id:11,name:'Evren Tuğcu',league:'super'},
     {id:12,name:'Burak Tuğcu',league:'super'},
-    // 2. LİG
     {id:13,name:'Göksenin Yıldırım',league:'l2'},
     {id:14,name:'Özge Şimşek',league:'l2'},
     {id:15,name:'Tacettin Sulu',league:'l2'},
@@ -1912,7 +1875,6 @@ const DEFAULT = {
     {id:22,name:'Edip Kazım Aydın',league:'l2'},
     {id:23,name:'Rıza Tüylüoğlu',league:'l2'},
     {id:24,name:'Metin Bıçakçı',league:'l2'},
-    // 3. LİG
     {id:25,name:'Kerem Asım Kotil',league:'l3'},
     {id:26,name:'Uğur Albayrak',league:'l3'},
     {id:27,name:'Fevzi Köse',league:'l3'},
@@ -1945,11 +1907,10 @@ function getStandings(league) {
 
   state.matches.filter(m => m.league === league).forEach(m => {
     if (!st[m.winner] || !st[m.loser]) return;
-    const wst = m.sets; // [wa, wb] per set
+    const wst = m.sets;
     let p1s = 0, p2s = 0, gw = 0, gl = 0;
     if (wst) {
       wst.forEach(([a,b], idx) => {
-        // 3. set ve tie break ise (herhangi biri 10+) → 1-0 say
         const isTiebreak = idx === 2 && (a >= 10 || b >= 10);
         if (isTiebreak) {
           if (a > b) { gw += 1; gl += 0; }
@@ -1961,7 +1922,6 @@ function getStandings(league) {
       });
     }
 
-    // winner stats
     st[m.winner].mp++;
     st[m.winner].mw++;
     st[m.winner].pts += m.wpts;
@@ -1970,7 +1930,6 @@ function getStandings(league) {
     st[m.winner].gw += gw;
     st[m.winner].gl += gl;
 
-    // loser stats
     st[m.loser].mp++;
     st[m.loser].ml++;
     st[m.loser].pts += m.lpts;
@@ -1983,11 +1942,9 @@ function getStandings(league) {
   return Object.values(st).sort((a,b) => {
     if (b.pts !== a.pts) return b.pts - a.pts;
     if (b.mw !== a.mw) return b.mw - a.mw;
-    // set averaj
     const aSetAvg = a.sl ? a.sw/a.sl : a.sw;
     const bSetAvg = b.sl ? b.sw/b.sl : b.sw;
     if (Math.abs(bSetAvg - aSetAvg) > 0.001) return bSetAvg - aSetAvg;
-    // oyun averaj (kazanılan oyun / kaybedilen oyun)
     const aGameAvg = a.gl ? a.gw/a.gl : a.gw;
     const bGameAvg = b.gl ? b.gw/b.gl : b.gw;
     return bGameAvg - aGameAvg;
@@ -1997,7 +1954,7 @@ function getStandings(league) {
 function pointsForResult(winningSets, losingSets) {
   if (winningSets === 2 && losingSets === 0) return {wpts: 4, lpts: 1};
   if (winningSets === 2 && losingSets === 1) return {wpts: 3, lpts: 2};
-  return {wpts: 4, lpts: 1}; // default (walkover)
+  return {wpts: 4, lpts: 1};
 }
 
 function playerName(id) {
@@ -2041,11 +1998,10 @@ function renderStanding(code) {
   const standings = getStandings(code);
   const n = standings.length;
 
-  // Zone config: top 4 promo, 8th playoff (super/l3), bottom 4 rel
   function getZone(i, code) {
     if (i < 4) return 'promo';
-    if (code === 'super' && i === 7) return 'playoff'; // 8th vs 3. lig 1st
-    if (code === 'l2' && i === 7) return 'playoff';    // 8th vs 4. lig 1st
+    if (code === 'super' && i === 7) return 'playoff';
+    if (code === 'l2' && i === 7) return 'playoff';
     if (i >= n - 4) return 'rel';
     return '';
   }
@@ -2081,7 +2037,6 @@ function renderStanding(code) {
     </tr>`;
   }).join('');
 
-  // Zone legend
   let legendHtml = '<div class="zone-legend">';
   if (code !== 'super') legendHtml += '<div class="zl-item"><span class="zone-icon zi-up"></span> Direkt Terfi (İlk 4)</div>';
   if (code === 'super' || code === 'l2') legendHtml += '<div class="zl-item"><span class="zone-icon zi-po"></span> Play-off (8. sıra)</div>';
@@ -2125,10 +2080,10 @@ function renderPlayoffs() {
   const hasPlayers = superSt.length >= 8 && l3St.length >= 1 && l2St.length >= 8 && l4St.length >= 1;
   if (!hasPlayers) { document.getElementById('playoff-section').innerHTML = ''; return; }
 
-  const p1a = superSt[7]; // Süper Lig 8.si
-  const p1b = l3St[0];    // 3. Lig 1.si
-  const p2a = l2St[7];    // 2. Lig 8.si
-  const p2b = l4St[0];    // 4. Lig 1.si
+  const p1a = superSt[7];
+  const p1b = l3St[0];
+  const p2a = l2St[7];
+  const p2b = l4St[0];
 
   document.getElementById('playoff-section').innerHTML = `
     <div class="sec-title">⚡ Play-off Maçları</div>
@@ -2156,7 +2111,6 @@ function renderAll(fromSupabase = false) {
   renderPlayoffs();
   updateKPIs();
   if (fromSupabase) renderHomeSections();
-  // Refresh open pages
   const ap = document.querySelector('.page.active');
   if (ap) {
     if (ap.id === 'page-sonuclar')   renderResults();
@@ -2182,7 +2136,6 @@ function updatePlayerDropdowns() {
   const opts = players.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
   document.getElementById('mp1').innerHTML = opts;
   document.getElementById('mp2').innerHTML = opts;
-  // select different defaults
   if (players.length >= 2) document.getElementById('mp2').selectedIndex = 1;
   calcPoints();
 
@@ -2292,11 +2245,9 @@ function submitWalkover() {
   const loser = parseInt(document.getElementById('hp').value);
   const date = new Date().toISOString().split('T')[0];
 
-  // Find any opponent (first in same league who isn't the loser)
   const others = state.players.filter(p => p.league === league && p.id !== loser);
   if (!others.length) { showToast('Ligde başka oyuncu yok!', 'err'); return; }
 
-  // For walkover we need to specify winner — ask via prompt for now
   const winnerName = prompt('Karşı oyuncunun adını girin (galip):');
   if (!winnerName) return;
   const wPlayer = state.players.find(p => p.name.toLowerCase().includes(winnerName.toLowerCase()) && p.league === league);
@@ -2323,7 +2274,6 @@ function renderResults() {
   const ligFilter = document.getElementById('filter-lig').value;
   const playerFilter = parseInt(document.getElementById('filter-player').value)||0;
 
-  // Populate player filter
   const pSel = document.getElementById('filter-player');
   const curVal = pSel.value;
   pSel.innerHTML = '<option value="">Tüm Oyuncular</option>' +
@@ -2373,7 +2323,6 @@ function deleteMatch(id) {
 // STATS
 // ═══════════════════════════════════════════════════
 function renderStats() {
-  // All-league leaderboard
   const allStats = [];
   ['super','l2','l3','l4'].forEach(lg => {
     getStandings(lg).forEach(p => {
@@ -2399,7 +2348,6 @@ function renderStats() {
     </tr>`;
   }).join('') || '<tr><td colspan="8" class="empty">Henüz maç yok.</td></tr>';
 
-  // Player selector
   const pSel = document.getElementById('stat-player-sel');
   const curVal = pSel.value;
   pSel.innerHTML = '<option value="">— Oyuncu Seçin —</option>' +
@@ -2417,30 +2365,21 @@ function renderPlayerDetail() {
 
   const myMatches = state.matches.filter(m => m.winner === pid || m.loser === pid);
   let wins=0, losses=0, pts=0, sw=0, sl=0, gw=0, gl=0;
+
   myMatches.forEach(m => {
     const won = m.winner === pid;
     pts += won ? m.wpts : m.lpts;
     if (won) { wins++; sw += m.winningSets; sl += m.losingSets; }
-    else { losses++; sw += m.losingSets; sl += m.winningSets; }
-    (m.sets||[]).forEach(([a,b], idx) => {
+    else     { losses++; sw += m.losingSets; sl += m.winningSets; }
+
+    (m.sets || []).forEach(([a, b], idx) => {
       const isTb = idx === 2 && (a >= 10 || b >= 10);
       if (isTb) {
-        if (won) { gw += 1; } else { gl += 1; }
+        if (won) gw += 1; else gl += 1;
       } else {
-        if (won) { gw+=a; gl+=b; } else { gw+=b; gl+=a; }
+        if (won) { gw += a; gl += b; }
+        else     { gw += b; gl += a; }
       }
-    });
-      if (won) {
-          m.sets?.forEach(([a,b], idx) => {
-            const isTb = idx === 2 && (a >= 10 || b >= 10);
-            if (isTb) { gw += 1; } else { gw+=a; gl+=b; }
-          });
-        } else {
-          m.sets?.forEach(([a,b], idx) => {
-            const isTb = idx === 2 && (a >= 10 || b >= 10);
-            if (isTb) { gl += 1; } else { gw+=b; gl+=a; }
-          });
-        }
     });
   });
 
@@ -2475,7 +2414,7 @@ function renderPlayerDetail() {
         ['Maç','mp',wins+losses],
         ['Galibiyet','mw',wins],
         ['Set Oran','',(sl?`${sw}/${sl}`:`${sw}/0`)],
-        ['Oyun Farkı','',`+${gw-gl}`],
+        ['Oyun Farkı','',`${gw-gl >= 0 ? '+' : ''}${gw-gl}`],
       ].map(([lbl,,val])=>`<div class="kpi" style="padding:12px"><div class="kpi-val" style="font-size:1.5rem">${val}</div><div class="kpi-label">${lbl}</div></div>`).join('')}
     </div>
     <div class="sec-title">Son Maçlar</div>
@@ -2498,18 +2437,14 @@ function showStatTab(name) {
 }
 
 // ═══════════════════════════════════════════════════
-// ═══════════════════════════════════════════════════
-// ═══════════════════════════════════════════════════
 // ANA SAYFA — Son Maçlar, Haftanın Maçı, Haftanın Oyuncusu
 // ═══════════════════════════════════════════════════
-
 function renderHomeSections() {
   renderLastMatches();
   renderFeaturedMatch();
   renderPlayerOfWeek();
 }
 
-// Son 5 maç
 function renderLastMatches() {
   const el = document.getElementById('last-matches-section');
   if (!el) return;
@@ -2536,7 +2471,6 @@ function renderLastMatches() {
     <div class="last-matches">${rows}</div>`;
 }
 
-// Haftanın maçı — en çekişmeli (3 set oynanan veya puan farkı en az)
 function renderFeaturedMatch() {
   const el = document.getElementById('featured-match-section');
   if (!el) return;
@@ -2546,7 +2480,6 @@ function renderFeaturedMatch() {
   const recent = state.matches.filter(m => new Date(m.date) >= weekAgo);
   if (!recent.length) { el.innerHTML = ''; return; }
 
-  // 3 set oynanana öncelik ver, yoksa puan farkı en az olanı al
   const threeSet = recent.filter(m => m.sets && m.sets.length === 3);
   const pool = threeSet.length ? threeSet : recent;
   const featured = pool.reduce((best, m) => {
@@ -2583,7 +2516,6 @@ function renderFeaturedMatch() {
     </div>`;
 }
 
-// Haftanın oyuncusu — son 7 günde en yüksek galibiyet %
 function renderPlayerOfWeek() {
   const el = document.getElementById('pow-section');
   if (!el) return;
@@ -2627,10 +2559,8 @@ function renderPlayerOfWeek() {
 }
 
 // SEZON SAYACI
-// ═══════════════════════════════════════════════════
 function initCountdown() {
-  // Sezon bitiş tarihini buradan ayarlayın (YIL, AY-1, GÜN)
-  const SEASON_END = new Date(2026, 6, 31); // 31 Temmuz 2026
+  const SEASON_END = new Date(2026, 6, 31);
 
   function update() {
     const el = document.getElementById('season-countdown');
@@ -2670,7 +2600,6 @@ function openProfile(playerId) {
   const winPct  = matches.length > 0 ? Math.round(wins / matches.length * 100) : 0;
   const pts     = matches.reduce((s, m) => s + (m.winner === playerId ? (m.wpts||0) : (m.lpts||0)), 0);
 
-  // Form serisi (son 5, büyük noktalar)
   const form = matches
     .sort((a,b) => new Date(b.date) - new Date(a.date))
     .slice(0, 5)
@@ -2680,7 +2609,6 @@ function openProfile(playerId) {
     ? form.map(r => `<div class="profile-form-dot ${r}">${r==='w'?'G':'M'}</div>`).join('')
     : '<span style="color:var(--text-muted);font-size:13px">Henüz maç yok</span>';
 
-  // Rakip istatistikleri
   const rivalMap = {};
   matches.forEach(m => {
     const rivalId = m.winner === playerId ? m.loser : m.winner;
@@ -2732,10 +2660,8 @@ function closeProfile() {
   document.body.style.overflow = '';
 }
 
-// Escape tuşuyla kapat
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeProfile(); });
 
-// ── Oyuncu Rozeti ──
 function getPlayerBadge(playerId) {
   const now = new Date();
   const matches = state.matches
@@ -2744,7 +2670,6 @@ function getPlayerBadge(playerId) {
 
   if (matches.length === 0) return '';
 
-  // 🔥 Galibiyet serisi (2+)
   let streak = 0;
   for (const m of matches) {
     if (m.winner === playerId) streak++;
@@ -2752,11 +2677,9 @@ function getPlayerBadge(playerId) {
   }
   if (streak >= 3) return `<span class="player-badge badge-fire">🔥 ${streak} seri</span>`;
 
-  // ⚡ Son 7 günde 2+ maç
   const last7 = matches.filter(m => (now - new Date(m.date)) / 86400000 <= 7);
   if (last7.length >= 3) return `<span class="player-badge badge-active">⚡ ${last7.length} maç/hafta</span>`;
 
-  // 😴 7+ gündür maç yok
   const daysSince = (now - new Date(matches[0].date)) / 86400000;
   if (daysSince >= 10) return `<span class="player-badge badge-sleep">😴 ${Math.floor(daysSince)} gün</span>`;
 
@@ -2764,9 +2687,6 @@ function getPlayerBadge(playerId) {
 }
 
 // FORM SERİSİ & SIRA DEĞİŞİMİ & HEAD-TO-HEAD
-// ═══════════════════════════════════════════════════
-
-// Son 5 maçın G/M serisi (en yeni solda)
 function getFormSeries(playerId) {
   const matches = state.matches
     .filter(m => m.winner === playerId || m.loser === playerId)
@@ -2782,7 +2702,6 @@ function formSeriesHtml(playerId) {
   return `<span class="form-series">${dots}</span>`;
 }
 
-// Önceki sıralamayı localStorage'da sakla, farkı hesapla
 const PREV_RANK_KEY = 'rta_prev_ranks';
 
 function savePrevRanks() {
@@ -2804,7 +2723,6 @@ function getRankChange(playerId, currentRank) {
   } catch(e) { return ''; }
 }
 
-// HEAD-TO-HEAD
 function populateH2HDropdowns() {
   const players = [...state.players].sort((a,b) => a.name.localeCompare(b.name));
   const opts = players.map(p => `<option value="${p.id}">${p.name} (${leagueName(p.league)})</option>`).join('');
@@ -2910,7 +2828,6 @@ function deletePlayer(id) {
 }
 
 function renderAdminTable() {
-  // Player move dropdown
   document.getElementById('mv-player').innerHTML =
     state.players.map(p=>`<option value="${p.id}">${p.name} (${leagueName(p.league)})</option>`).join('');
 
@@ -2960,62 +2877,6 @@ function importData(input) {
 }
 
 // ═══════════════════════════════════════════════════
-// SEED — İlk kurulumda oyuncuları Supabase'e yükle
-// ═══════════════════════════════════════════════════
-async function seedPlayers() {
-  if (!window._sbReady) {
-    showToast('Supabase bağlantısı yok! Config ayarlarını kontrol et.', 'err');
-    return;
-  }
-  const btn = document.getElementById('seed-btn');
-  const status = document.getElementById('seed-status');
-  btn.disabled = true;
-  btn.textContent = '⏳ Yükleniyor...';
-
-  try {
-    const sb = window._sb;
-
-    // Check if players already exist
-    const { data: existing } = await sb.from('players').select('id').limit(1);
-    if (existing && existing.length > 0) {
-      status.innerHTML = '<span style="color:var(--accent)">✅ Oyuncular zaten Supabase\'de mevcut!</span>';
-      btn.textContent = '✅ Zaten yüklü';
-      return;
-    }
-
-    // Upsert all players
-    const { error: pe } = await sb.from('players').upsert(
-      state.players.map(p => ({ id: p.id, name: p.name, league: p.league }))
-    );
-    if (pe) throw pe;
-
-    // Upsert meta
-    const { error: me } = await sb.from('meta').upsert({
-      id: 1,
-      next_player_id: state.nextPlayerId,
-      next_match_id: state.nextMatchId
-    });
-    if (me) throw me;
-
-    status.innerHTML = `<span style="color:var(--accent)">✅ ${state.players.length} oyuncu başarıyla Supabase'e yüklendi!</span>`;
-    btn.textContent = '✅ Yüklendi';
-    showToast(`✅ ${state.players.length} oyuncu yüklendi!`);
-
-    // Hide seed card after success
-    setTimeout(() => {
-      const card = document.getElementById('seed-card');
-      if (card) card.style.display = 'none';
-    }, 3000);
-
-  } catch(e) {
-    status.innerHTML = `<span style="color:var(--red)">❌ Hata: ${e.message || e}</span>`;
-    btn.disabled = false;
-    btn.textContent = '⬆️ Tekrar Dene';
-    showToast('Yükleme hatası! Supabase config\'ini kontrol et.', 'err');
-  }
-}
-
-// ═══════════════════════════════════════════════════
 // AUTH
 // ═══════════════════════════════════════════════════
 const PW_KEY   = 'rta_admin_pw';
@@ -3027,7 +2888,6 @@ function getStoredPw() {
 }
 
 function isLoggedIn() {
-  // session valid for 8 hours
   const s = localStorage.getItem(AUTH_KEY);
   if (!s) return false;
   try {
@@ -3057,7 +2917,6 @@ function doLogin() {
     errEl.style.display = 'block';
     document.getElementById('login-pw').value = '';
     document.getElementById('login-pw').focus();
-    // shake animation
     const box = document.querySelector('.login-box');
     box.style.animation = 'none';
     requestAnimationFrame(() => {
@@ -3077,18 +2936,15 @@ function doLogout() {
   localStorage.removeItem(AUTH_KEY);
   setAdminUI(false);
   showPage('puan');
-  // show login overlay again
   document.getElementById('login-overlay').style.display = 'flex';
   document.getElementById('login-pw').value = '';
   document.getElementById('login-error').style.display = 'none';
 }
 
 function setAdminUI(isAdmin) {
-  // show/hide admin nav buttons
   document.querySelectorAll('.admin-only').forEach(el => {
     el.classList.toggle('visible', isAdmin);
   });
-  // badge & logout button
   document.getElementById('admin-badge').classList.toggle('visible', isAdmin);
   document.getElementById('logout-btn').classList.toggle('visible', isAdmin);
   document.getElementById('login-trigger-btn').classList.toggle('hidden', isAdmin);
@@ -3133,14 +2989,12 @@ function renderFixture() {
     return;
   }
 
-  // Build played pairs set
   const played = new Set();
   state.matches.filter(m => m.league === lg).forEach(m => {
     const key = [Math.min(m.winner, m.loser), Math.max(m.winner, m.loser)].join('-');
     played.add(key);
   });
 
-  // Stats per player
   let totalPairs = 0, donePairs = 0;
   players.forEach(p => {
     players.forEach(q => {
@@ -3153,7 +3007,6 @@ function renderFixture() {
 
   const pct = totalPairs ? Math.round(donePairs / totalPairs * 100) : 0;
 
-  // Progress bar
   let html = `
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-bottom:16px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
@@ -3177,7 +3030,6 @@ function renderFixture() {
       const key = `${Math.min(p.id,q.id)}-${Math.max(p.id,q.id)}`;
       const isDone = played.has(key);
 
-      // Find match score if played
       let scoreStr = '';
       if (isDone) {
         const m = state.matches.find(m => m.league === lg &&
@@ -3289,7 +3141,6 @@ function renderArchive() {
   }
 
   const ligNames = {super:'Süper Lig', l2:'2. Lig', l3:'3. Lig', l4:'4. Lig'};
-  const ligClass = {super:'super', l2:'l2', l3:'l3', l4:'l4'};
 
   el.innerHTML = archive.map(season => {
     const ligRows = Object.entries(season.leagues).map(([lg, players]) => {
@@ -3375,8 +3226,6 @@ function showToast(msg, type = 'ok') {
 // ═══════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════
-
-// shake keyframe for wrong password
 const styleEl = document.createElement('style');
 styleEl.textContent = `
 @keyframes shake {
@@ -3395,17 +3244,14 @@ document.getElementById('hl').addEventListener('change', function() {
       .map(p => `<option value="${p.id}">${p.name}</option>`).join('');
 });
 
-// close modal on overlay click
 document.getElementById('pw-modal').addEventListener('click', function(e) {
   if (e.target === this) this.classList.remove('open');
 });
 
-// ── Sync status badge ──
 const syncBadge = document.createElement('div');
 syncBadge.id = 'sync-badge';
 syncBadge.innerHTML = '🔄 Güncellendi';
 
-// Manuel yenile butonu (header'a eklenecek)
 const refreshBtn = document.createElement('button');
 refreshBtn.id = 'manual-refresh-btn';
 refreshBtn.title = 'Şimdi güncelle';
@@ -3434,6 +3280,7 @@ refreshBtn.onclick = async () => {
   refreshBtn.disabled = false;
 };
 document.querySelector('.header').appendChild(refreshBtn);
+
 syncBadge.style.cssText = `
   position:fixed; bottom:24px; left:24px;
   background:#1a7a1a; color:white;
@@ -3444,7 +3291,6 @@ syncBadge.style.cssText = `
 `;
 document.body.appendChild(syncBadge);
 
-// ── Connection indicator dot in header ──
 const connDot = document.createElement('div');
 connDot.id = 'conn-dot';
 connDot.title = 'Supabase — 30 saniyede bir otomatik güncellenir';
@@ -3463,18 +3309,15 @@ function setConnected(ok) {
   d.title = ok ? '🟢 Supabase bağlı — 30 sn\'de bir güncellenir' : '🔴 Supabase bağlantısı yok — config ayarlarını kontrol et';
 }
 
-// ── Start ──
 document.getElementById('login-overlay').style.display = 'none';
 if (isLoggedIn()) { setAdminUI(true); } else { setAdminUI(false); }
 
-// 1) Render instantly from localStorage cache
 renderAll();
 initCountdown();
 
-// 2) Then load fresh from Supabase and start realtime sync
 async function initSupabase() {
   if (!window._sbReady) { setConnected(false); return; }
-  setConnected(false); // show orange/grey while connecting
+  setConnected(false);
   const loaded = await loadFromSupabase();
   if (loaded) {
     renderAll(true);
@@ -3484,7 +3327,6 @@ async function initSupabase() {
   startRealtimeSync();
 }
 
-// ── Supabase Realtime ──
 function startRealtimeSync() {
   if (!window._sbReady) return;
   try {
@@ -3511,7 +3353,6 @@ if (window._sbReady) {
   setTimeout(() => { if (!window._sbReady) setConnected(false); }, 5000);
 }
 
-// ── PWA Service Worker ──
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/rta/sw.js').catch(() => {});
