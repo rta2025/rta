@@ -2017,7 +2017,8 @@ function renderStanding(code) {
     const [bg, fg] = avColor(p.name);
     const rankCls = i===0?'r1':i===1?'r2':i===2?'r3':'';
     const gal = p.mp > 0 ? Math.round(p.mw/p.mp*100) : 0;
-    const setAvg = p.sl > 0 ? (p.sw/p.sl).toFixed(2) : p.sw > 0 ? '∞' : '—';
+    const gameAvg = p.gw - p.gl;
+    const setAvg = p.mp > 0 ? (gameAvg > 0 ? '+' + gameAvg : String(gameAvg)) : '—';
 
     return `<tr class="${zoneClass}">
       <td><span class="rank-num ${rankCls}">${i+1}</span>${getRankChange(p.id, i+1)}</td>
@@ -2060,7 +2061,7 @@ function renderStanding(code) {
           <th class="center">Maç</th>
           <th class="center">G/M</th>
           <th class="center">Gal%</th>
-          <th class="center">Set Av.</th>
+          <th class="center">Averaj</th>
           <th class="center">Oyun</th>
           <th class="right">Puan</th>
         </tr></thead>
