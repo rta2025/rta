@@ -2615,9 +2615,14 @@ function openProfile(playerId) {
   const rivalMap = {};
   matches.forEach(m => {
     const rivalId = m.winner === playerId ? m.loser : m.winner;
-    if (!rivalMap[rivalId]) rivalMap[rivalId] = { w: 0, l: 0 };
+    if (!rivalMap[rivalId]) rivalMap[rivalId] = { w: 0, l: 0, matches: [] };
     if (m.winner === playerId) rivalMap[rivalId].w++;
     else rivalMap[rivalId].l++;
+    // Set skoru
+    const ws = m.winningSets || 0;
+    const ls = m.losingSets  || 0;
+    const setScore = m.winner === playerId ? `${ws}-${ls}` : `${ls}-${ws}`;
+    rivalMap[rivalId].matches.push({ won: m.winner === playerId, setScore, date: m.date });
   });
 
   const rivals = Object.entries(rivalMap)
@@ -2629,9 +2634,17 @@ function openProfile(playerId) {
     ? rivals.map(r => {
         const name = playerName(r.id);
         const cls  = r.w >= r.l ? 'win' : 'loss';
+        // Son maçları listele
+        const matchRows = r.matches
+          .sort((a,b) => new Date(b.date) - new Date(a.date))
+          .map(m => `<span style="font-size:10px;color:${m.won ? 'var(--accent)' : 'var(--red)'};margin-left:6px">${m.won ? 'G' : 'M'} ${m.setScore}</span>`)
+          .join('');
         return `<div class="profile-rival">
           <span class="pr-name">${name}</span>
-          <span class="pr-score ${cls}">${r.w}G – ${r.l}M</span>
+          <div style="display:flex;align-items:center;flex-wrap:wrap;gap:2px">
+            <span class="pr-score ${cls}">${r.w}G – ${r.l}M</span>
+            ${matchRows}
+          </div>
         </div>`;
       }).join('')
     : '<span style="color:var(--text-muted);font-size:13px">Henüz rakip yok</span>';
