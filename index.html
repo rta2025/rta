@@ -1940,13 +1940,15 @@ function getStandings(league) {
   });
 
   return Object.values(st).sort((a,b) => {
+    // 1. Puan
     if (b.pts !== a.pts) return b.pts - a.pts;
-    if (b.mw !== a.mw) return b.mw - a.mw;
+    // 2. Set averajı (fark)
     const aSetAvg = a.sw - a.sl;
     const bSetAvg = b.sw - b.sl;
-    if (Math.abs(bSetAvg - aSetAvg) > 0.001) return bSetAvg - aSetAvg;
-    const aGameAvg = a.gl ? a.gw/a.gl : a.gw;
-    const bGameAvg = b.gl ? b.gw/b.gl : b.gw;
+    if (bSetAvg !== aSetAvg) return bSetAvg - aSetAvg;
+    // 3. Oyun averajı (fark)
+    const aGameAvg = a.gw - a.gl;
+    const bGameAvg = b.gw - b.gl;
     return bGameAvg - aGameAvg;
   });
 }
