@@ -1942,8 +1942,8 @@ function getStandings(league) {
   return Object.values(st).sort((a,b) => {
     if (b.pts !== a.pts) return b.pts - a.pts;
     if (b.mw !== a.mw) return b.mw - a.mw;
-    const aSetAvg = a.sl ? a.sw/a.sl : a.sw;
-    const bSetAvg = b.sl ? b.sw/b.sl : b.sw;
+    const aSetAvg = a.sw - a.sl;
+    const bSetAvg = b.sw - b.sl;
     if (Math.abs(bSetAvg - aSetAvg) > 0.001) return bSetAvg - aSetAvg;
     const aGameAvg = a.gl ? a.gw/a.gl : a.gw;
     const bGameAvg = b.gl ? b.gw/b.gl : b.gw;
@@ -2017,7 +2017,8 @@ function renderStanding(code) {
     const [bg, fg] = avColor(p.name);
     const rankCls = i===0?'r1':i===1?'r2':i===2?'r3':'';
     const gal = p.mp > 0 ? Math.round(p.mw/p.mp*100) : 0;
-    const setAvg = p.sl > 0 ? (p.sw/p.sl).toFixed(2) : p.sw > 0 ? '∞' : '—';
+    const setDiff = p.sw - p.sl;
+    const setAvg = p.mp > 0 ? (setDiff > 0 ? '+' + setDiff : String(setDiff)) : '—';
 
     return `<tr class="${zoneClass}">
       <td><span class="rank-num ${rankCls}">${i+1}</span>${getRankChange(p.id, i+1)}</td>
