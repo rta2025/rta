@@ -1374,6 +1374,15 @@ body.light-mode .ranking-info-box { background: #e8efe8; }
 .set-edit-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
 .set-edit-row label { font-size: 12px; color: var(--text-dim); width: 50px; flex-shrink: 0; }
 .set-edit-row input { width: 60px; text-align: center; }
+
+/* ── İkon Seçici ── */
+.icon-opt {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; border-radius: 8px; font-size: 20px;
+  border: 2px solid var(--border); cursor: pointer; transition: all 0.15s;
+}
+.icon-opt:hover { border-color: var(--accent); background: rgba(26,122,26,0.1); }
+.icon-opt.selected { border-color: var(--accent); background: rgba(26,122,26,0.2); }
 </style>
 
 <!-- Supabase SDK -->
@@ -1827,6 +1836,17 @@ body.light-mode .ranking-info-box { background: #e8efe8; }
     <div class="fgroup">
       <label>Açıklama</label>
       <input type="text" id="special-player-desc" class="finput" placeholder="örn. Antalya Federasyon Turnuvası Şampiyonu! 🎾">
+    </div>
+    <div class="fgroup">
+      <label>İkon</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+        <label style="cursor:pointer;font-size:22px"><input type="radio" name="special-icon" value="🏆" checked style="display:none"> <span id="icon-opt-1" class="icon-opt selected">🏆</span></label>
+        <label style="cursor:pointer;font-size:22px"><input type="radio" name="special-icon" value="📢" style="display:none"> <span id="icon-opt-2" class="icon-opt">📢</span></label>
+        <label style="cursor:pointer;font-size:22px"><input type="radio" name="special-icon" value="🎾" style="display:none"> <span id="icon-opt-3" class="icon-opt">🎾</span></label>
+        <label style="cursor:pointer;font-size:22px"><input type="radio" name="special-icon" value="⭐" style="display:none"> <span id="icon-opt-4" class="icon-opt">⭐</span></label>
+        <label style="cursor:pointer;font-size:22px"><input type="radio" name="special-icon" value="🎉" style="display:none"> <span id="icon-opt-5" class="icon-opt">🎉</span></label>
+        <label style="cursor:pointer;font-size:22px"><input type="radio" name="special-icon" value="🥇" style="display:none"> <span id="icon-opt-6" class="icon-opt">🥇</span></label>
+      </div>
     </div>
     <div style="display:flex;gap:8px;margin-top:8px">
       <button class="btn btn-green" onclick="saveSpecialPlayer()" style="flex:1">💾 Kaydet</button>
@@ -2687,7 +2707,7 @@ function renderPlayerOfWeek() {
   if (special && special.name) {
     el.innerHTML = `
       <div class="player-of-week" style="border-color:var(--gold)">
-        <div class="pow-avatar" style="background:var(--green);color:#fff;font-size:24px">🏆</div>
+        <div class="pow-avatar" style="background:var(--green);color:#fff;font-size:24px">${special.icon || '🏆'}</div>
         <div class="pow-info">
           <div class="pow-badge" style="color:var(--gold)">⭐ ÖZEL DUYURU</div>
           <div class="pow-name">${special.name}</div>
@@ -2736,12 +2756,22 @@ function renderPlayerOfWeek() {
     </div>`;
 }
 
+// İkon seçici
+document.addEventListener('change', e => {
+  if (e.target.name === 'special-icon') {
+    document.querySelectorAll('.icon-opt').forEach(el => {
+      el.classList.toggle('selected', el.textContent.trim() === e.target.value);
+    });
+  }
+});
+
 function saveSpecialPlayer() {
-  const name = document.getElementById('special-player-name').value.trim();
   const desc = document.getElementById('special-player-desc').value.trim();
+  const iconEl = document.querySelector('input[name="special-icon"]:checked');
+  const icon = iconEl ? iconEl.value : '🏆';
   if (!name) { showToast('Oyuncu adı boş olamaz', 'err'); return; }
-  localStorage.setItem('rta_special_player', JSON.stringify({ name, desc }));
-  document.getElementById('special-player-preview').textContent = `✅ Aktif: ${name} — ${desc}`;
+  localStorage.setItem('rta_special_player', JSON.stringify({ name, desc, icon }));
+  document.getElementById('special-player-preview').textContent = `✅ Aktif: ${icon} ${name} — ${desc}`;
   renderPlayerOfWeek();
   showToast('Özel manşet kaydedildi!', 'ok');
 }
@@ -3045,7 +3075,14 @@ function renderAdminTable() {
     if (special && special.name) {
       document.getElementById('special-player-name').value = special.name;
       document.getElementById('special-player-desc').value = special.desc || '';
-      preview.textContent = `✅ Aktif: ${special.name} — ${special.desc || ''}`;
+      preview.textContent = `✅ Aktif: ${special.icon || '🏆'} ${special.name} — ${special.desc || ''}`;
+      // Kayıtlı ikonu seç
+      document.querySelectorAll('input[name="special-icon"]').forEach(r => {
+        r.checked = r.value === (special.icon || '🏆');
+      });
+      document.querySelectorAll('.icon-opt').forEach(el => {
+        el.classList.toggle('selected', el.textContent.trim() === (special.icon || '🏆'));
+      });
     } else {
       preview.textContent = 'Şu an özel manşet yok, normal sistem çalışıyor.';
     }
