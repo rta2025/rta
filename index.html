@@ -1346,6 +1346,34 @@ body.light-mode .ranking-info-box { background: #e8efe8; }
   flex-shrink: 0; transition: all 0.2s;
 }
 .theme-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── Düzenleme Modalları ── */
+.edit-modal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7); z-index: 3000;
+  align-items: center; justify-content: center; padding: 16px;
+}
+.edit-modal.open { display: flex; }
+.edit-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; padding: 24px; width: 100%; max-width: 360px;
+  position: relative;
+}
+.edit-card h3 {
+  font-family: 'Oswald', sans-serif; font-size: 1.1rem;
+  color: var(--accent); margin-bottom: 20px; letter-spacing: 1px;
+}
+.edit-close {
+  position: absolute; top: 12px; right: 14px;
+  background: none; border: none; color: var(--text-dim);
+  font-size: 20px; cursor: pointer;
+}
+
+/* ── Maç Düzenleme Modalı ── */
+#edit-match-modal .edit-card { max-width: 400px; }
+.set-edit-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.set-edit-row label { font-size: 12px; color: var(--text-dim); width: 50px; flex-shrink: 0; }
+.set-edit-row input { width: 60px; text-align: center; }
 </style>
 
 <!-- Supabase SDK -->
@@ -1440,6 +1468,62 @@ body.light-mode .ranking-info-box { background: #e8efe8; }
   <button class="logout-btn" id="logout-btn" onclick="doLogout()">Çıkış</button>
   <button class="login-trigger-btn" id="login-trigger-btn" onclick="openLoginOverlay()">🔐 Yönetici Girişi</button>
 </header>
+
+<!-- ── Maç Skoru Düzenleme ── -->
+<div class="edit-modal" id="edit-match-modal">
+  <div class="edit-card">
+    <button class="edit-close" onclick="closeEditMatch()">✕</button>
+    <h3>✏️ SKOR DÜZENLE</h3>
+    <input type="hidden" id="edit-match-id">
+    <div id="edit-match-players" style="font-size:13px;color:var(--text-dim);margin-bottom:16px"></div>
+    <div class="set-edit-row">
+      <label>1. Set</label>
+      <input type="number" class="finput" id="em-s1a" min="0" max="7" placeholder="0">
+      <span style="color:var(--text-dim)">–</span>
+      <input type="number" class="finput" id="em-s1b" min="0" max="7" placeholder="0">
+    </div>
+    <div class="set-edit-row">
+      <label>2. Set</label>
+      <input type="number" class="finput" id="em-s2a" min="0" max="7" placeholder="0">
+      <span style="color:var(--text-dim)">–</span>
+      <input type="number" class="finput" id="em-s2b" min="0" max="7" placeholder="0">
+    </div>
+    <div class="set-edit-row">
+      <label>3. Set</label>
+      <input type="number" class="finput" id="em-s3a" min="0" max="13" placeholder="–">
+      <span style="color:var(--text-dim)">–</span>
+      <input type="number" class="finput" id="em-s3b" min="0" max="13" placeholder="–">
+    </div>
+    <div class="fgroup" style="margin-top:8px">
+      <label>Tarih</label>
+      <input type="date" class="finput" id="em-date">
+    </div>
+    <button class="btn btn-green" onclick="saveEditMatch()" style="width:100%;margin-top:12px">💾 Kaydet</button>
+  </div>
+</div>
+
+<!-- ── Oyuncu Adı Düzenleme ── -->
+<div class="edit-modal" id="edit-player-modal">
+  <div class="edit-card">
+    <button class="edit-close" onclick="closeEditPlayer()">✕</button>
+    <h3>✏️ OYUNCU DÜZENLE</h3>
+    <input type="hidden" id="edit-player-id">
+    <div class="fgroup">
+      <label>Ad Soyad</label>
+      <input type="text" id="edit-player-name" class="finput" placeholder="Oyuncu adı">
+    </div>
+    <div class="fgroup">
+      <label>Lig</label>
+      <select id="edit-player-league" class="finput">
+        <option value="super">Süper Lig</option>
+        <option value="l2">2. Lig</option>
+        <option value="l3">3. Lig</option>
+        <option value="l4">4. Lig</option>
+      </select>
+    </div>
+    <button class="btn btn-green" onclick="saveEditPlayer()" style="width:100%;margin-top:8px">💾 Kaydet</button>
+  </div>
+</div>
 
 <!-- ── Oyuncu Profil Kartı ── -->
 <div class="profile-overlay" id="profile-overlay" onclick="if(event.target===this)closeProfile()">
@@ -2359,7 +2443,10 @@ function renderResults() {
       </div>
       <div class="match-meta">
         ${m.date}
-        ${isLoggedIn() ? `<br><button class="btn btn-sm" onclick="deleteMatch(${m.id})">Sil</button>` : ""}
+        ${isLoggedIn() ? `<br><span style="display:flex;gap:4px;justify-content:flex-end;margin-top:4px">
+          <button class="btn btn-sm" style="background:rgba(26,122,26,0.2);color:var(--accent)" onclick="openEditMatch(${m.id})">✏️</button>
+          <button class="btn btn-sm" onclick="deleteMatch(${m.id})">Sil</button>
+        </span>` : ""}
       </div>
     </div>`;
   }).join('');
@@ -2907,7 +2994,10 @@ function renderAdminTable() {
       <td><span class="match-lig ${lc}" style="font-size:0.78rem">${leagueName(p.league)}</span></td>
       <td>${st.mp||0}</td>
       <td style="color:var(--accent);font-weight:700">${st.pts||0}</td>
-      <td><button class="btn btn-sm" onclick="deletePlayer(${p.id})">Sil</button></td>
+      <td style="display:flex;gap:4px">
+          <button class="btn btn-sm" onclick="openEditPlayer(${p.id})" style="background:rgba(26,122,26,0.2);color:var(--accent)">✏️</button>
+          <button class="btn btn-sm" onclick="deletePlayer(${p.id})">Sil</button>
+        </td>
     </tr>`;
   }).join('');
 
@@ -3278,6 +3368,139 @@ function showPage(name) {
   if (name === 'istatistik') { renderStats(); }
   if (name === 'yonetim')    { renderAdminTable(); }
 }
+
+function openEditMatch(id) {
+  if (!isLoggedIn()) { showToast('Yönetici girişi gerekli', 'err'); return; }
+  const m = state.matches.find(x => x.id === id);
+  if (!m) return;
+
+  document.getElementById('edit-match-id').value = id;
+  document.getElementById('edit-match-players').textContent =
+    `🏆 ${playerName(m.winner)}  vs  ${playerName(m.loser)}`;
+  document.getElementById('em-date').value = m.date || '';
+
+  const sets = m.sets || [];
+  document.getElementById('em-s1a').value = sets[0]?.[0] ?? '';
+  document.getElementById('em-s1b').value = sets[0]?.[1] ?? '';
+  document.getElementById('em-s2a').value = sets[1]?.[0] ?? '';
+  document.getElementById('em-s2b').value = sets[1]?.[1] ?? '';
+  document.getElementById('em-s3a').value = sets[2]?.[0] ?? '';
+  document.getElementById('em-s3b').value = sets[2]?.[1] ?? '';
+
+  document.getElementById('edit-match-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeEditMatch() {
+  document.getElementById('edit-match-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+async function saveEditMatch() {
+  const id = parseInt(document.getElementById('edit-match-id').value);
+  const m  = state.matches.find(x => x.id === id);
+  if (!m) return;
+
+  const s1a = parseInt(document.getElementById('em-s1a').value);
+  const s1b = parseInt(document.getElementById('em-s1b').value);
+  const s2a = parseInt(document.getElementById('em-s2a').value);
+  const s2b = parseInt(document.getElementById('em-s2b').value);
+  const s3a = document.getElementById('em-s3a').value;
+  const s3b = document.getElementById('em-s3b').value;
+  const date = document.getElementById('em-date').value;
+
+  if (isNaN(s1a) || isNaN(s1b) || isNaN(s2a) || isNaN(s2b)) {
+    showToast('1. ve 2. set zorunlu', 'err'); return;
+  }
+
+  // Setleri güncelle
+  const newSets = [[s1a, s1b], [s2a, s2b]];
+  if (s3a !== '' && s3b !== '') newSets.push([parseInt(s3a), parseInt(s3b)]);
+
+  // Kazanılan/kaybedilen set sayısını yeniden hesapla
+  let ws = 0, ls = 0;
+  newSets.forEach(([a,b]) => { if (a > b) ws++; else if (b > a) ls++; });
+
+  // Puan hesapla
+  const { wpts, lpts } = pointsForResult(ws, ls);
+
+  // Skor metni
+  const scoreStr = newSets.map(([a,b]) => `${a}-${b}`).join(' / ');
+
+  m.sets         = newSets;
+  m.winningSets  = ws;
+  m.losingSets   = ls;
+  m.wpts         = wpts;
+  m.lpts         = lpts;
+  m.score        = scoreStr;
+  if (date) m.date = date;
+
+  // Supabase güncelle
+  try {
+    await window._sbAdmin.from('matches').update({
+      sets_json:     JSON.stringify(newSets),
+      winning_sets:  ws,
+      losing_sets:   ls,
+      wpts, lpts,
+      score:         scoreStr,
+      match_date:    date || m.date,
+    }).eq('id', id);
+  } catch(e) { console.warn('Supabase güncelleme hatası:', e); }
+
+  saveState();
+  renderAll(true);
+  renderResults();
+  closeEditMatch();
+  showToast('Skor güncellendi ✅', 'ok');
+}
+
+// ═══════════════════════════════════════════════════
+// OYUNCU & MAÇ DÜZENLEME
+// ═══════════════════════════════════════════════════
+
+function openEditPlayer(id) {
+  if (!isLoggedIn()) { showToast('Yönetici girişi gerekli', 'err'); return; }
+  const p = state.players.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('edit-player-id').value = id;
+  document.getElementById('edit-player-name').value = p.name;
+  document.getElementById('edit-player-league').value = p.league;
+  document.getElementById('edit-player-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeEditPlayer() {
+  document.getElementById('edit-player-modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+async function saveEditPlayer() {
+  const id   = parseInt(document.getElementById('edit-player-id').value);
+  const name = document.getElementById('edit-player-name').value.trim();
+  const league = document.getElementById('edit-player-league').value;
+  if (!name) { showToast('Ad boş olamaz', 'err'); return; }
+
+  const p = state.players.find(x => x.id === id);
+  if (!p) return;
+  p.name   = name;
+  p.league = league;
+
+  // Supabase güncelle
+  try {
+    await window._sbAdmin.from('players').update({ name, league }).eq('id', id);
+  } catch(e) { console.warn('Supabase güncelleme hatası:', e); }
+
+  saveState();
+  renderAll(true);
+  renderAdminTable();
+  closeEditPlayer();
+  showToast(`${name} güncellendi`, 'ok');
+}
+
+// Escape ile kapat
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeEditPlayer(); closeProfile(); }
+});
 
 // ═══════════════════════════════════════════════════
 // TEMA (KOYU / AÇIK MOD)
