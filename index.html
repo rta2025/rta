@@ -1814,6 +1814,27 @@ body.light-mode .ranking-info-box { background: #e8efe8; }
     <button class="btn" style="background:rgba(180,30,30,0.15);color:#e05555;border:1px solid rgba(180,30,30,0.3);" onclick="if(confirm('DİKKAT: Tüm maç verisi silinecek! Bu işlem geri alınamaz.') && confirm('Gerçekten emin misiniz? Tüm maçlar kalıcı olarak silinecek.')){state.matches=[];state.nextMatchId=1;saveState();renderAll(true);showToast('Maçlar temizlendi','err');}">🗑️ Maçları Temizle</button>
   </div>
 
+  <div class="sec-title">Özel Manşet</div>
+  <div class="score-card" style="max-width:480px">
+    <div class="card-title" style="font-size:1rem">🏆 Ana Sayfa Özel Duyuru</div>
+    <p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:14px;line-height:1.6">
+      Doldurulursa "Haftanın Oyuncusu" yerine bu gösterilir. Temizleyince normal sisteme döner.
+    </p>
+    <div class="fgroup">
+      <label>Oyuncu Adı</label>
+      <input type="text" id="special-player-name" class="finput" placeholder="örn. Şeref Tüylüoğlu">
+    </div>
+    <div class="fgroup">
+      <label>Açıklama</label>
+      <input type="text" id="special-player-desc" class="finput" placeholder="örn. Antalya Federasyon Turnuvası Şampiyonu! 🎾">
+    </div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn btn-green" onclick="saveSpecialPlayer()" style="flex:1">💾 Kaydet</button>
+      <button class="btn" onclick="clearSpecialPlayer()" style="flex:1">✕ Temizle</button>
+    </div>
+    <div id="special-player-preview" style="margin-top:12px;font-size:12px;color:var(--text-dim)"></div>
+  </div>
+
   <div class="sec-title">Güvenlik</div>
   <div class="score-card" style="max-width:420px">
     <div class="card-title" style="font-size:1rem">🔑 Yönetici Şifresini Değiştir</div>
@@ -2661,6 +2682,22 @@ function renderPlayerOfWeek() {
   const el = document.getElementById('pow-section');
   if (!el) return;
 
+  // Özel manşet varsa onu göster
+  const special = JSON.parse(localStorage.getItem('rta_special_player') || 'null');
+  if (special && special.name) {
+    el.innerHTML = `
+      <div class="player-of-week" style="border-color:var(--gold)">
+        <div class="pow-avatar" style="background:var(--green);color:#fff;font-size:24px">🏆</div>
+        <div class="pow-info">
+          <div class="pow-badge" style="color:var(--gold)">⭐ ÖZEL DUYURU</div>
+          <div class="pow-name">${special.name}</div>
+          <div class="pow-stats">${special.desc || ''}</div>
+        </div>
+      </div>`;
+    return;
+  }
+
+  // Normal haftanın oyuncusu hesabı
   const now = new Date();
   const weekAgo = new Date(now - 7 * 86400000);
   const recent = state.matches.filter(m => new Date(m.date) >= weekAgo);
@@ -2697,6 +2734,25 @@ function renderPlayerOfWeek() {
         <div class="pow-league">${leagueName(p.league)}</div>
       </div>
     </div>`;
+}
+
+function saveSpecialPlayer() {
+  const name = document.getElementById('special-player-name').value.trim();
+  const desc = document.getElementById('special-player-desc').value.trim();
+  if (!name) { showToast('Oyuncu adı boş olamaz', 'err'); return; }
+  localStorage.setItem('rta_special_player', JSON.stringify({ name, desc }));
+  document.getElementById('special-player-preview').textContent = `✅ Aktif: ${name} — ${desc}`;
+  renderPlayerOfWeek();
+  showToast('Özel manşet kaydedildi!', 'ok');
+}
+
+function clearSpecialPlayer() {
+  localStorage.removeItem('rta_special_player');
+  document.getElementById('special-player-name').value = '';
+  document.getElementById('special-player-desc').value = '';
+  document.getElementById('special-player-preview').textContent = '';
+  renderPlayerOfWeek();
+  showToast('Özel manşet temizlendi', 'ok');
 }
 
 // SEZON SAYACI
@@ -2982,6 +3038,18 @@ function deletePlayer(id) {
 }
 
 function renderAdminTable() {
+  // Özel manşet preview'ı doldur
+  const special = JSON.parse(localStorage.getItem('rta_special_player') || 'null');
+  const preview = document.getElementById('special-player-preview');
+  if (preview) {
+    if (special && special.name) {
+      document.getElementById('special-player-name').value = special.name;
+      document.getElementById('special-player-desc').value = special.desc || '';
+      preview.textContent = `✅ Aktif: ${special.name} — ${special.desc || ''}`;
+    } else {
+      preview.textContent = 'Şu an özel manşet yok, normal sistem çalışıyor.';
+    }
+  }
   document.getElementById('mv-player').innerHTML =
     state.players.map(p=>`<option value="${p.id}">${p.name} (${leagueName(p.league)})</option>`).join('');
 
