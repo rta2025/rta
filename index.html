@@ -1994,6 +1994,12 @@ async function loadFromSupabase() {
     if (meta) {
       state.nextPlayerId = meta.next_player_id || state.nextPlayerId;
       state.nextMatchId  = meta.next_match_id  || state.nextMatchId;
+      // Özel manşeti Supabase'den al
+      if (meta.special_player) {
+        localStorage.setItem('rta_special_player', JSON.stringify(meta.special_player));
+      } else {
+        localStorage.removeItem('rta_special_player');
+      }
     }
     localStorage.setItem(SK, JSON.stringify(state));
     return true;
@@ -2766,21 +2772,34 @@ document.addEventListener('change', e => {
 });
 
 function saveSpecialPlayer() {
+  const name = document.getElementById('special-player-name').value.trim();
   const desc = document.getElementById('special-player-desc').value.trim();
   const iconEl = document.querySelector('input[name="special-icon"]:checked');
   const icon = iconEl ? iconEl.value : '🏆';
   if (!name) { showToast('Oyuncu adı boş olamaz', 'err'); return; }
-  localStorage.setItem('rta_special_player', JSON.stringify({ name, desc, icon }));
+  const data = { name, desc, icon };
+  localStorage.setItem('rta_special_player', JSON.stringify(data));
+  // Supabase'e kaydet
+  if (window._sbAdmin) {
+    window._sbAdmin.from('meta').update({ special_player: data }).eq('id', 1)
+      .then(() => showToast('Özel manşet kaydedildi! ✅', 'ok'))
+      .catch(() => showToast('Yerel kaydedildi, Supabase hatası', 'err'));
+  } else {
+    showToast('Özel manşet kaydedildi! ✅', 'ok');
+  }
   document.getElementById('special-player-preview').textContent = `✅ Aktif: ${icon} ${name} — ${desc}`;
   renderPlayerOfWeek();
-  showToast('Özel manşet kaydedildi!', 'ok');
 }
 
 function clearSpecialPlayer() {
   localStorage.removeItem('rta_special_player');
   document.getElementById('special-player-name').value = '';
   document.getElementById('special-player-desc').value = '';
-  document.getElementById('special-player-preview').textContent = '';
+  document.getElementById('special-player-preview').textContent = 'Şu an özel manşet yok, normal sistem çalışıyor.';
+  // Supabase'den temizle
+  if (window._sbAdmin) {
+    window._sbAdmin.from('meta').update({ special_player: null }).eq('id', 1).catch(() => {});
+  }
   renderPlayerOfWeek();
   showToast('Özel manşet temizlendi', 'ok');
 }
