@@ -2807,9 +2807,12 @@ function clearSpecialPlayer() {
   }
   // Supabase'den temizle
   if (window._sbAdmin) {
-    window._sbAdmin.from('meta').update({ special_player: null }).eq('id', 1).catch(() => {});
+    window._sbAdmin.from('meta').update({ special_player: null }).eq('id', 1)
+      .then(() => { renderPlayerOfWeek(); })
+      .catch(() => {});
+  } else {
+    renderPlayerOfWeek();
   }
-  renderPlayerOfWeek();
   showToast('Özel manşet temizlendi', 'ok');
 }
 
