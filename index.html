@@ -2793,9 +2793,18 @@ function saveSpecialPlayer() {
 
 function clearSpecialPlayer() {
   localStorage.removeItem('rta_special_player');
-  document.getElementById('special-player-name').value = '';
-  document.getElementById('special-player-desc').value = '';
-  document.getElementById('special-player-preview').textContent = 'Şu an özel manşet yok, normal sistem çalışıyor.';
+  const nameEl = document.getElementById('special-player-name');
+  const descEl = document.getElementById('special-player-desc');
+  const previewEl = document.getElementById('special-player-preview');
+  if (nameEl) nameEl.value = '';
+  if (descEl) descEl.value = '';
+  if (previewEl) previewEl.textContent = 'Şu an özel manşet yok, normal sistem çalışıyor.';
+  // Radio butonları sıfırla
+  const firstRadio = document.querySelector('input[name="special-icon"]');
+  if (firstRadio) {
+    firstRadio.checked = true;
+    document.querySelectorAll('.icon-opt').forEach((el, i) => el.classList.toggle('selected', i === 0));
+  }
   // Supabase'den temizle
   if (window._sbAdmin) {
     window._sbAdmin.from('meta').update({ special_player: null }).eq('id', 1).catch(() => {});
