@@ -1433,22 +1433,21 @@ body.light-mode .ranking-info-box { background: #e8efe8; }
 
 <script>
   // ════════════════════════════════════════════════
-  // 🔧 BURAYA KENDİ SUPABASE BİLGİLERİNİ GİR
+  // 🔧 SUPABASE BAĞLANTISI
   // ════════════════════════════════════════════════
-  // ⚠️ GÜVENLİK UYARISI:
-  // SUPABASE_SERVICE (service_role) anahtarı RLS'yi bypass eder ve
-  // bu sayfanın kaynak kodu PUBLIC olduğu için herkes erişebilir.
-  // 1) Supabase dashboard'dan bu key'i RESET'le.
-  // 2) Tablolarına RLS politikaları kurup sadece anon key kullan.
+  // ✅ GÜVENLİK: Yalnızca PUBLIC anon (publishable) anahtarı kullanılır.
+  //    Yazma/silme işlemleri Supabase Auth ile giriş yapmış yönetici
+  //    oturumu üzerinden, RLS politikalarıyla korunur.
+  //    service_role anahtarı ARTIK istemcide YOK.
   // ════════════════════════════════════════════════
   const SUPABASE_URL    = "https://owbwkkptimsibwabuozc.supabase.co";
   const SUPABASE_ANON   = "sb_publishable_JNAjF1j0CUZRnSL4tUQAeA_yVw1Ug8M";
-  const SUPABASE_SERVICE = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93Yndra3B0aW1zaWJ3YWJ1b3pjIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODI2MTA3MSwiZXhwIjoyMDkzODM3MDcxfQ.06p-KJ_mPMm6PKfr9XEDpvnvzYQCVLwMcDneHRJ8PyE";
   window._sbReady = false;
   try {
     const { createClient } = supabase;
     window._sb      = createClient(SUPABASE_URL, SUPABASE_ANON);
-    window._sbAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE);
+    // Tek istemci: okuma herkese açık (RLS), yazma giriş yapan yöneticiye.
+    window._sbAdmin = window._sb;
     window._sbReady = true;
     window.dispatchEvent(new Event('sbReady'));
   } catch(e) {
@@ -1464,9 +1463,12 @@ body.light-mode .ranking-info-box { background: #e8efe8; }
   <div class="login-box">
     <div class="login-icon">🎾</div>
     <div class="login-title">RTA LİGİ</div>
-    <div class="login-sub">Yönetici paneline erişmek için şifrenizi girin.</div>
-    <div class="login-error" id="login-error">❌ Hatalı şifre, tekrar deneyin.</div>
-    <input type="password" class="login-input" id="login-pw" placeholder="••••••••"
+    <div class="login-sub">Yönetici paneline erişmek için e-posta ve şifrenizi girin.</div>
+    <div class="login-error" id="login-error">❌ Hatalı e-posta veya şifre.</div>
+    <input type="email" class="login-input" id="login-email" placeholder="e-posta" autocomplete="username"
+      style="text-align:left;letter-spacing:0.5px;margin-bottom:10px"
+      onkeydown="if(event.key==='Enter')doLogin()">
+    <input type="password" class="login-input" id="login-pw" placeholder="••••••••" autocomplete="current-password"
       onkeydown="if(event.key==='Enter')doLogin()">
     <button class="login-btn" onclick="doLogin()">🔐 GİRİŞ YAP</button>
     <button class="login-public-btn" onclick="document.getElementById('login-overlay').style.display='none'">✕ Kapat</button>
@@ -1477,10 +1479,6 @@ body.light-mode .ranking-info-box { background: #e8efe8; }
 <div class="modal-overlay" id="pw-modal">
   <div class="modal-box">
     <div class="modal-title">🔑 ŞİFRE DEĞİŞTİR</div>
-    <div class="fgroup" style="margin-bottom:12px">
-      <label>Mevcut Şifre</label>
-      <input type="password" class="login-input" id="pw-old" placeholder="••••••••" style="text-align:left;letter-spacing:1px">
-    </div>
     <div class="fgroup" style="margin-bottom:12px">
       <label>Yeni Şifre</label>
       <input type="password" class="login-input" id="pw-new" placeholder="••••••••" style="text-align:left;letter-spacing:1px">
@@ -3337,67 +3335,99 @@ function importData(input) {
 }
 
 // ═══════════════════════════════════════════════════
-// AUTH
+// AUTH (Supabase Auth ile)
 // ═══════════════════════════════════════════════════
-const PW_KEY   = 'rta_admin_pw';
-const AUTH_KEY = 'rta_admin_session';
-const DEFAULT_PW = 'rta2026';
-
-function getStoredPw() {
-  return localStorage.getItem(PW_KEY) || DEFAULT_PW;
-}
+// İstemci tarafı oturum durumu (senkron erişim için cache).
+// Gerçek doğrulama ve yetki Supabase + RLS tarafında yapılır.
+let _adminSession = null;
 
 function isLoggedIn() {
-  const s = localStorage.getItem(AUTH_KEY);
-  if (!s) return false;
-  try {
-    const { ts } = JSON.parse(s);
-    return (Date.now() - ts) < 8 * 60 * 60 * 1000;
-  } catch { return false; }
+  return !!_adminSession;
+}
+
+// Supabase oturum değişikliklerini dinle (giriş, çıkış, sayfa yenileme)
+function initAuth() {
+  if (!window._sbReady) return;
+  // Mevcut oturumu geri yükle
+  window._sb.auth.getSession().then(({ data }) => {
+    _adminSession = data.session || null;
+    setAdminUI(isLoggedIn());
+    renderAll();
+  });
+  // Değişiklikleri izle
+  window._sb.auth.onAuthStateChange((_event, session) => {
+    _adminSession = session || null;
+    setAdminUI(isLoggedIn());
+    renderAll();
+  });
 }
 
 function openLoginOverlay() {
   document.getElementById('login-overlay').style.display = 'flex';
   document.getElementById('login-error').style.display = 'none';
   document.getElementById('login-pw').value = '';
-  setTimeout(() => document.getElementById('login-pw').focus(), 100);
+  setTimeout(() => document.getElementById('login-email').focus(), 100);
 }
 
-function doLogin() {
-  const pw = document.getElementById('login-pw').value;
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pw    = document.getElementById('login-pw').value;
   const errEl = document.getElementById('login-error');
-  if (pw === getStoredPw()) {
-    localStorage.setItem(AUTH_KEY, JSON.stringify({ ts: Date.now() }));
-    document.getElementById('login-overlay').style.display = 'none';
-    document.getElementById('login-pw').value = '';
-    errEl.style.display = 'none';
-    setAdminUI(true);
-    renderAll();
-  } else {
+
+  if (!email || !pw) {
+    errEl.textContent = '❌ E-posta ve şifre gerekli.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (!window._sbReady) { showToast('Sunucu bağlantısı yok', 'err'); return; }
+
+  const btn = document.querySelector('.login-btn');
+  const oldTxt = btn ? btn.textContent : '';
+  if (btn) { btn.textContent = '⏳ Giriş yapılıyor...'; btn.disabled = true; }
+
+  const { data, error } = await window._sb.auth.signInWithPassword({ email, password: pw });
+
+  if (btn) { btn.textContent = oldTxt; btn.disabled = false; }
+
+  if (error || !data.session) {
+    errEl.textContent = '❌ Hatalı e-posta veya şifre.';
     errEl.style.display = 'block';
     document.getElementById('login-pw').value = '';
     document.getElementById('login-pw').focus();
     const box = document.querySelector('.login-box');
-    box.style.animation = 'none';
-    requestAnimationFrame(() => {
-      box.style.animation = 'shake 0.4s ease';
-    });
+    if (box) {
+      box.style.animation = 'none';
+      requestAnimationFrame(() => { box.style.animation = 'shake 0.4s ease'; });
+    }
+    return;
   }
+
+  // Başarılı — onAuthStateChange UI'ı güncelleyecek
+  _adminSession = data.session;
+  document.getElementById('login-overlay').style.display = 'none';
+  document.getElementById('login-pw').value = '';
+  document.getElementById('login-email').value = '';
+  errEl.style.display = 'none';
+  setAdminUI(true);
+  renderAll();
+  showToast('✅ Giriş başarılı');
 }
 
 function enterPublic() {
-  localStorage.removeItem(AUTH_KEY);
   document.getElementById('login-overlay').style.display = 'none';
   setAdminUI(false);
   renderAll();
 }
 
-function doLogout() {
-  localStorage.removeItem(AUTH_KEY);
+async function doLogout() {
+  try { await window._sb.auth.signOut(); } catch(e) {}
+  _adminSession = null;
   setAdminUI(false);
   showPage('puan');
   document.getElementById('login-overlay').style.display = 'flex';
   document.getElementById('login-pw').value = '';
+  const em = document.getElementById('login-email');
+  if (em) em.value = '';
   document.getElementById('login-error').style.display = 'none';
 }
 
@@ -3410,18 +3440,18 @@ function setAdminUI(isAdmin) {
   document.getElementById('login-trigger-btn').classList.toggle('hidden', isAdmin);
 }
 
-function changePassword() {
-  const oldPw  = document.getElementById('pw-old').value;
+async function changePassword() {
+  if (!isLoggedIn()) { showToast('Önce giriş yapın', 'err'); return; }
   const newPw  = document.getElementById('pw-new').value;
   const newPw2 = document.getElementById('pw-new2').value;
 
-  if (oldPw !== getStoredPw()) { showToast('Mevcut şifre yanlış!', 'err'); return; }
-  if (newPw.length < 4)        { showToast('Şifre en az 4 karakter olmalı!', 'err'); return; }
-  if (newPw !== newPw2)        { showToast('Yeni şifreler eşleşmiyor!', 'err'); return; }
+  if (newPw.length < 6)  { showToast('Şifre en az 6 karakter olmalı!', 'err'); return; }
+  if (newPw !== newPw2)  { showToast('Yeni şifreler eşleşmiyor!', 'err'); return; }
 
-  localStorage.setItem(PW_KEY, newPw);
+  const { error } = await window._sb.auth.updateUser({ password: newPw });
+  if (error) { showToast('Şifre değiştirilemedi: ' + error.message, 'err'); return; }
+
   document.getElementById('pw-modal').classList.remove('open');
-  document.getElementById('pw-old').value = '';
   document.getElementById('pw-new').value = '';
   document.getElementById('pw-new2').value = '';
   showToast('✅ Şifre değiştirildi!');
@@ -4134,7 +4164,7 @@ function setConnected(ok) {
 }
 
 document.getElementById('login-overlay').style.display = 'none';
-if (isLoggedIn()) { setAdminUI(true); } else { setAdminUI(false); }
+setAdminUI(false); // Oturum durumu initAuth() ile (Supabase'den) belirlenecek
 
 renderAll();
 initCountdown();
@@ -4143,6 +4173,7 @@ initTheme();
 async function initSupabase() {
   if (!window._sbReady) { setConnected(false); return; }
   setConnected(false);
+  initAuth(); // Supabase Auth oturumunu geri yükle / dinle
   const loaded = await loadFromSupabase();
   if (loaded) {
     renderAll(true);
