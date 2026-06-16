@@ -1349,15 +1349,19 @@ body.light-mode {
   --border: #c0d4c0;
   --green: #1a7a1a;
   --green-light: #2a9a2a;
-  --accent: #1a7a1a;
-  --gold: #8a6a00;
-  --silver: #5a7a8a;
-  --bronze: #7a4a1a;
+  --accent: #15881a;
+  --gold: #b07d0a;
+  --silver: #5a7180;
+  --bronze: #a85a28;
   --red: #cc2222;
   --text: #1a2a1a;
   --text-dim: #4a6a4a;
   --text-muted: #6a8a6a;
-  --super-color: #1a5a1a;
+  /* Lig renkleri — açık zeminde okunaklı tonlar */
+  --super: #b07d0a;
+  --l2: #4f6a7a;
+  --l3: #b5642f;
+  --l4: #4a7a4a;
 }
 
 body.light-mode .header {
@@ -1377,8 +1381,15 @@ body.light-mode .player-of-week { background: linear-gradient(135deg, #e8efe8, #
 body.light-mode .profile-card { background: #ffffff; }
 body.light-mode .profile-stat { background: #e8efe8; }
 body.light-mode .profile-rival { background: #e8efe8; }
-body.light-mode .ranking-header { background: linear-gradient(135deg, #e8efe8, #dde8dd); }
-body.light-mode .ranking-info-box { background: #e8efe8; }
+/* Ranking sayfası — açık mod */
+body.light-mode .rk-info-box { background: #fbf6e6; border-color: #ecdca6; }
+body.light-mode .rk-detail-row td { background: #f3f7f3; }
+body.light-mode .rk-lg-none { background: #e8efe8; color: var(--text-muted); }
+body.light-mode .ranking-table tbody tr.rk-main:hover td { background: rgba(176,125,10,0.08); }
+/* Bölge satırları — açık modda yumuşak pastel tonlar */
+body.light-mode .zone-promo td { background: #e3f3e3 !important; }
+body.light-mode .zone-playoff td { background: #fbf3d6 !important; }
+body.light-mode .zone-rel td { background: #fae3e3 !important; }
 
 /* Mod butonu */
 .theme-toggle {
