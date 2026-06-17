@@ -1143,6 +1143,46 @@ body.light-mode .po-type-btn { background:var(--surface2); }
 .chip-g { background: rgba(93,201,93,0.15); color: var(--accent); }
 .chip-r { background: rgba(224,85,85,0.12); color: var(--red); }
 
+/* ── SEZON GALERİSİ ── */
+.gallery-block { margin-top:18px; border-top:1px solid var(--border); padding-top:16px; }
+.gallery-block-title { font-family:'Oswald',sans-serif; font-size:0.8rem; letter-spacing:1.5px;
+  color:var(--text-dim); margin-bottom:12px; text-transform:uppercase; }
+.gallery-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:8px; margin-bottom:14px; }
+.gallery-thumb {
+  aspect-ratio:1; border-radius:8px; overflow:hidden; cursor:pointer;
+  position:relative; background:var(--surface3);
+}
+.gallery-thumb img { width:100%; height:100%; object-fit:cover; transition:transform 0.2s; display:block; }
+.gallery-thumb:hover img { transform:scale(1.07); }
+.gallery-thumb .del-photo {
+  display:none; position:absolute; top:4px; right:4px;
+  background:rgba(0,0,0,0.6); color:#fff; border:none; border-radius:4px;
+  font-size:0.65rem; padding:2px 5px; cursor:pointer;
+}
+.gallery-thumb:hover .del-photo { display:block; }
+.gallery-add-row { display:flex; gap:8px; margin-top:4px; }
+.gallery-add-row input { flex:1; }
+/* Lightbox */
+.lightbox {
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92);
+  z-index:9999; align-items:center; justify-content:center; flex-direction:column;
+}
+.lightbox.open { display:flex; }
+.lightbox img { max-width:92vw; max-height:82vh; border-radius:10px; object-fit:contain; }
+.lightbox-close {
+  position:absolute; top:18px; right:22px; font-size:2rem; color:#fff;
+  cursor:pointer; line-height:1; background:none; border:none;
+}
+.lightbox-nav {
+  position:absolute; top:50%; transform:translateY(-50%);
+  font-size:2rem; color:#fff; cursor:pointer; background:rgba(0,0,0,0.4);
+  border:none; padding:8px 14px; border-radius:8px; user-select:none;
+}
+.lightbox-nav.prev { left:12px; }
+.lightbox-nav.next { right:12px; }
+.lightbox-caption { color:rgba(255,255,255,0.7); font-size:0.8rem; margin-top:10px; }
+body.light-mode .gallery-thumb { background:var(--surface3); }
+
 /* ── RANKING ── */
 .rank-hero-badge {
   display:inline-block; background:linear-gradient(135deg,var(--gold),#c89a20);
@@ -2110,6 +2150,14 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
     <div id="ranking-list"></div>
   </div>
 </div>
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <button class="lightbox-nav prev" onclick="lightboxNav(-1);event.stopPropagation()">‹</button>
+  <img id="lightbox-img" src="" alt="">
+  <div class="lightbox-caption" id="lightbox-caption"></div>
+  <button class="lightbox-nav next" onclick="lightboxNav(1);event.stopPropagation()">›</button>
+</div>
 </div><!-- /main -->
 
 <div class="toast" id="toast"></div>
@@ -2179,13 +2227,14 @@ async function loadFromSupabase() {
   if (!window._sbReady) return false;
   const sb = window._sb;
   try {
-    const [{ data: players }, { data: matches }, { data: meta }, { data: ranking }, { data: archives }, { data: playoffs }] = await Promise.all([
+    const [{ data: players }, { data: matches }, { data: meta }, { data: ranking }, { data: archives }, { data: playoffs }, { data: photos }] = await Promise.all([
       sb.from('players').select('*').order('id'),
       sb.from('matches').select('*').order('id'),
       sb.from('meta').select('*').eq('id', 1).single(),
       sb.from('ranking_entries').select('*'),
       sb.from('archives').select('*').order('id', { ascending: false }),
-      sb.from('playoff_matches').select('*')
+      sb.from('playoff_matches').select('*'),
+      sb.from('season_photos').select('*').order('id')
     ]);
 
     if (players && players.length) state.players = players;
@@ -2244,6 +2293,14 @@ async function loadFromSupabase() {
         scoreStr: p.score_str, note: p.note, date: p.match_date
       }));
       localStorage.setItem(PO_KEY, JSON.stringify(mapped));
+    }
+
+    // Fotoğrafları Supabase'den al → localStorage cache
+    if (photos) {
+      const mapped = photos.map(p => ({
+        id: p.id, seasonId: p.season_id, url: p.url, date: p.photo_date
+      }));
+      localStorage.setItem(GALLERY_KEY, JSON.stringify(mapped));
     }
 
     localStorage.setItem(SK, JSON.stringify(state));
@@ -3784,7 +3841,27 @@ function renderArchive() {
         </div>`;
     }).join('');
 
-    const poMatches = loadPlayoffs().filter(p => p.seasonId === season.id);
+    // Galeri
+    const photos = loadGallery().filter(p => p.seasonId === season.id);
+    const galleryHtml = (() => {
+      const thumbs = photos.map((p, i) => `
+        <div class="gallery-thumb" onclick="openLightbox(${JSON.stringify(photos).replace(/"/g,'&quot;')}, ${i})">
+          <img src="${p.url}" alt="Fotoğraf" loading="lazy" onerror="this.parentElement.style.display='none'">
+          ${isAdmin ? `<button class="del-photo" onclick="event.stopPropagation();deletePhoto(${p.id})">✕</button>` : ''}
+        </div>`).join('');
+
+      const addRow = isAdmin ? `
+        <div class="gallery-add-row">
+          <input type="text" id="photo-url-${season.id}" class="finput" placeholder="Fotoğraf URL'si yapıştır (GitHub, Drive vb.)">
+          <button class="btn btn-green" style="white-space:nowrap" onclick="addPhoto(${season.id})">+ Ekle</button>
+        </div>` : '';
+
+      return `<div class="gallery-block">
+        <div class="gallery-block-title">📸 Sezon Fotoğrafları ${photos.length ? `(${photos.length})` : ''}</div>
+        ${photos.length ? `<div class="gallery-grid">${thumbs}</div>` : isAdmin ? '' : '<div style="font-size:0.78rem;color:var(--text-muted);font-style:italic;margin-bottom:10px">Henüz fotoğraf eklenmemiş.</div>'}
+        ${addRow}
+      </div>`;
+    })();
     const poHtml = (() => {
       const po1 = poMatches.find(p => p.matchType === 1);
       const po2 = poMatches.find(p => p.matchType === 2);
@@ -3826,6 +3903,7 @@ function renderArchive() {
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px">
           ${ligRows}
         </div>
+        ${galleryHtml}
         ${poHtml}
       </div>
     </div>`;
@@ -4207,6 +4285,79 @@ async function sbUpsertPlayoff(entry) {
 }
 
 // ═══════════════════════════════════════════════════
+// SEZON GALERİSİ
+// ═══════════════════════════════════════════════════
+const GALLERY_KEY = 'rta_gallery_v1';
+let _lbPhotos = [], _lbIdx = 0;
+
+function loadGallery() {
+  try { return JSON.parse(localStorage.getItem(GALLERY_KEY) || '[]'); } catch { return []; }
+}
+function saveGallery(data) { localStorage.setItem(GALLERY_KEY, JSON.stringify(data)); }
+
+function addPhoto(seasonId) {
+  const input = document.getElementById('photo-url-' + seasonId);
+  const url = input?.value.trim();
+  if (!url) { showToast('Fotoğraf URL\'si girin', 'err'); return; }
+  if (!url.startsWith('http')) { showToast('Geçerli bir URL girin', 'err'); return; }
+
+  const entry = { id: Date.now(), seasonId, url, date: new Date().toISOString().split('T')[0] };
+  const all = loadGallery();
+  all.push(entry);
+  saveGallery(all);
+  sbUpsertPhoto(entry);
+  input.value = '';
+  renderArchive();
+  showToast('✅ Fotoğraf eklendi');
+}
+
+async function deletePhoto(id) {
+  if (!confirm('Bu fotoğraf silinecek!')) return;
+  saveGallery(loadGallery().filter(p => p.id !== id));
+  if (window._sbReady) {
+    try { await window._sbAdmin.from('season_photos').delete().eq('id', id); } catch(e){}
+  }
+  renderArchive();
+  showToast('Fotoğraf silindi', 'err');
+}
+
+async function sbUpsertPhoto(entry) {
+  if (!window._sbReady) return;
+  try {
+    await window._sbAdmin.from('season_photos').upsert({
+      id: entry.id, season_id: entry.seasonId, url: entry.url, photo_date: entry.date
+    });
+  } catch(e) { console.warn('Photo upsert error:', e); }
+}
+
+// Lightbox
+function openLightbox(photos, idx) {
+  _lbPhotos = photos; _lbIdx = idx;
+  document.getElementById('lightbox').classList.add('open');
+  updateLightboxImg();
+  document.addEventListener('keydown', lightboxKey);
+}
+function closeLightbox(e) {
+  if (e && e.target !== document.getElementById('lightbox') && !e.target.classList.contains('lightbox-close')) return;
+  document.getElementById('lightbox').classList.remove('open');
+  document.removeEventListener('keydown', lightboxKey);
+}
+function updateLightboxImg() {
+  document.getElementById('lightbox-img').src = _lbPhotos[_lbIdx].url;
+  document.getElementById('lightbox-caption').textContent =
+    `${_lbIdx + 1} / ${_lbPhotos.length}`;
+}
+function lightboxNav(dir) {
+  _lbIdx = (_lbIdx + dir + _lbPhotos.length) % _lbPhotos.length;
+  updateLightboxImg();
+}
+function lightboxKey(e) {
+  if (e.key === 'ArrowRight') lightboxNav(1);
+  if (e.key === 'ArrowLeft')  lightboxNav(-1);
+  if (e.key === 'Escape')     document.getElementById('lightbox').classList.remove('open');
+}
+
+// ═══════════════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════════════
 function showPage(name) {
@@ -4524,6 +4675,11 @@ function startRealtimeSync() {
         showSyncBadge();
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'playoff_matches' }, async () => {
+        await loadFromSupabase();
+        renderArchive();
+        showSyncBadge();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'season_photos' }, async () => {
         await loadFromSupabase();
         renderArchive();
         showSyncBadge();
