@@ -1183,6 +1183,35 @@ body.light-mode .po-type-btn { background:var(--surface2); }
 .lightbox-caption { color:rgba(255,255,255,0.7); font-size:0.8rem; margin-top:10px; }
 body.light-mode .gallery-thumb { background:var(--surface3); }
 
+/* ── GALERİ SAYFASI ── */
+.album-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:16px; margin-top:16px; }
+.album-card {
+  background:var(--surface); border:1px solid var(--border); border-radius:14px;
+  overflow:hidden; cursor:pointer; transition:border-color 0.2s, transform 0.15s;
+}
+.album-card:hover { border-color:var(--accent); transform:translateY(-2px); }
+.album-cover {
+  width:100%; aspect-ratio:4/3; object-fit:cover; background:var(--surface3);
+  display:flex; align-items:center; justify-content:center;
+  font-size:2.5rem; color:var(--text-muted);
+}
+.album-cover img { width:100%; height:100%; object-fit:cover; display:block; }
+.album-info { padding:12px 14px; }
+.album-name { font-weight:700; font-size:0.92rem; color:var(--text); margin-bottom:4px; }
+.album-meta { font-size:0.72rem; color:var(--text-muted); }
+.album-detail { display:none; }
+.album-detail.open { display:block; }
+.album-detail-header {
+  display:flex; align-items:center; gap:12px; margin-bottom:20px;
+  padding-bottom:14px; border-bottom:1px solid var(--border);
+}
+.album-back { background:none; border:1px solid var(--border); color:var(--text);
+  border-radius:8px; padding:7px 14px; cursor:pointer; font-size:0.82rem; font-weight:700; }
+.album-back:hover { border-color:var(--accent); color:var(--accent); }
+.album-detail-name { font-family:'Oswald',sans-serif; font-size:1.3rem; color:var(--text); }
+.album-detail-desc { font-size:0.78rem; color:var(--text-muted); margin-top:3px; }
+body.light-mode .album-card { background:#fff; }
+
 /* ── RANKING ── */
 .rank-hero-badge {
   display:inline-block; background:linear-gradient(135deg,var(--gold),#c89a20);
@@ -1605,6 +1634,7 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
     <button class="nav-btn" onclick="showPage('sonuclar')">Sonuçlar</button>
     <button class="nav-btn" onclick="showPage('fiktur')">Fikstür</button>
     <button class="nav-btn" onclick="showPage('arsiv')">Arşiv</button>
+    <button class="nav-btn" onclick="showPage('galeri')">📸 Galeri</button>
     <button class="nav-btn" onclick="showPage('istatistik')">İstatistik</button>
     <button class="nav-btn" onclick="showPage('kurallar')">Kurallar</button>
     <button class="nav-btn admin-only" id="nav-yonetim" onclick="showPage('yonetim')">Yönetim</button>
@@ -2069,6 +2099,63 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
   <div id="fixture-content"></div>
 </div>
 
+<!-- ══ GALERİ ══ -->
+<div id="page-galeri" class="page">
+  <div class="hero" style="margin-bottom:20px">
+    <div class="hero-title" style="font-size:1.5rem">📸 GALERİ</div>
+    <div class="hero-sub">RTA Ligi'nden kareler</div>
+  </div>
+
+  <!-- Albüm listesi -->
+  <div id="galeri-list-view">
+    <div id="galeri-admin-bar" class="admin-only" style="display:none;margin-bottom:16px">
+      <div class="score-card" style="padding:18px">
+        <div class="card-title" style="font-size:0.95rem">➕ Yeni Albüm Oluştur</div>
+        <div class="form-grid">
+          <div class="fgroup">
+            <label>Albüm Adı</label>
+            <input type="text" id="album-name" class="finput" placeholder="örn. 2026 Bahar Sezonu Kareleri">
+          </div>
+          <div class="fgroup">
+            <label>Açıklama (isteğe bağlı)</label>
+            <input type="text" id="album-desc" class="finput" placeholder="örn. Sezon boyunca çekilen maç fotoğrafları">
+          </div>
+        </div>
+        <button class="btn btn-green" onclick="createAlbum()">✓ Albüm Oluştur</button>
+      </div>
+    </div>
+    <div id="album-grid" class="album-grid"></div>
+    <div id="galeri-empty" style="display:none;text-align:center;padding:60px 0;color:var(--text-muted);font-size:0.9rem">
+      📸 Henüz albüm yok.<br>
+      <span style="font-size:0.78rem;margin-top:6px;display:block">Yönetici girişi yaparak albüm oluşturabilirsiniz.</span>
+    </div>
+  </div>
+
+  <!-- Albüm detay görünümü -->
+  <div id="galeri-detail-view" class="album-detail">
+    <div class="album-detail-header">
+      <button class="album-back" onclick="closeAlbum()">← Geri</button>
+      <div>
+        <div class="album-detail-name" id="detail-album-name"></div>
+        <div class="album-detail-desc" id="detail-album-desc"></div>
+      </div>
+      <div id="detail-admin-btns" class="admin-only" style="display:none;margin-left:auto;display:flex;gap:8px">
+        <button class="btn btn-sm" style="color:var(--red)" onclick="deleteAlbum()">Albümü Sil</button>
+      </div>
+    </div>
+    <div id="detail-admin-add" class="admin-only" style="display:none;margin-bottom:16px">
+      <div class="gallery-add-row">
+        <input type="text" id="detail-photo-url" class="finput" placeholder="Fotoğraf URL'si yapıştır (GitHub raw link vb.)">
+        <button class="btn btn-green" style="white-space:nowrap" onclick="addPhotoToAlbum()">+ Ekle</button>
+      </div>
+    </div>
+    <div id="detail-gallery-grid" class="gallery-grid"></div>
+    <div id="detail-empty" style="display:none;text-align:center;padding:40px 0;color:var(--text-muted);font-size:0.85rem;font-style:italic">
+      Bu albümde henüz fotoğraf yok.
+    </div>
+  </div>
+</div>
+
 <!-- ══ ARŞİV ══ -->
 <div id="page-arsiv" class="page">
   <div class="hero" style="margin-bottom:20px">
@@ -2227,14 +2314,16 @@ async function loadFromSupabase() {
   if (!window._sbReady) return false;
   const sb = window._sb;
   try {
-    const [{ data: players }, { data: matches }, { data: meta }, { data: ranking }, { data: archives }, { data: playoffs }, { data: photos }] = await Promise.all([
+    const [{ data: players }, { data: matches }, { data: meta }, { data: ranking }, { data: archives }, { data: playoffs }, { data: photos }, { data: gAlbums }, { data: gPhotos }] = await Promise.all([
       sb.from('players').select('*').order('id'),
       sb.from('matches').select('*').order('id'),
       sb.from('meta').select('*').eq('id', 1).single(),
       sb.from('ranking_entries').select('*'),
       sb.from('archives').select('*').order('id', { ascending: false }),
       sb.from('playoff_matches').select('*'),
-      sb.from('season_photos').select('*').order('id')
+      sb.from('season_photos').select('*').order('id'),
+      sb.from('gallery_albums').select('*').order('id', { ascending: false }),
+      sb.from('gallery_photos').select('*').order('id')
     ]);
 
     if (players && players.length) state.players = players;
@@ -2301,6 +2390,14 @@ async function loadFromSupabase() {
         id: p.id, seasonId: p.season_id, url: p.url, date: p.photo_date
       }));
       localStorage.setItem(GALLERY_KEY, JSON.stringify(mapped));
+    }
+
+    // Galeri albümleri ve fotoğrafları
+    if (gAlbums) {
+      saveAlbums(gAlbums.map(a => ({ id:a.id, name:a.name, desc:a.description, date:a.created_date })));
+    }
+    if (gPhotos) {
+      saveAlbumPhotos(gPhotos.map(p => ({ id:p.id, albumId:p.album_id, url:p.url, date:p.added_date })));
     }
 
     localStorage.setItem(SK, JSON.stringify(state));
@@ -4358,6 +4455,138 @@ function lightboxKey(e) {
 }
 
 // ═══════════════════════════════════════════════════
+// GALERİ SAYFASI
+// ═══════════════════════════════════════════════════
+const ALBUM_KEY       = 'rta_albums_v1';
+const ALBUM_PHOTO_KEY = 'rta_album_photos_v1';
+let _currentAlbumId   = null;
+
+function loadAlbums()       { try { return JSON.parse(localStorage.getItem(ALBUM_KEY)||'[]'); } catch { return []; } }
+function saveAlbums(d)      { localStorage.setItem(ALBUM_KEY, JSON.stringify(d)); }
+function loadAlbumPhotos()  { try { return JSON.parse(localStorage.getItem(ALBUM_PHOTO_KEY)||'[]'); } catch { return []; } }
+function saveAlbumPhotos(d) { localStorage.setItem(ALBUM_PHOTO_KEY, JSON.stringify(d)); }
+
+function createAlbum() {
+  if (!isLoggedIn()) { showToast('Yönetici girişi gerekli','err'); return; }
+  const name = document.getElementById('album-name').value.trim();
+  const desc = document.getElementById('album-desc').value.trim();
+  if (!name) { showToast('Albüm adı girin','err'); return; }
+  const album = { id: Date.now(), name, desc, date: new Date().toISOString().split('T')[0] };
+  const all = loadAlbums(); all.unshift(album); saveAlbums(all);
+  sbUpsertAlbum(album);
+  document.getElementById('album-name').value = '';
+  document.getElementById('album-desc').value = '';
+  renderGaleri();
+  showToast(`✅ "${name}" albümü oluşturuldu`);
+}
+
+async function deleteAlbum() {
+  if (!isLoggedIn() || !_currentAlbumId) return;
+  const album = loadAlbums().find(a => a.id === _currentAlbumId);
+  if (!confirm(`"${album?.name}" albümü ve içindeki tüm fotoğraflar silinecek!`)) return;
+  saveAlbums(loadAlbums().filter(a => a.id !== _currentAlbumId));
+  saveAlbumPhotos(loadAlbumPhotos().filter(p => p.albumId !== _currentAlbumId));
+  if (window._sbReady) {
+    try {
+      await window._sbAdmin.from('gallery_photos').delete().eq('album_id', _currentAlbumId);
+      await window._sbAdmin.from('gallery_albums').delete().eq('id', _currentAlbumId);
+    } catch(e) {}
+  }
+  closeAlbum(); renderGaleri();
+  showToast('Albüm silindi','err');
+}
+
+function addPhotoToAlbum() {
+  if (!isLoggedIn() || !_currentAlbumId) return;
+  const url = document.getElementById('detail-photo-url').value.trim();
+  if (!url || !url.startsWith('http')) { showToast('Geçerli bir URL girin','err'); return; }
+  const photo = { id: Date.now(), albumId: _currentAlbumId, url, date: new Date().toISOString().split('T')[0] };
+  const all = loadAlbumPhotos(); all.push(photo); saveAlbumPhotos(all);
+  sbUpsertAlbumPhoto(photo);
+  document.getElementById('detail-photo-url').value = '';
+  renderAlbumDetail(_currentAlbumId);
+  showToast('✅ Fotoğraf eklendi');
+}
+
+async function deleteAlbumPhoto(id) {
+  if (!confirm('Bu fotoğraf silinecek!')) return;
+  saveAlbumPhotos(loadAlbumPhotos().filter(p => p.id !== id));
+  if (window._sbReady) {
+    try { await window._sbAdmin.from('gallery_photos').delete().eq('id', id); } catch(e){}
+  }
+  renderAlbumDetail(_currentAlbumId);
+  showToast('Fotoğraf silindi','err');
+}
+
+async function sbUpsertAlbum(a) {
+  if (!window._sbReady) return;
+  try { await window._sbAdmin.from('gallery_albums').upsert({ id:a.id, name:a.name, description:a.desc, created_date:a.date }); } catch(e){}
+}
+async function sbUpsertAlbumPhoto(p) {
+  if (!window._sbReady) return;
+  try { await window._sbAdmin.from('gallery_photos').upsert({ id:p.id, album_id:p.albumId, url:p.url, added_date:p.date }); } catch(e){}
+}
+
+function openAlbum(id) {
+  _currentAlbumId = id;
+  document.getElementById('galeri-list-view').style.display = 'none';
+  document.getElementById('galeri-detail-view').classList.add('open');
+  renderAlbumDetail(id);
+}
+
+function closeAlbum() {
+  _currentAlbumId = null;
+  document.getElementById('galeri-list-view').style.display = 'block';
+  document.getElementById('galeri-detail-view').classList.remove('open');
+}
+
+function renderAlbumDetail(id) {
+  const album  = loadAlbums().find(a => a.id === id);
+  const photos = loadAlbumPhotos().filter(p => p.albumId === id);
+  const isAdmin = isLoggedIn();
+  if (!album) return;
+  document.getElementById('detail-album-name').textContent = album.name;
+  document.getElementById('detail-album-desc').textContent = album.desc || '';
+  document.getElementById('detail-admin-add').style.display  = isAdmin ? 'block' : 'none';
+  document.getElementById('detail-admin-btns').style.display = isAdmin ? 'flex'  : 'none';
+  const grid = document.getElementById('detail-gallery-grid');
+  const empty = document.getElementById('detail-empty');
+  if (!photos.length) { grid.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  grid.innerHTML = photos.map((p,i) => `
+    <div class="gallery-thumb" onclick="openLightbox(${JSON.stringify(photos).replace(/"/g,'&quot;')},${i})">
+      <img src="${p.url}" alt="" loading="lazy" onerror="this.parentElement.style.display='none'">
+      ${isAdmin ? `<button class="del-photo" onclick="event.stopPropagation();deleteAlbumPhoto(${p.id})">✕</button>` : ''}
+    </div>`).join('');
+}
+
+function renderGaleri() {
+  const isAdmin = isLoggedIn();
+  const adminBar = document.getElementById('galeri-admin-bar');
+  if (adminBar) adminBar.style.display = isAdmin ? 'block' : 'none';
+  const albums = loadAlbums();
+  const photos = loadAlbumPhotos();
+  const empty  = document.getElementById('galeri-empty');
+  const grid   = document.getElementById('album-grid');
+  if (!albums.length) { grid.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  grid.innerHTML = albums.map(a => {
+    const ap = photos.filter(p => p.albumId === a.id);
+    const cover = ap[0]?.url;
+    return `<div class="album-card" onclick="openAlbum(${a.id})">
+      <div class="album-cover">${cover
+        ? `<img src="${cover}" alt="${a.name}" loading="lazy" onerror="this.parentElement.innerHTML='📸'">`
+        : '📸'}</div>
+      <div class="album-info">
+        <div class="album-name">${a.name}</div>
+        <div class="album-meta">${ap.length} fotoğraf • ${a.date}</div>
+        ${a.desc ? `<div class="album-meta" style="margin-top:3px;opacity:0.7">${a.desc}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════════════
 function showPage(name) {
@@ -4368,7 +4597,7 @@ function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
 
-  const pages = ['puan','ranking','skor','sonuclar','fiktur','arsiv','istatistik','kurallar','yonetim'];
+  const pages = ['puan','ranking','skor','sonuclar','fiktur','arsiv','galeri','istatistik','kurallar','yonetim'];
   document.querySelectorAll('.nav-btn').forEach((b, i) =>
     b.classList.toggle('active', pages[i] === name));
 
@@ -4376,6 +4605,7 @@ function showPage(name) {
   if (name === 'sonuclar')   { renderResults(); }
   if (name === 'fiktur')     { renderFixture(); }
   if (name === 'arsiv')      { renderArchive(); }
+  if (name === 'galeri')     { renderGaleri(); }
   if (name === 'ranking')    { renderRanking(); }
   if (name === 'istatistik') { renderStats(); }
   if (name === 'yonetim')    { renderAdminTable(); }
@@ -4680,9 +4910,13 @@ function startRealtimeSync() {
         showSyncBadge();
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'season_photos' }, async () => {
-        await loadFromSupabase();
-        renderArchive();
-        showSyncBadge();
+        await loadFromSupabase(); renderArchive(); showSyncBadge();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'gallery_albums' }, async () => {
+        await loadFromSupabase(); renderGaleri(); showSyncBadge();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'gallery_photos' }, async () => {
+        await loadFromSupabase(); renderGaleri(); showSyncBadge();
       })
       .subscribe();
   } catch(e) { console.warn('Realtime başlatılamadı:', e); }
