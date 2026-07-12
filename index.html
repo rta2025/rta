@@ -1356,6 +1356,9 @@ body.light-mode .rk-lg-none{background:#e8efe8;}
 }
 .profile-form-dot.w { background: rgba(93,201,93,0.2); color: #5dc95d; }
 .profile-form-dot.l { background: rgba(224,85,85,0.2); color: #e05555; }
+.profile-rivals-list {
+  max-height: 220px; overflow-y: auto; padding-right: 4px;
+}
 .profile-rival {
   background: var(--surface2); border-radius: 8px; padding: 10px 12px;
   display: flex; justify-content: space-between; align-items: center;
@@ -2186,6 +2189,50 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
     <div class="hero-sub">Şehir geneli resmi tenis sıralaması • Son 1 yılın performansı</div>
   </div>
 
+  <!-- Admin: Turnuva puanı ekleme -->
+  <div id="ranking-admin-panel" style="display:none;margin-bottom:22px">
+    <div class="score-card" style="padding:22px">
+      <div class="card-title" style="font-size:1rem">🎾 Turnuva Ranking Puanı Ekle</div>
+      <p style="font-size:0.8rem;color:var(--text-dim);margin-bottom:16px;line-height:1.6">
+        Lig puanları sezon arşivlenince otomatik eklenir. Buradan sadece <strong>turnuva</strong> (Rize Cup, RTA Tekler vb.) puanlarını elle girersiniz.
+      </p>
+      <div class="form-grid">
+        <div class="fgroup">
+          <label>Oyuncu</label>
+          <select id="rk-player" class="finput"></select>
+        </div>
+        <div class="fgroup">
+          <label>Turnuva / Açıklama</label>
+          <input type="text" id="rk-label" class="finput" placeholder="örn. Rize Cup 2026 - Çeyrek Final">
+        </div>
+        <div class="fgroup">
+          <label>Ranking Puanı</label>
+          <input type="number" id="rk-points" class="finput" min="0" placeholder="örn. 250">
+        </div>
+        <div class="fgroup">
+          <label>Tarih</label>
+          <input type="date" id="rk-date" class="finput">
+        </div>
+      </div>
+      <button class="btn btn-green" onclick="addTournamentPoints()">➕ Puan Ekle</button>
+
+      <div class="sec-title" style="margin-top:24px">Elle Eklenen Turnuva Puanları</div>
+      <div id="rk-tournament-list"></div>
+    </div>
+  </div>
+
+  <div class="league-block" style="overflow-x:auto">
+    <div class="league-header">
+      <span class="rank-hero-badge">RANKING</span>
+      <div class="league-info">
+        <div class="name">Genel Sıralama</div>
+        <div class="desc" id="rk-period-desc">Son 12 ay</div>
+      </div>
+      <span class="league-count" id="rk-count">0 oyuncu</span>
+    </div>
+    <div id="ranking-list"></div>
+  </div>
+</div>
   <div class="rk-info-box">
     <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.08)">
       <div style="font-size:1rem;font-weight:700;color:var(--gold);margin-bottom:10px;letter-spacing:1px">RİZE RTA RANKING SİSTEMİ</div>
@@ -2238,50 +2285,7 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
     </div>
   </div>
 
-  <!-- Admin: Turnuva puanı ekleme -->
-  <div id="ranking-admin-panel" style="display:none;margin-bottom:22px">
-    <div class="score-card" style="padding:22px">
-      <div class="card-title" style="font-size:1rem">🎾 Turnuva Ranking Puanı Ekle</div>
-      <p style="font-size:0.8rem;color:var(--text-dim);margin-bottom:16px;line-height:1.6">
-        Lig puanları sezon arşivlenince otomatik eklenir. Buradan sadece <strong>turnuva</strong> (Rize Cup, RTA Tekler vb.) puanlarını elle girersiniz.
-      </p>
-      <div class="form-grid">
-        <div class="fgroup">
-          <label>Oyuncu</label>
-          <select id="rk-player" class="finput"></select>
-        </div>
-        <div class="fgroup">
-          <label>Turnuva / Açıklama</label>
-          <input type="text" id="rk-label" class="finput" placeholder="örn. Rize Cup 2026 - Çeyrek Final">
-        </div>
-        <div class="fgroup">
-          <label>Ranking Puanı</label>
-          <input type="number" id="rk-points" class="finput" min="0" placeholder="örn. 250">
-        </div>
-        <div class="fgroup">
-          <label>Tarih</label>
-          <input type="date" id="rk-date" class="finput">
-        </div>
-      </div>
-      <button class="btn btn-green" onclick="addTournamentPoints()">➕ Puan Ekle</button>
 
-      <div class="sec-title" style="margin-top:24px">Elle Eklenen Turnuva Puanları</div>
-      <div id="rk-tournament-list"></div>
-    </div>
-  </div>
-
-  <div class="league-block" style="overflow-x:auto">
-    <div class="league-header">
-      <span class="rank-hero-badge">RANKING</span>
-      <div class="league-info">
-        <div class="name">Genel Sıralama</div>
-        <div class="desc" id="rk-period-desc">Son 12 ay</div>
-      </div>
-      <span class="league-count" id="rk-count">0 oyuncu</span>
-    </div>
-    <div id="ranking-list"></div>
-  </div>
-</div>
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
   <button class="lightbox-close" onclick="closeLightbox()">✕</button>
@@ -3363,17 +3367,19 @@ function openProfile(playerId) {
   });
 
   const rivals = Object.entries(rivalMap)
-    .map(([id, rec]) => ({ id: parseInt(id), ...rec, total: rec.w + rec.l }))
-    .sort((a,b) => b.total - a.total)
-    .slice(0, 4);
+    .map(([id, rec]) => {
+      const sortedMatches = rec.matches.sort((a,b) => new Date(b.date) - new Date(a.date));
+      const lastDate = sortedMatches.length ? new Date(sortedMatches[0].date) : new Date(0);
+      return { id: parseInt(id), ...rec, matches: sortedMatches, total: rec.w + rec.l, lastDate };
+    })
+    .sort((a,b) => b.lastDate - a.lastDate);
 
   const rivalsHtml = rivals.length
-    ? rivals.map(r => {
+    ? `<div class="profile-rivals-list">` + rivals.map(r => {
         const name = playerName(r.id);
         const cls  = r.w >= r.l ? 'win' : 'loss';
         // Son maçları listele
         const matchRows = r.matches
-          .sort((a,b) => new Date(b.date) - new Date(a.date))
           .map(m => `<span style="font-size:10px;color:${m.won ? 'var(--accent)' : 'var(--red)'};margin-left:6px">${m.won ? 'G' : 'M'} ${m.setScore}</span>`)
           .join('');
         return `<div class="profile-rival">
@@ -3383,7 +3389,7 @@ function openProfile(playerId) {
             ${matchRows}
           </div>
         </div>`;
-      }).join('')
+      }).join('') + `</div>`
     : '<span style="color:var(--text-muted);font-size:13px">Henüz rakip yok</span>';
 
   const [bg, fg] = avColor(player.name);
