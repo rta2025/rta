@@ -2187,10 +2187,79 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
   </div>
 
   <div class="rk-info-box">
-    <strong style="color:var(--gold)">Nasıl işler?</strong> Her lig dönemi sonunda bitiş sıralamasına göre ranking puanı dağıtılır
-    (Süper Lig 1.si 2000 → 4. Lig 12.si 70). Puanlar <strong>1 yıl</strong> geçerlidir; süresi dolan puanlar otomatik düşer.
-    RTA özel turnuvalarından (Rize Cup, RTA Tekler) da puan kazanılır. Akademi Ligi ranking'e dahil değildir.
-    <br><span style="color:var(--text-muted)">Not: Play-off maçlarından (4.Lig 1.si–2.Lig 8.si ve 3.Lig 1.si–Süper Lig 8.si) ranking puanı kazanılmaz.</span>
+    <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.08)">
+      <div style="font-size:1rem;font-weight:700;color:var(--gold);margin-bottom:10px;letter-spacing:1px">RİZE RTA RANKING SİSTEMİ</div>
+      <p style="font-size:0.82rem;line-height:1.8;color:var(--text-dim)">
+        Rize RTA Ranking, şehrimizdeki tüm tenis oyuncularını kapsayan resmi genel sıralama sistemidir. Bu sistem sayesinde oyuncular yalnızca kendi liglerinde değil, Rize genelinde de sıralanmaktadır. Sistem, ATP ve WTA ranking mantığına benzer şekilde işlemektedir.
+      </p>
+    </div>
+
+    <!-- Lig Ranking Puanları -->
+    <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.08)">
+      <div style="font-size:0.82rem;font-weight:700;color:var(--accent);margin-bottom:14px;letter-spacing:1px">LİG RANKING PUANLARI</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+        <!-- Süper Lig -->
+        <div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:14px;border:1px solid rgba(255,215,0,0.15)">
+          <div style="color:var(--gold);font-weight:700;font-size:0.78rem;letter-spacing:1px;margin-bottom:10px">🏆 SÜPER LİG</div>
+          ${[[1,2000],[2,1900],[3,1800],[4,1700],[5,1500],[6,1400],[7,1300],[8,1200],[9,1100],[10,1050],[11,1000],[12,950]].map(([s,p])=>`<div style="display:flex;justify-content:space-between;font-size:0.75rem;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--text-dim)"><span>${s}. sıra</span><span style="color:var(--gold);font-weight:600">${p}</span></div>`).join('')}
+        </div>
+        <!-- 2. Lig -->
+        <div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:14px;border:1px solid rgba(192,192,192,0.15)">
+          <div style="color:#c0c0c0;font-weight:700;font-size:0.78rem;letter-spacing:1px;margin-bottom:10px">🥈 2. LİG</div>
+          ${[[1,1100],[2,1050],[3,1000],[4,950],[5,850],[6,800],[7,750],[8,700],[9,650],[10,620],[11,590],[12,560]].map(([s,p])=>`<div style="display:flex;justify-content:space-between;font-size:0.75rem;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--text-dim)"><span>${s}. sıra</span><span style="color:#c0c0c0;font-weight:600">${p}</span></div>`).join('')}
+        </div>
+        <!-- 3. Lig -->
+        <div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:14px;border:1px solid rgba(205,127,50,0.15)">
+          <div style="color:#cd7f32;font-weight:700;font-size:0.78rem;letter-spacing:1px;margin-bottom:10px">🥉 3. LİG</div>
+          ${[[1,650],[2,620],[3,590],[4,560],[5,460],[6,430],[7,400],[8,370],[9,340],[10,320],[11,300],[12,280]].map(([s,p])=>`<div style="display:flex;justify-content:space-between;font-size:0.75rem;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--text-dim)"><span>${s}. sıra</span><span style="color:#cd7f32;font-weight:600">${p}</span></div>`).join('')}
+        </div>
+        <!-- 4. Lig -->
+        <div style="background:rgba(255,255,255,0.03);border-radius:8px;padding:14px;border:1px solid rgba(93,201,93,0.15)">
+          <div style="color:var(--accent);font-weight:700;font-size:0.78rem;letter-spacing:1px;margin-bottom:10px">🎾 4. LİG</div>
+          ${[[1,340],[2,320],[3,300],[4,280],[5,180],[6,160],[7,140],[8,120],[9,100],[10,90],[11,80],[12,70]].map(([s,p])=>`<div style="display:flex;justify-content:space-between;font-size:0.75rem;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--text-dim)"><span>${s}. sıra</span><span style="color:var(--accent);font-weight:600">${p}</span></div>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <!-- Sistem Nasıl İşler -->
+    <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.08)">
+      <div style="font-size:0.82rem;font-weight:700;color:var(--accent);margin-bottom:12px;letter-spacing:1px">SİSTEM NASIL İŞLER?</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${[
+          ['📅','RTA Ranking, yıllık bir sistemdir. Oyuncular 1 yıl boyunca oynanan tüm lig dönemlerinden ranking puanı toplar.'],
+          ['⏱️','Ranking sıralaması her zaman son 1 yıl içinde kazanılan puanlara göre oluşur. 1 yılı geçen puanlar sistemden otomatik olarak düşer.'],
+          ['🏆','Lig maçlarının yanı sıra RTA tarafından düzenlenen özel turnuvalardan (Rize Cup, RTA Tekler) da ranking puanı kazanılır.'],
+          ['📋','Turnuvalarda verilecek puanlar, turnuva dönemlerinde ayrıca duyurulur.'],
+          ['🎓','Akademi Ligi (5. Lig) gelişim odaklı olduğundan ranking puanlamasına dahil değildir.'],
+          ['⚽','Play-off maçlarından (4. Lig 1.si – 2. Lig 8.si ve 3. Lig 1.si – Süper Lig 8.si) ranking puanı kazanılmaz.'],
+        ].map(([i,t])=>`<div style="display:flex;gap:10px;align-items:flex-start;font-size:0.78rem;color:var(--text-dim);line-height:1.6"><span style="font-size:1rem;flex-shrink:0">${i}</span><span>${t}</span></div>`).join('')}
+      </div>
+    </div>
+
+    <!-- Örnek Senaryo -->
+    <div>
+      <div style="font-size:0.82rem;font-weight:700;color:var(--accent);margin-bottom:12px;letter-spacing:1px">ÖRNEK SENARYO</div>
+      <div style="background:rgba(255,255,255,0.02);border-radius:8px;padding:16px;border:1px solid rgba(255,255,255,0.06);font-size:0.78rem;color:var(--text-dim);line-height:1.8">
+        <div style="color:#fff;font-weight:600;margin-bottom:8px">🎾 Oyuncu: Ahmet</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="padding:10px;background:rgba(93,201,93,0.05);border-radius:6px;border-left:2px solid var(--accent)">
+            <span style="color:var(--accent);font-weight:600">1. Dönem —</span> 3. Lig'de 2. sıra &nbsp;→&nbsp; <span style="color:var(--gold);font-weight:600">+620 puan</span> &nbsp;|&nbsp; Toplam: 620
+          </div>
+          <div style="padding:10px;background:rgba(93,201,93,0.05);border-radius:6px;border-left:2px solid var(--accent)">
+            <span style="color:var(--accent);font-weight:600">2. Dönem —</span> 2. Lig'de 5. sıra &nbsp;→&nbsp; <span style="color:var(--gold);font-weight:600">+850 puan</span> &nbsp;|&nbsp; Toplam: 1.470
+          </div>
+          <div style="padding:10px;background:rgba(93,201,93,0.05);border-radius:6px;border-left:2px solid var(--accent)">
+            <span style="color:var(--accent);font-weight:600">3. Dönem —</span> 2. Lig'de 2. sıra &nbsp;→&nbsp; <span style="color:var(--gold);font-weight:600">+1.050 puan</span> &nbsp;|&nbsp; Toplam: 2.520
+          </div>
+          <div style="padding:10px;background:rgba(255,215,0,0.04);border-radius:6px;border-left:2px solid var(--gold);color:var(--text-dim)">
+            <span style="color:var(--gold);font-weight:600">1 yıl sonra —</span> 1. dönem puanı (620) düşer &nbsp;→&nbsp; <span style="color:#fff;font-weight:600">Güncel: 1.900 puan</span>
+          </div>
+        </div>
+        <div style="margin-top:12px;color:var(--text-muted);font-size:0.74rem">
+          Bu örnek yalnızca lig performansını göstermektedir. Oyuncunun bu süre içinde katıldığı RTA turnuvalarından kazandığı puanlar da toplam hesabına eklenir.
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Admin: Turnuva puanı ekleme -->
