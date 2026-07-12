@@ -2570,7 +2570,7 @@ function getStandings(league) {
   const players = state.players.filter(p => p.league === league);
   const st = {};
   players.forEach(p => {
-    st[p.id] = {id: p.id, name: p.name, mp: 0, mw: 0, ml: 0, pts: 0, sw: 0, sl: 0, gw: 0, gl: 0};
+    st[p.id] = {id: p.id, name: p.name, photo_url: p.photo_url || null, mp: 0, mw: 0, ml: 0, pts: 0, sw: 0, sl: 0, gw: 0, gl: 0};
   });
 
   state.matches.filter(m => m.league === league).forEach(m => {
