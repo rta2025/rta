@@ -1691,6 +1691,10 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
       <input type="text" id="edit-player-name" class="finput" placeholder="Oyuncu adı">
     </div>
     <div class="fgroup">
+      <label>Fotoğraf URL (opsiyonel)</label>
+      <input type="text" id="edit-player-photo" class="finput" placeholder="Fotoğraf URL'si yapıştır (GitHub raw link vb.)">
+    </div>
+    <div class="fgroup">
       <label>Lig</label>
       <select id="edit-player-league" class="finput">
         <option value="super">Süper Lig</option>
@@ -2321,7 +2325,7 @@ async function saveState() {
     if (state.players.length) {
       await sb.from('players').upsert(
         state.players.map(p => ({
-          id: p.id, name: p.name, league: p.league
+          id: p.id, name: p.name, league: p.league, photo_url: p.photo_url || null
         }))
       );
     }
@@ -2649,6 +2653,22 @@ function avColor(name) {
 
 function initials(name) { return name.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase(); }
 
+// Oyuncu avatarı: fotoğrafı varsa fotoğraf, yoksa baş harfli renkli daire.
+// cls: kullanılacak css class'ı (.av / .profile-avatar / .pow-avatar), size/fontSize: boyut override.
+function avatarHtml(player, cls, size, fontSize) {
+  const [bg, fg] = avColor(player.name);
+  const ini = initials(player.name);
+  const sizeStyle = size ? `width:${size}px;height:${size}px;` : '';
+  const fontStyle = fontSize ? `font-size:${fontSize};` : '';
+  if (player.photo_url) {
+    return `<span class="${cls}" style="${sizeStyle}${fontStyle}padding:0;overflow:hidden;position:relative">` +
+      `<img src="${player.photo_url}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block" ` +
+      `onerror="var p=this.parentElement;p.removeChild(this);p.textContent='${ini}';p.style.background='${bg}';p.style.color='${fg}';">` +
+      `</span>`;
+  }
+  return `<span class="${cls}" style="background:${bg};color:${fg};${sizeStyle}${fontStyle}">${ini}</span>`;
+}
+
 // ═══════════════════════════════════════════════════
 // RENDER STANDINGS
 // ═══════════════════════════════════════════════════
@@ -2680,7 +2700,6 @@ function renderStanding(code) {
     if (zone === 'playoff') zi = '<span class="zone-icon zi-po" title="Play-off"></span>';
     if (code !== 'l4' && zone === 'rel') zi = '<span class="zone-icon zi-dn" title="Düşme bölgesi"></span>';
 
-    const [bg, fg] = avColor(p.name);
     const rankCls = i===0?'r1':i===1?'r2':i===2?'r3':'';
     const gal = p.mp > 0 ? Math.round(p.mw/p.mp*100) : 0;
     const setDiff = p.sw - p.sl;
@@ -2689,7 +2708,7 @@ function renderStanding(code) {
     return `<tr class="${zoneClass}">
       <td><span class="rank-num ${rankCls}">${i+1}</span>${getRankChange(p.id, i+1)}</td>
       <td><span class="pname pname-clickable" onclick="openProfile(${p.id})">
-        <span class="av" style="background:${bg};color:${fg}">${initials(p.name)}</span>
+        ${avatarHtml(p, 'av')}
         ${p.name}${zi}
       </span>${formSeriesHtml(p.id)}${getPlayerBadge(p.id)}</td>
       <td class="center">${p.mp}</td>
@@ -3009,10 +3028,9 @@ function renderStats() {
     const gal = p.mp > 0 ? Math.round(p.mw/p.mp*100) : 0;
     const ln = leagueName(p.league);
     const lc = leagueClass(p.league);
-    const [bg,fg] = avColor(p.name);
     return `<tr>
       <td><span class="rank-num ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</span></td>
-      <td><span class="pname"><span class="av" style="background:${bg};color:${fg}">${initials(p.name)}</span>${p.name}</span></td>
+      <td><span class="pname">${avatarHtml(p, 'av')}${p.name}</span></td>
       <td><span class="match-lig ${lc}" style="font-size:0.78rem">${ln}</span></td>
       <td class="right">${p.mp}</td>
       <td class="right"><span class="tag tag-win">${p.mw}G</span> <span class="tag tag-loss">${p.ml}M</span></td>
@@ -3070,10 +3088,9 @@ function renderPlayerDetail() {
     </tr>`;
   }).join('');
 
-  const [bg,fg] = avColor(player.name);
   box.innerHTML = `
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:20px">
-      <span class="av" style="background:${bg};color:${fg};width:56px;height:56px;font-size:1.2rem">${initials(player.name)}</span>
+      ${avatarHtml(player, 'av', 56, '1.2rem')}
       <div>
         <div style="font-family:'Oswald',sans-serif;font-size:1.4rem;letter-spacing:1px">${player.name}</div>
         <div style="color:var(--text-dim);font-size:0.82rem;margin-top:3px">${leagueName(player.league)}</div>
@@ -3235,10 +3252,9 @@ function renderPlayerOfWeek() {
   const p = state.players.find(pl => pl.id === best.id);
   if (!p) { el.innerHTML = ''; return; }
 
-  const [bg, fg] = avColor(p.name);
   el.innerHTML = `
     <div class="player-of-week">
-      <div class="pow-avatar" style="background:${bg};color:${fg}">${initials(p.name)}</div>
+      ${avatarHtml(p, 'pow-avatar')}
       <div class="pow-info">
         <div class="pow-badge">🌟 Haftanın Oyuncusu</div>
         <div class="pow-name">${p.name}</div>
@@ -3392,11 +3408,10 @@ function openProfile(playerId) {
       }).join('') + `</div>`
     : '<span style="color:var(--text-muted);font-size:13px">Henüz rakip yok</span>';
 
-  const [bg, fg] = avColor(player.name);
   const lgName   = leagueName(player.league);
 
   document.getElementById('profile-content').innerHTML = `
-    <div class="profile-avatar" style="background:${bg};color:${fg}">${initials(player.name)}</div>
+    ${avatarHtml(player, 'profile-avatar', 56, '20px')}
     <div class="profile-name">${player.name}</div>
     <div class="profile-league">${lgName} ${getPlayerBadge(playerId)}</div>
     <div class="profile-stats">
@@ -3854,16 +3869,14 @@ function renderFixture() {
         }
       }
 
-      const [bg, fg] = avColor(q.name);
       return `<div class="fix-row">
         <span class="fix-status-dot ${isDone ? 'fix-done' : 'fix-todo'}"></span>
-        <span class="av" style="background:${bg};color:${fg};width:24px;height:24px;font-size:0.62rem">${initials(q.name)}</span>
+        ${avatarHtml(q, 'av', 24, '0.62rem')}
         <span style="${isDone ? 'color:var(--text-dim)' : ''}">${q.name}</span>
         <span class="fix-result">${scoreStr}</span>
       </div>`;
     }).join('');
 
-    const [pbg, pfg] = avColor(p.name);
     const playerDone = opponents.filter(q => {
       const key = `${Math.min(p.id,q.id)}-${Math.max(p.id,q.id)}`;
       return played.has(key);
@@ -3871,7 +3884,7 @@ function renderFixture() {
 
     html += `<div class="fix-card">
       <div class="fix-player-header">
-        <span class="av" style="background:${pbg};color:${pfg};width:28px;height:28px;font-size:0.7rem">${initials(p.name)}</span>
+        ${avatarHtml(p, 'av', 28, '0.7rem')}
         ${p.name}
         <span style="margin-left:auto;font-size:0.72rem;color:var(--text-dim)">${playerDone}/${opponents.length}</span>
       </div>
@@ -4757,6 +4770,7 @@ function openEditPlayer(id) {
   if (!p) return;
   document.getElementById('edit-player-id').value = id;
   document.getElementById('edit-player-name').value = p.name;
+  document.getElementById('edit-player-photo').value = p.photo_url || '';
   document.getElementById('edit-player-league').value = p.league;
   document.getElementById('edit-player-modal').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -4770,6 +4784,7 @@ function closeEditPlayer() {
 async function saveEditPlayer() {
   const id   = parseInt(document.getElementById('edit-player-id').value);
   const name = document.getElementById('edit-player-name').value.trim();
+  const photoUrl = document.getElementById('edit-player-photo').value.trim();
   const league = document.getElementById('edit-player-league').value;
   if (!name) { showToast('Ad boş olamaz', 'err'); return; }
 
@@ -4777,10 +4792,11 @@ async function saveEditPlayer() {
   if (!p) return;
   p.name   = name;
   p.league = league;
+  p.photo_url = photoUrl || null;
 
   // Supabase güncelle
   try {
-    await window._sbAdmin.from('players').update({ name, league }).eq('id', id);
+    await window._sbAdmin.from('players').update({ name, league, photo_url: p.photo_url }).eq('id', id);
   } catch(e) { console.warn('Supabase güncelleme hatası:', e); }
 
   saveState();
