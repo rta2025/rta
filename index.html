@@ -1622,7 +1622,7 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
 
 <header class="header">
   <a class="brand" href="#" onclick="showPage('puan')">
-    <div class="brand-icon">🎾</div>
+    <div class="brand-icon" ondblclick="openLoginOverlay()" title="">🎾</div>
     <div class="brand-text">
       <div class="name">RTA LİGİ</div>
       <div class="sub">Rize Tenis Akademisi</div>
@@ -1644,7 +1644,7 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
   </nav>
   <div class="admin-badge" id="admin-badge"><span class="admin-dot"></span>YÖNETİCİ</div>
   <button class="logout-btn" id="logout-btn" onclick="doLogout()">Çıkış</button>
-  <button class="login-trigger-btn" id="login-trigger-btn" onclick="openLoginOverlay()">🔐 Yönetici Girişi</button>
+  <button class="login-trigger-btn hidden" id="login-trigger-btn" onclick="openLoginOverlay()">🔐 Yönetici Girişi</button>
 </header>
 
 <!-- ── Maç Skoru Düzenleme ── -->
@@ -1955,48 +1955,123 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
 <!-- ══ KURALLAR ══ -->
 <div id="page-kurallar" class="page">
   <div class="rules-container">
+
     <div class="rule-section">
-      <div class="rule-section-title">🏆 Lig Yapısı</div>
-      <div class="rule-item"><span class="rule-icon">▸</span>RTA Ligi 4 seviyeden oluşur: <strong>Süper Lig</strong>, <strong>2. Lig</strong>, <strong>3. Lig</strong> ve <strong>4. Lig</strong>. İlk 3 lig 12 oyuncu, 4. Lig ucu açık oyuncu sayısından oluşur.</div>
-      <div class="rule-item"><span class="rule-icon">▸</span>Bir lig dönemi <strong>3 ay</strong> sürer. Oyuncular maçlarını bu süre içinde tamamlamak zorundadır.</div>
+      <div class="rule-section-title">📌 1. Lig Yapısı</div>
+      <div class="rule-item"><span class="rule-icon">▸</span>RTA Ligleri 5 seviyeden oluşur: <strong>Süper Lig</strong>, <strong>2. Lig</strong>, <strong>3. Lig</strong>, <strong>4. Lig</strong> ve <strong>5. Lig (Akademi Ligi)</strong>.</div>
+      <div class="rule-item"><span class="rule-icon">▸</span>Süper Lig, 2. Lig, 3. Lig ve 4. Lig <strong>12 sporcudan</strong>, 5. Lig (Akademi Ligi) ise <strong>24 sporcudan</strong> oluşur.</div>
     </div>
+
     <div class="rule-section">
-      <div class="rule-section-title">🔀 Terfi & Düşme</div>
-      <div class="rule-item"><span class="rule-icon">▸</span>Süper Lig, 2. Lig ve 3. Lig'den <strong>son 4 oyuncu</strong> direkt alt lige düşer. 2., 3. ve 4. Lig'in <strong>ilk 4 oyuncusu</strong> direkt üst lige çıkar.</div>
-      <div class="rule-item"><span class="rule-icon">▸</span><strong>Play-off 1:</strong> 4. Lig şampiyonu ↔ 2. Lig 8.si — Kazanan 2. Lig'e girer, kaybeden 3. Lig'te kalır.</div>
-      <div class="rule-item"><span class="rule-icon">▸</span><strong>Play-off 2:</strong> 3. Lig şampiyonu ↔ Süper Lig 8.si — Kazanan Süper Lig'e girer, kaybeden 2. Lig'e iner.</div>
+      <div class="rule-section-title">📖 2. Liglerin Oluşturulması (İlk Sezon)</div>
+      <div class="rule-item"><span class="rule-icon">▸</span>RTA Ligleri, Edip Kazım Aydın tarafından uzun yıllar organize edilen Piramit Ligi'nin sona ermesinin ardından, Rize Tenis Akademisi Spor Kulübü tarafından oluşturulmuştur.</div>
+      <div class="rule-item"><span class="rule-icon">🏆</span><strong>Süper Lig:</strong> Piramit Ligi'nin Nisan 2026 sıralamasındaki ilk 10 sporcu doğrudan alınmıştır. Kalan 2 kontenjan için mini eleme turnuvası düzenlenmiş ve gruplarını lider tamamlayan 2 sporcu yükselmiştir.</div>
+      <div class="rule-item"><span class="rule-icon">🥈</span><strong>2. Lig:</strong> Süper Lig elemesinde yükselemeyen sporcular ile Piramit Ligi ve Wild Card oyuncularından oluşturulmuştur.</div>
+      <div class="rule-item"><span class="rule-icon">🥉</span><strong>3. Lig:</strong> Piramit Ligi sıralaması ve komite değerlendirmesi sonucunda belirlenmiştir.</div>
+      <div class="rule-item"><span class="rule-icon">🎾</span><strong>4. Lig:</strong> Piramit Ligi'nde kalan oyuncular ve yeni katılan sporculardan oluşturulmuştur. İlk sezon 40 kişi olarak başlamış, sonraki dönemlerde 12 kişiye düşürülmüştür.</div>
+      <div class="rule-item"><span class="rule-icon">🌱</span><strong>5. Lig (Akademi Ligi):</strong> İlk lig döneminden sonra oluşturulmuş olup, 4. Lig'de ilk 12 dışında kalan sporculardan meydana gelmiştir.</div>
     </div>
+
     <div class="rule-section">
-      <div class="rule-section-title">📊 Puan Sistemi</div>
-      <table class="pts-table">
-        <tr><td>2-0 galip</td><td>4 Puan</td></tr>
-        <tr><td>2-1 galip</td><td>3 Puan</td></tr>
-        <tr><td>1-2 mağlup</td><td>2 Puan</td></tr>
-        <tr><td>0-2 mağlup</td><td>1 Puan</td></tr>
-        <tr><td>Sahaya çıkmayan</td><td>0 Puan</td></tr>
-      </table>
+      <div class="rule-section-title">📅 3. Lig Süresi</div>
+      <div class="rule-item"><span class="rule-icon">▸</span>Bir lig dönemi <strong>3 ay</strong> sürer. Tüm maçlar bu süre içerisinde tamamlanmalıdır.</div>
     </div>
+
     <div class="rule-section">
-      <div class="rule-section-title">🏆 RTA Ranking Sistemi</div>
-      <div class="rule-item"><span class="rule-icon">▸</span><strong>Rize RTA Ranking</strong>, şehir genelindeki tüm oyuncuları kapsayan yıllık resmi sıralamadır. ATP/WTA mantığıyla işler: sıralama her zaman <strong>son 1 yılda</strong> kazanılan puanları gösterir, 1 yılı geçen puanlar otomatik düşer.</div>
-      <div class="rule-item"><span class="rule-icon">▸</span>Her lig dönemi sonunda bitiş sıralamasına göre ranking puanı verilir. Örnek: Süper Lig 1.si <strong>2000</strong>, 2. Lig 1.si <strong>1100</strong>, 3. Lig 1.si <strong>650</strong>, 4. Lig 1.si <strong>340</strong> puan.</div>
-      <div class="rule-item"><span class="rule-icon">▸</span>RTA özel turnuvalarından (<strong>Rize Cup</strong>, <strong>RTA Tekler</strong>) da ranking puanı kazanılır; bu puanlar da 1 yıllık sisteme dahildir.</div>
-      <div class="rule-item"><span class="rule-icon">▸</span><strong>Akademi Ligi (5. Lig)</strong> gelişim odaklı olduğu için ranking'e dahil değildir.</div>
-      <div class="rule-item"><span class="rule-icon">▸</span><strong>Play-off maçlarından ranking puanı kazanılmaz</strong> (4.Lig 1.si–2.Lig 8.si ve 3.Lig 1.si–Süper Lig 8.si maçları).</div>
+      <div class="rule-section-title">🔄 4. Yükselme ve Düşme</div>
+      <div class="rule-item"><span class="rule-icon">⬇️</span>Süper Lig, 2. Lig, 3. Lig ve 4. Lig'de <strong>son 4 sporcu</strong> bir alt lige düşer.</div>
+      <div class="rule-item"><span class="rule-icon">⬆️</span>2. Lig, 3. Lig, 4. Lig ve 5. Lig'de <strong>ilk 4 sporcu</strong> bir üst lige yükselir.</div>
+      <div class="rule-item"><span class="rule-icon">🔥</span><strong>Play-Off:</strong> RTA 3. Lig Şampiyonu ile Süper Lig 8.si play-off maçı oynar — kazanan Süper Lig'e yükselir, kaybeden 2. Lig'de yer alır.</div>
+      <div class="rule-item"><span class="rule-icon">🔥</span><strong>Play-Off:</strong> RTA 4. Lig Şampiyonu ile 2. Lig 8.si play-off maçı oynar — kazanan 2. Lig'e yükselir, kaybeden 3. Lig'de yer alır.</div>
+      <div class="rule-item"><span class="rule-icon">🔥</span><strong>Play-Off:</strong> RTA 5. Lig (Akademi Ligi) Şampiyonu ile 3. Lig 8.si play-off maçı oynar — kazanan 3. Lig'e yükselir, kaybeden 4. Lig'de yer alır.</div>
     </div>
+
     <div class="rule-section">
-      <div class="rule-section-title">📋 Maç Kuralları</div>
-      <div class="rule-item"><span class="rule-icon">▸</span>Maçlar <strong>2 set kazanan</strong> esasına göre oynanır. 1-1'de 3. set veya Süper Tie-Break oyuncuların tercihine bırakılır.</div>
-      <div class="rule-item"><span class="rule-icon">▸</span>Maç başlangıcından itibaren <strong>15 dakika</strong> içinde kortta olunmazsa hükmen yenik sayılır (0-6 / 0-6).</div>
-      <div class="rule-item"><span class="rule-icon">▸</span>Bir oyuncu <strong>aynı anda en fazla 2 maç teklifi</strong> yapabilir. Her maçtan sonra 2 teklif hakkı yenilenir.</div>
-      <div class="rule-item"><span class="rule-icon">▸</span>Teklif alan oyuncu <strong>10 gün</strong> içinde maçı oynamak zorundadır. Bu sürede başka maç yapamaz. Teklif eden serbesttir.</div>
-      <div class="rule-item"><span class="rule-icon">▸</span>Saha değişimlerinde <strong>90 saniyelik</strong>, set aralarında <strong>2 dakikalık</strong> mola hakkı vardır. Mola aşımında: 1.tekrar uyarı → puan → oyun → set cezası.</div>
-      <div class="rule-item"><span class="rule-icon">▸</span>Maç sonucu (oyun skorları ile birlikte) WhatsApp grubunda ve <strong>@rizetenisakademisi</strong> Instagram sayfasında paylaşılmalıdır.</div>
+      <div class="rule-section-title">🎾 5. Maç Formatı</div>
+      <div class="rule-item"><span class="rule-icon">▸</span>Maçlar <strong>2 set kazanan sistemiyle</strong> oynanır.</div>
+      <div class="rule-item"><span class="rule-icon">▸</span>Setlerin 1-1 eşitlenmesi halinde 3. set veya Süper Tie-Break oynanabilir. Tercih tamamen oyunculara aittir.</div>
     </div>
+
+    <div class="rule-section">
+      <div class="rule-section-title">⏰ 6. Maça Geç Kalma</div>
+      <div class="rule-item"><span class="rule-icon">▸</span>Maç saatinden itibaren <strong>15 dakika</strong> içinde kortta hazır bulunmayan sporcu <strong>hükmen mağlup</strong> sayılır.</div>
+      <div class="rule-item"><span class="rule-icon">▸</span>Sonuç: <strong>0-6 / 0-6 (0-2)</strong></div>
+    </div>
+
+    <div class="rule-section">
+      <div class="rule-section-title">🏅 7. Puanlama Sistemi</div>
+      <div class="rule-item"><span class="rule-icon">✅</span><strong>2-0 galibiyet</strong> → 4 puan</div>
+      <div class="rule-item"><span class="rule-icon">✅</span><strong>2-1 galibiyet</strong> → 3 puan</div>
+      <div class="rule-item"><span class="rule-icon">➖</span><strong>1-2 mağlubiyet</strong> → 2 puan</div>
+      <div class="rule-item"><span class="rule-icon">➖</span><strong>0-2 mağlubiyet</strong> → 1 puan</div>
+      <div class="rule-item"><span class="rule-icon">❌</span><strong>Hükmen mağlubiyet / maça çıkmama</strong> → 0 puan</div>
+    </div>
+
+    <div class="rule-section">
+      <div class="rule-section-title">📊 8. Sıralama Kriterleri</div>
+      <div class="rule-item"><span class="rule-icon">▸</span>Puan üstünlüğü esasına göre sıralama yapılır.</div>
+      <div class="rule-item"><span class="rule-icon">▸</span>Eşit puan halinde sırasıyla: <strong>1) Genel set averajı</strong> &nbsp;2) Genel oyun averajı &nbsp;3) İkili averaj</div>
+    </div>
+
+    <div class="rule-section">
+      <div class="rule-section-title">📅 9. Maç Teklifi Kuralı</div>
+      <div class="rule-item"><span class="rule-icon">▸</span>Geçerli olduğu ligler: Süper Lig, 2. Lig, 3. Lig, 4. Lig. <em>(5. Lig için uygulanmaz.)</em></div>
+      <div class="rule-item"><span class="rule-icon">▸</span>Teklif alan sporcu maçı <strong>10 gün içinde</strong> oynamak zorundadır. Bu süre içerisinde başka lig maçı yapamaz.</div>
+      <div class="rule-item"><span class="rule-icon">▸</span>Teklif alan oyuncu olumlu yanıt verdiği halde taraflar ortak gün ve saat belirleyemezse teklif geçersiz olur, maç zorunluluğu düşer.</div>
+    </div>
+
+    <div class="rule-section">
+      <div class="rule-section-title">🎫 10. Maç Teklif Hakkı</div>
+      <div class="rule-item"><span class="rule-icon">▸</span>Her sporcu aynı anda en fazla <strong>2 aktif maç teklifi</strong> yapabilir. Her oynanan maçtan sonra teklif hakkı yeniden 2'ye tamamlanır.</div>
+      <div class="rule-item"><span class="rule-icon">▸</span>Kort rezervasyonundan teklif yapan sporcu sorumludur.</div>
+    </div>
+
+    <div class="rule-section">
+      <div class="rule-section-title">🚑 11. Maçı Tamamlayamama (Retired)</div>
+      <div class="rule-item"><span class="rule-icon">▸</span>Sakatlık veya benzeri sebeplerle maçı tamamlayamayan sporcu <strong>Retired</strong> sayılır. O ana kadar kazandığı set ve oyunlar geçerli, kalan tüm oyunları kaybetmiş kabul edilir.</div>
+      <div class="rule-item"><span class="rule-icon">▸</span>Zorunlu durumlarda her oyuncunun bir maçta <strong>2 tıbbi mola hakkı</strong> (5 dakika) vardır.</div>
+    </div>
+
+    <div class="rule-section">
+      <div class="rule-section-title">⏱️ 12. Molalar</div>
+      <div class="rule-item"><span class="rule-icon">▸</span>Her iki oyunda bir (changeover) <strong>90 saniye</strong>, set aralarında <strong>2 dakika</strong> kullanılabilir.</div>
+      <div class="rule-item"><span class="rule-icon">▸</span>Süre aşımında sırasıyla: Uyarı → Puan cezası → Puan cezası → Puan cezası. <em>(Oyuncuların ortak kararıyla uygulanır.)</em></div>
+      <div class="rule-item"><span class="rule-icon">▸</span>Setlerin 1. oyunundan sonra ve Tie Break'te 6. puan sonrasındaki changeover'larda bekleme süresi uygulanmaz.</div>
+    </div>
+
+    <div class="rule-section">
+      <div class="rule-section-title">📸 13. Sosyal Medya</div>
+      <div class="rule-item"><span class="rule-icon">▸</span>Oyuncular maç öncesi ve sonrası fotoğraf paylaşabilir; maç sırasında kısa video çekerek <strong>@rizetenisakademisi</strong> hesabını etiketleyebilirler.</div>
+    </div>
+
+    <div class="rule-section">
+      <div class="rule-section-title">📢 14. Sonuç Bildirimi</div>
+      <div class="rule-item"><span class="rule-icon">▸</span>Maç sonuçları set ve oyun skorlarıyla birlikte lig WhatsApp grubunda paylaşılmalıdır.</div>
+      <div class="rule-item"><span class="rule-icon">▸</span>Örnek: <strong>Ali 2-1 Mehmet (6-4, 3-6, 10-8)</strong></div>
+    </div>
+
+    <div class="rule-section">
+      <div class="rule-section-title">🌐 15. Resmî Bilgilendirme</div>
+      <div class="rule-item"><span class="rule-icon">▸</span>Puan durumu, ranking, fikstür, oyuncu kartları ve istatistikler <strong>rtaligleri.com</strong> üzerinden takip edilir.</div>
+    </div>
+
+    <div class="rule-section">
+      <div class="rule-section-title">🤝 16. Fair Play ve Sporcu Davranışı</div>
+      <div class="rule-item"><span class="rule-icon">▸</span>Sportmenliğe aykırı davranışlarda bulunan sporcu hakkında lig komitesi karar verir.</div>
+      <div class="rule-item"><span class="rule-icon">▸</span>Davranış ihlallerinde (raketi kırma, küfür, topu tehlikeli vurma vb.) sırasıyla: Uyarı → Puan cezası → Oyun cezası → Diskalifiye uygulanır.</div>
+    </div>
+
+    <div class="rule-section">
+      <div class="rule-section-title">📣 17. Duyuruların Takibi</div>
+      <div class="rule-item"><span class="rule-icon">▸</span>Tüm sporcular; lig WhatsApp grubu, <strong>rtaligleri.com</strong> ve <strong>@rizetenisakademisi</strong> Instagram hesabı üzerinden yapılan duyuruları takip etmekle yükümlüdür.</div>
+    </div>
+
   </div>
 </div>
 
 <!-- ══ YÖNETİM ══ -->
+
+
 <div id="page-yonetim" class="page">
   <div class="admin-grid">
     <div class="score-card">
@@ -2299,7 +2374,7 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
   <div class="lightbox-caption" id="lightbox-caption"></div>
   <button class="lightbox-nav next" onclick="lightboxNav(1);event.stopPropagation()">›</button>
 </div>
-</div><!-- /main -->
+<!-- /main -->
 
 <div class="toast" id="toast"></div>
 
