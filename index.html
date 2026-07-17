@@ -650,6 +650,25 @@ body {
   color: var(--text);
   display: flex;
   gap: 12px;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.rule-item strong, .rule-item em {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+@media(max-width: 600px) {
+  .rules-container {
+    padding: 16px;
+  }
+  .rule-item {
+    font-size: 0.82rem;
+  }
+  .rule-section-title {
+    font-size: 0.9rem;
+  }
 }
 
 .rule-item:last-child { border-bottom: none; }
