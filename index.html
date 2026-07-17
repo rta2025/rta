@@ -1663,7 +1663,7 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
   </nav>
   <div class="admin-badge" id="admin-badge"><span class="admin-dot"></span>YÖNETİCİ</div>
   <button class="logout-btn" id="logout-btn" onclick="doLogout()">Çıkış</button>
-  <button class="login-trigger-btn hidden" id="login-trigger-btn" onclick="openLoginOverlay()">🔐 Yönetici Girişi</button>
+
 </header>
 
 <!-- ── Maç Skoru Düzenleme ── -->
@@ -3870,7 +3870,7 @@ function setAdminUI(isAdmin) {
   });
   document.getElementById('admin-badge').classList.toggle('visible', isAdmin);
   document.getElementById('logout-btn').classList.toggle('visible', isAdmin);
-  document.getElementById('login-trigger-btn').classList.toggle('hidden', isAdmin);
+  // login-trigger-btn kaldırıldı (tenis topu çift tık ile giriş aktif)
 }
 
 async function changePassword() {
