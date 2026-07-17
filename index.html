@@ -621,6 +621,68 @@ body {
 .stat-table tr:last-child td { border-bottom: none; }
 .stat-table tbody tr:hover td { background: rgba(26,122,26,0.06); }
 
+/* ── SON MAÇ TICKER ── */
+.last-match-ticker {
+  display: flex;
+  align-items: center;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: 220px;
+  cursor: pointer;
+  transition: all 0.18s;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.last-match-ticker:hover { border-color: var(--accent); color: var(--text); }
+.last-match-ticker .ticker-label {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.65rem;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+.last-match-ticker .ticker-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.last-match-ticker .ticker-score {
+  font-family: 'Oswald', sans-serif;
+  color: var(--text);
+  font-size: 0.78rem;
+  flex-shrink: 0;
+}
+@media(max-width: 768px) {
+  .last-match-ticker { display: none; }
+}
+
+/* ── WHATSAPP BUTONU ── */
+.wa-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(37,211,102,0.1);
+  border: 1px solid rgba(37,211,102,0.25);
+  color: #25d366;
+  padding: 5px 10px;
+  border-radius: 7px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.18s;
+  flex-shrink: 0;
+  font-family: 'Mulish', sans-serif;
+}
+.wa-btn:hover { background: rgba(37,211,102,0.2); }
+@media(max-width: 480px) {
+  .wa-btn span { display: none; }
+}
+
 /* ── RULES ── */
 .rules-container {
   background: var(--surface);
@@ -969,21 +1031,6 @@ body.light-mode .po-type-btn { background:var(--surface2); }
 .logout-btn.visible { display: block; }
 .logout-btn:hover { background: rgba(224,85,85,0.1); }
 
-.login-trigger-btn {
-  background: rgba(26,122,26,0.15);
-  border: 1px solid rgba(93,201,93,0.25);
-  color: var(--accent);
-  padding: 7px 16px;
-  border-radius: 7px;
-  cursor: pointer;
-  font-family: 'Mulish', sans-serif;
-  font-size: 0.8rem;
-  font-weight: 700;
-  transition: all 0.18s;
-  display: block;
-}
-.login-trigger-btn:hover { background: rgba(26,122,26,0.28); }
-.login-trigger-btn.hidden { display: none; }
 
 /* Admin-only nav items hidden by default */
 .admin-only { display: none !important; }
@@ -1661,6 +1708,11 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
     <button class="nav-btn" onclick="showPage('kurallar')">Kurallar</button>
     <button class="nav-btn admin-only" id="nav-yonetim" onclick="showPage('yonetim')">Yönetim</button>
   </nav>
+  <div class="last-match-ticker" id="last-match-ticker" onclick="showPage('sonuclar')" title="Son maçlar için tıkla"></div>
+  <a class="wa-btn" href="https://chat.whatsapp.com/CT43VJYVV42CiemKe1qOJc?s=sw&p=a&ilr=0" target="_blank" title="WhatsApp Grubu">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    Grup
+  </a>
   <div class="admin-badge" id="admin-badge"><span class="admin-dot"></span>YÖNETİCİ</div>
   <button class="logout-btn" id="logout-btn" onclick="doLogout()">Çıkış</button>
 
@@ -2393,7 +2445,7 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
   <div class="lightbox-caption" id="lightbox-caption"></div>
   <button class="lightbox-nav next" onclick="lightboxNav(1);event.stopPropagation()">›</button>
 </div>
-<!-- /main -->
+</div><!-- /main -->
 
 <div class="toast" id="toast"></div>
 
@@ -2891,6 +2943,7 @@ function renderAll(fromSupabase = false) {
   ['super','l2','l3','l4'].forEach(renderStanding);
   renderPlayoffs();
   updateKPIs();
+  renderLastMatchTicker();
   if (fromSupabase) renderHomeSections();
   const ap = document.querySelector('.page.active');
   if (ap) {
@@ -4965,6 +5018,28 @@ syncBadge.id = 'sync-badge';
 syncBadge.innerHTML = '🔄 Güncellendi';
 
 // Manuel yenile butonu kaldırıldı (realtime sync yeterli)
+
+// ── SON MAÇ TICKER ──
+function renderLastMatchTicker() {
+  const ticker = document.getElementById('last-match-ticker');
+  if (!ticker) return;
+  const matches = [...state.matches]
+    .filter(m => m.score && m.date)
+    .sort((a, b) => new Date(b.date) - new Date(a.date));
+  if (!matches.length) { ticker.style.display = 'none'; return; }
+  const m = matches[0];
+  const wp = state.players.find(p => p.id === m.winner);
+  const lp = state.players.find(p => p.id === m.loser);
+  if (!wp || !lp) { ticker.style.display = 'none'; return; }
+  const wName = wp.name.split(' ')[0];
+  const lName = lp.name.split(' ')[0];
+  ticker.style.display = 'flex';
+  ticker.innerHTML = `
+    <span class="ticker-label">SON MAÇ</span>
+    <span class="ticker-text">${wName} - ${lName}</span>
+    <span class="ticker-score">${m.score}</span>
+  `;
+}
 
 syncBadge.style.cssText = `
   position:fixed; bottom:24px; left:24px;
