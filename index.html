@@ -3582,8 +3582,14 @@ function openProfile(playerId) {
 
   const lgName   = leagueName(player.league);
 
+  const avatarClickAttr = player.photo_url
+    ? `onclick="openLightbox([{url:'${player.photo_url}',caption:'${player.name}'}],0);event.stopPropagation()" style="cursor:zoom-in;display:inline-block"`
+    : 'style="display:inline-block"';
+
+  const avatarWrapped = `<div ${avatarClickAttr}>${avatarHtml(player, 'profile-avatar', 56, '20px')}</div>`;
+
   document.getElementById('profile-content').innerHTML = `
-    ${avatarHtml(player, 'profile-avatar', 56, '20px')}
+    ${avatarWrapped}
     <div class="profile-name">${player.name}</div>
     <div class="profile-league">${lgName} ${getPlayerBadge(playerId)}</div>
     <div class="profile-stats">
