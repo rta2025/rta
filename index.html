@@ -3582,14 +3582,16 @@ function openProfile(playerId) {
 
   const lgName   = leagueName(player.league);
 
-  const avatarClickAttr = player.photo_url
-    ? `onclick="openLightbox([{url:'${player.photo_url}',caption:'${player.name}'}],0);event.stopPropagation()" style="cursor:zoom-in;display:inline-block"`
-    : 'style="display:inline-block"';
-
-  const avatarWrapped = `<div ${avatarClickAttr}>${avatarHtml(player, 'profile-avatar', 56, '20px')}</div>`;
+  let avatarEl = avatarHtml(player, 'profile-avatar', 56, '20px');
+  if (player.photo_url) {
+    avatarEl = avatarEl.replace(
+      /^(<\w+)/,
+      `$1 onclick="openLightbox([{url:'${player.photo_url}',caption:'${player.name}'}],0);event.stopPropagation()" style="cursor:zoom-in"`
+    );
+  }
 
   document.getElementById('profile-content').innerHTML = `
-    ${avatarWrapped}
+    ${avatarEl}
     <div class="profile-name">${player.name}</div>
     <div class="profile-league">${lgName} ${getPlayerBadge(playerId)}</div>
     <div class="profile-stats">
