@@ -1,4 +1,4 @@
-const CACHE = 'rta-v1';
+const CACHE = 'rta-v2';
 const URLS  = ['/rta/', '/rta/index.html'];
 
 self.addEventListener('install', e => {
