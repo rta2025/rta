@@ -3547,11 +3547,24 @@ function openProfile(playerId) {
     if (!rivalMap[rivalId]) rivalMap[rivalId] = { w: 0, l: 0, matches: [] };
     if (m.winner === playerId) rivalMap[rivalId].w++;
     else rivalMap[rivalId].l++;
-    // Set skoru
-    const ws = m.winningSets || 0;
-    const ls = m.losingSets  || 0;
-    const setScore = m.winner === playerId ? `${ws}-${ls}` : `${ls}-${ws}`;
-    rivalMap[rivalId].matches.push({ won: m.winner === playerId, setScore, date: m.date });
+    // Set skoru — oyuncunun bakış açısından göster
+    const won = m.winner === playerId;
+    let setScore = '';
+    if (m.score) {
+      if (won) {
+        setScore = m.score;
+      } else {
+        setScore = m.score.split('/').map(s => {
+          const parts = s.trim().split('-');
+          return parts.length === 2 ? `${parts[1]}-${parts[0]}` : s.trim();
+        }).join(' / ');
+      }
+    } else {
+      const ws = m.winningSets || 0;
+      const ls = m.losingSets  || 0;
+      setScore = won ? `${ws}-${ls}` : `${ls}-${ws}`;
+    }
+    rivalMap[rivalId].matches.push({ won, setScore, date: m.date });
   });
 
   const rivals = Object.entries(rivalMap)
