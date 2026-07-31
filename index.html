@@ -4058,7 +4058,14 @@ function renderFixture() {
            (m.winner === q.id && m.loser === p.id)));
         if (m) {
           const won = m.winner === p.id;
-          scoreStr = `<span style="color:${won?'var(--accent)':'var(--red)'}">${won?'G':'M'} ${m.score}</span>`;
+          let displayScore = m.score || '';
+          if (!won && displayScore) {
+            displayScore = displayScore.split('/').map(s => {
+              const parts = s.trim().split('-');
+              return parts.length === 2 ? `${parts[1]}-${parts[0]}` : s.trim();
+            }).join(' / ');
+          }
+          scoreStr = `<span style="color:${won?'var(--accent)':'var(--red)'}">${won?'G':'M'} ${displayScore}</span>`;
         }
       }
 
