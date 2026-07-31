@@ -4196,8 +4196,9 @@ function _renderArchiveList() {
   const ligNames = {super:'Süper Lig', l2:'2. Lig', l3:'3. Lig', l4:'4. Lig'};
 
   el.innerHTML = archive.map(season => {
-    const ligRows = Object.entries(season.leagues).map(([lg, players]) => {
-      if (!players.length) return '';
+    const leagues = season.leagues || {};
+    const ligRows = Object.entries(leagues).map(([lg, players]) => {
+      if (!players || !players.length) return '';
       const rows = players.slice(0, 5).map(p =>
         `<tr>
           <td style="color:var(--text-muted)">${p.rank}</td>
