@@ -4182,6 +4182,7 @@ function renderArchive() {
 }
 
 function _renderArchiveList() {
+  const isAdmin = isLoggedIn();
   const archive = loadArchive();
   const el = document.getElementById('archive-list');
   if (!el) return;
