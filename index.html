@@ -4163,6 +4163,24 @@ function renderArchive() {
   const panel = document.getElementById('archive-admin-panel');
   if (panel) panel.style.display = isAdmin ? 'block' : 'none';
 
+  if (window._sbReady && window.sb) {
+    window.sb.from('archives').select('*').order('id', { ascending: false }).then(({ data: archives }) => {
+      if (archives && archives.length) {
+        const mapped = archives.map(a => ({
+          id: a.id, name: a.name, date: a.archived_date,
+          totalMatches: a.total_matches,
+          leagues: (() => { try { return JSON.parse(a.leagues_json || '{}'); } catch { return {}; } })()
+        }));
+        localStorage.setItem(ARCHIVE_KEY, JSON.stringify(mapped));
+      }
+      _renderArchiveList();
+    }).catch(() => _renderArchiveList());
+  } else {
+    _renderArchiveList();
+  }
+}
+
+function _renderArchiveList() {
   const archive = loadArchive();
   const el = document.getElementById('archive-list');
   if (!el) return;
