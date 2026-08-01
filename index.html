@@ -3502,27 +3502,47 @@ function clearSpecialPlayer() {
 // SEZON SAYACI
 function initCountdown() {
   const SEASON_END = new Date(2026, 6, 31, 23, 59, 59);
+  const NEXT_SEASON = new Date(2026, 8, 1, 0, 0, 0); // 1 Eylül 2026
 
   function update() {
     const el = document.getElementById('season-countdown');
     if (!el) return;
     const now = new Date();
     const diff = SEASON_END - now;
-    if (diff <= 0) {
-      el.innerHTML = '<span style="color:var(--red)">Sezon sona erdi</span>';
-      return;
+
+    if (diff > 0) {
+      // Mevcut sezon devam ediyor
+      const days  = Math.floor(diff / 86400000);
+      const hours = Math.floor((diff % 86400000) / 3600000);
+      const mins  = Math.floor((diff % 3600000)  / 60000);
+      el.innerHTML = `
+        <span>🏁</span>
+        <div class="cd-unit"><span class="cd-num">${days}</span><span class="cd-label">GÜN</span></div>
+        <span style="color:var(--border)">:</span>
+        <div class="cd-unit"><span class="cd-num">${String(hours).padStart(2,'0')}</span><span class="cd-label">SAAT</span></div>
+        <span style="color:var(--border)">:</span>
+        <div class="cd-unit"><span class="cd-num">${String(mins).padStart(2,'0')}</span><span class="cd-label">DAK</span></div>
+      `;
+    } else {
+      // Yeni sezon geri sayımı
+      const diff2 = NEXT_SEASON - now;
+      if (diff2 <= 0) {
+        el.innerHTML = '<span style="color:var(--accent)">🎾 Yeni Sezon Başladı!</span>';
+        return;
+      }
+      const days  = Math.floor(diff2 / 86400000);
+      const hours = Math.floor((diff2 % 86400000) / 3600000);
+      const mins  = Math.floor((diff2 % 3600000)  / 60000);
+      el.innerHTML = `
+        <span>🎾</span>
+        <div class="cd-unit"><span class="cd-num" style="color:var(--accent)">${days}</span><span class="cd-label">GÜN</span></div>
+        <span style="color:var(--border)">:</span>
+        <div class="cd-unit"><span class="cd-num" style="color:var(--accent)">${String(hours).padStart(2,'0')}</span><span class="cd-label">SAAT</span></div>
+        <span style="color:var(--border)">:</span>
+        <div class="cd-unit"><span class="cd-num" style="color:var(--accent)">${String(mins).padStart(2,'0')}</span><span class="cd-label">DAK</span></div>
+      `;
+      el.title = 'Yeni sezon başlangıcına kalan süre (1 Eylül 2026)';
     }
-    const days  = Math.floor(diff / 86400000);
-    const hours = Math.floor((diff % 86400000) / 3600000);
-    const mins  = Math.floor((diff % 3600000)  / 60000);
-    el.innerHTML = `
-      <span>🏁</span>
-      <div class="cd-unit"><span class="cd-num">${days}</span><span class="cd-label">GÜN</span></div>
-      <span style="color:var(--border)">:</span>
-      <div class="cd-unit"><span class="cd-num">${String(hours).padStart(2,'0')}</span><span class="cd-label">SAAT</span></div>
-      <span style="color:var(--border)">:</span>
-      <div class="cd-unit"><span class="cd-num">${String(mins).padStart(2,'0')}</span><span class="cd-label">DAK</span></div>
-    `;
   }
   update();
   setInterval(update, 60000);
