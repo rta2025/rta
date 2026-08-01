@@ -4202,25 +4202,26 @@ function _renderArchiveList() {
     const leagues = season.leagues || {};
     const ligRows = Object.entries(leagues).map(([lg, players]) => {
       if (!players || !players.length) return '';
-      const rows = players.slice(0, 5).map(p =>
+      const rows = players.map(p =>
         `<tr>
           <td style="color:var(--text-muted)">${p.rank}</td>
           <td style="font-weight:600">${p.name}</td>
-          <td>${p.mp}</td>
+          <td>${p.mp ?? ''}</td>
+          <td>${p.mw ?? ''}</td>
+          <td>${p.ml ?? ''}</td>
           <td style="color:var(--accent);font-weight:700">${p.pts}</td>
         </tr>`
       ).join('');
 
       return `
-        <div style="margin-bottom:16px">
+        <div style="margin-bottom:20px">
           <div style="font-family:'Oswald',sans-serif;font-size:0.85rem;letter-spacing:1.5px;
             color:var(--${lg === 'super' ? 'gold' : lg === 'l2' ? 'silver' : lg === 'l3' ? 'bronze' : 'text-dim'});
-            margin-bottom:8px">${ligNames[lg]} — İlk 5</div>
+            margin-bottom:8px">${ligNames[lg]}</div>
           <table class="archive-mini-table">
-            <thead><tr><th>#</th><th>Oyuncu</th><th>Maç</th><th>Puan</th></tr></thead>
+            <thead><tr><th>#</th><th>Oyuncu</th><th>M</th><th>G</th><th>M</th><th>Puan</th></tr></thead>
             <tbody>${rows}</tbody>
           </table>
-          ${players.length > 5 ? `<div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px">+${players.length-5} oyuncu daha</div>` : ''}
         </div>`;
     }).join('');
 
