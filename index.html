@@ -1195,14 +1195,14 @@ body.light-mode .po-type-btn { background:var(--surface2); }
 .archive-mini-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.82rem;
+  font-size: 0.75rem;
   margin-bottom: 12px;
 }
 
 .archive-mini-table th {
-  padding: 7px 10px;
+  padding: 5px 7px;
   text-align: left;
-  font-size: 0.68rem;
+  font-size: 0.62rem;
   text-transform: uppercase;
   letter-spacing: 0.8px;
   color: var(--text-muted);
@@ -1210,7 +1210,7 @@ body.light-mode .po-type-btn { background:var(--surface2); }
 }
 
 .archive-mini-table td {
-  padding: 8px 10px;
+  padding: 5px 7px;
   border-bottom: 1px solid rgba(36,48,36,0.35);
 }
 
@@ -4291,7 +4291,7 @@ function _renderArchiveList() {
         ${deleteBtn}
       </div>
       <div class="archive-body">
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px">
+        <div style="display:flex;flex-direction:column;gap:24px">
           ${ligRows}
         </div>
         ${galleryHtml}
