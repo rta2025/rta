@@ -4246,6 +4246,7 @@ function _renderArchiveList() {
       </div>`;
     })();
     const poHtml = (() => {
+      const poMatches = (state.playoffMatches || []).filter(p => p.seasonId === season.id);
       const po1 = poMatches.find(p => p.matchType === 1);
       const po2 = poMatches.find(p => p.matchType === 2);
       const poCard = (po, label) => po
