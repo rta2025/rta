@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- RTA v6 build:20260801-1700 -->
+<!-- RTA v7 build:20260801-1800 -->
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -1845,8 +1845,14 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
       <div class="kpi"><div class="kpi-val" id="kpi-week">0</div><div class="kpi-label">Bu Hafta</div></div>
       <div class="kpi"><div class="kpi-val">4</div><div class="kpi-label">Aktif Lig</div></div>
     </div>
-    <div id="completion-bar" style="margin-top:16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 20px">
-      <div id="completion-inner"></div>
+    <div id="completion-bar" style="margin-top:16px">
+      <div class="inner-tabs" id="standing-tabs" style="margin-bottom:12px">
+        <button class="inner-tab active" onclick="setStandingLeague('super')">Süper Lig</button>
+        <button class="inner-tab" onclick="setStandingLeague('l2')">2. Lig</button>
+        <button class="inner-tab" onclick="setStandingLeague('l3')">3. Lig</button>
+        <button class="inner-tab" onclick="setStandingLeague('l4')">4. Lig</button>
+      </div>
+      <div id="completion-inner" style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 20px"></div>
     </div>
   </div>
 
@@ -1863,10 +1869,7 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
   <div id="playoff-section"></div>
 
   <!-- STANDINGS BY LEAGUE -->
-  <div id="standings-super"></div>
-  <div id="standings-l2"></div>
-  <div id="standings-l3"></div>
-  <div id="standings-l4"></div>
+  <div id="standings-content"></div>
 
 </div>
 
@@ -2988,8 +2991,7 @@ function renderPlayoffs() {
 }
 
 function renderAll(fromSupabase = false) {
-  ['super','l2','l3','l4'].forEach(renderStanding);
-  renderPlayoffs();
+  renderStandingContent();
   updateKPIs();
   renderLastMatchTicker();
   if (fromSupabase) renderHomeSections();
@@ -3007,53 +3009,33 @@ function updateCompletionBar() {
   const el = document.getElementById('completion-inner');
   if (!el) return;
 
+  const lg = _standingLeague;
   const lgNames = {super:'Süper Lig', l2:'2. Lig', l3:'3. Lig', l4:'4. Lig'};
-  let html = '';
-  let grandTotal = 0, grandDone = 0;
-
-  ['super','l2','l3','l4'].forEach(lg => {
-    const lgPlayers = state.players.filter(p => p.league === lg);
-    const played = new Set();
-    state.matches.filter(m => m.league === lg).forEach(m => {
-      played.add([Math.min(m.winner,m.loser), Math.max(m.winner,m.loser)].join('-'));
-    });
-    let donePairs = 0, totalPairs = 0;
-    lgPlayers.forEach(p => {
-      lgPlayers.forEach(q => {
-        if (p.id >= q.id) return;
-        totalPairs++;
-        if (played.has(`${Math.min(p.id,q.id)}-${Math.max(p.id,q.id)}`)) donePairs++;
-      });
-    });
-    grandTotal += totalPairs;
-    grandDone  += donePairs;
-    const pct = totalPairs ? Math.round(donePairs / totalPairs * 100) : 0;
-    html += `
-      <div style="margin-bottom:10px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-          <span style="font-size:0.82rem;font-weight:600">${lgNames[lg]}</span>
-          <span style="font-family:'Oswald',sans-serif;font-size:1rem;color:var(--accent)">${donePairs} / ${totalPairs} maç</span>
-        </div>
-        <div style="background:var(--surface3);border-radius:20px;height:8px;overflow:hidden">
-          <div style="background:var(--accent);height:100%;width:${pct}%;transition:width 0.5s;border-radius:20px"></div>
-        </div>
-        <div style="font-size:0.72rem;color:var(--text-dim);margin-top:4px">%${pct} tamamlandı</div>
-      </div>`;
+  const lgPlayers = state.players.filter(p => p.league === lg);
+  const played = new Set();
+  state.matches.filter(m => m.league === lg).forEach(m => {
+    played.add([Math.min(m.winner,m.loser), Math.max(m.winner,m.loser)].join('-'));
   });
+  let donePairs = 0, totalPairs = 0;
+  lgPlayers.forEach(p => {
+    lgPlayers.forEach(q => {
+      if (p.id >= q.id) return;
+      totalPairs++;
+      if (played.has(`${Math.min(p.id,q.id)}-${Math.max(p.id,q.id)}`)) donePairs++;
+    });
+  });
+  const pct = totalPairs ? Math.round(donePairs / totalPairs * 100) : 0;
 
-  const totalPct = grandTotal ? Math.round(grandDone / grandTotal * 100) : 0;
-  html = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
       <span style="font-size:0.85rem;font-weight:600">Tamamlanma Durumu</span>
-      <span style="font-family:'Oswald',sans-serif;font-size:1.1rem;color:var(--accent)">${grandDone} / ${grandTotal} maç</span>
+      <span style="font-family:'Oswald',sans-serif;font-size:1.1rem;color:var(--accent)">${donePairs} / ${totalPairs} maç</span>
     </div>
-    ${html}
-    <div style="background:var(--surface3);border-radius:20px;height:8px;overflow:hidden;margin-top:4px">
-      <div style="background:var(--accent);height:100%;width:${totalPct}%;transition:width 0.5s;border-radius:20px"></div>
+    <div style="background:var(--surface3);border-radius:20px;height:8px;overflow:hidden">
+      <div style="background:var(--accent);height:100%;width:${pct}%;transition:width 0.5s;border-radius:20px"></div>
     </div>
-    <div style="font-size:0.75rem;color:var(--text-dim);margin-top:6px">Toplam %${totalPct} tamamlandı</div>`;
-
-  el.innerHTML = html;
+    <div style="font-size:0.75rem;color:var(--text-dim);margin-top:6px">%${pct} tamamlandı</div>
+  `;
 }
 
 function updateKPIs() {
@@ -4111,6 +4093,26 @@ async function changePassword() {
 // FİKSTÜR
 // ═══════════════════════════════════════════════════
 let _fixLeague = 'super';
+let _standingLeague = 'super';
+
+function setStandingLeague(lg) {
+  _standingLeague = lg;
+  document.querySelectorAll('#standing-tabs .inner-tab').forEach((b, i) =>
+    b.classList.toggle('active', ['super','l2','l3','l4'][i] === lg));
+  updateCompletionBar();
+  renderStandingContent();
+}
+
+function renderStandingContent() {
+  const el = document.getElementById('standings-content');
+  if (!el) return;
+  el.innerHTML = '';
+  const div = document.createElement('div');
+  div.id = 'standings-' + _standingLeague;
+  el.appendChild(div);
+  renderStanding(_standingLeague);
+  renderPlayoffs();
+}
 
 function setFixLeague(lg) {
   _fixLeague = lg;
