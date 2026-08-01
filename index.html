@@ -1846,11 +1846,12 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
       <div class="kpi"><div class="kpi-val">4</div><div class="kpi-label">Aktif Lig</div></div>
     </div>
     <div id="completion-bar" style="margin-top:16px;background:rgba(0,0,0,0.2);border-radius:12px;padding:12px 16px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
         <span style="font-size:0.75rem;color:var(--text-dim);letter-spacing:0.5px">Tamamlanma Durumu</span>
         <span id="completion-text" style="font-size:0.85rem;font-weight:700;color:var(--accent)">0 / 0 maç</span>
       </div>
-      <div style="background:rgba(255,255,255,0.08);border-radius:6px;height:8px;overflow:hidden">
+      <div id="completion-leagues"></div>
+      <div style="background:rgba(255,255,255,0.08);border-radius:6px;height:8px;overflow:hidden;margin-top:10px">
         <div id="completion-fill" style="height:100%;border-radius:6px;background:linear-gradient(90deg,var(--accent),#7dce7d);width:0%;transition:width 0.8s ease"></div>
       </div>
       <div id="completion-pct" style="font-size:0.7rem;color:var(--text-muted);margin-top:5px">%0 tamamlandı</div>
@@ -3016,10 +3017,11 @@ function updateKPIs() {
   const wk = Date.now() - 7*24*60*60*1000;
   document.getElementById('kpi-week').textContent = state.matches.filter(m => new Date(m.date).getTime() > wk).length;
 
-  // Tamamlanma durumu
+  // Tamamlanma durumu — lig lig
+  const lgNames = {super:'Süper Lig', l2:'2. Lig', l3:'3. Lig', l4:'4. Lig'};
   const leagues = ['super','l2','l3','l4'];
   let totalPossible = 0, totalPlayed = 0;
-  leagues.forEach(lg => {
+  const lgRows = leagues.map(lg => {
     const lgPlayers = state.players.filter(p => p.league === lg);
     const n = lgPlayers.length;
     const possible = n * (n - 1) / 2;
@@ -3031,14 +3033,28 @@ function updateKPIs() {
     ).size;
     totalPossible += possible;
     totalPlayed += played;
-  });
-  const pct = totalPossible > 0 ? Math.round(totalPlayed / totalPossible * 100) : 0;
+    const pct = possible > 0 ? Math.round(played / possible * 100) : 0;
+    return `
+      <div style="margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <span style="font-size:0.7rem;color:var(--text-dim)">${lgNames[lg]}</span>
+          <span style="font-size:0.7rem;color:var(--accent);font-weight:700">${played}/${possible} · %${pct}</span>
+        </div>
+        <div style="background:rgba(255,255,255,0.08);border-radius:4px;height:5px;overflow:hidden">
+          <div style="height:100%;border-radius:4px;background:var(--accent);width:${pct}%;transition:width 0.8s ease"></div>
+        </div>
+      </div>`;
+  }).join('');
+
+  const totalPct = totalPossible > 0 ? Math.round(totalPlayed / totalPossible * 100) : 0;
+  const lgEl = document.getElementById('completion-leagues');
   const fillEl = document.getElementById('completion-fill');
   const textEl = document.getElementById('completion-text');
   const pctEl = document.getElementById('completion-pct');
-  if (fillEl) fillEl.style.width = pct + '%';
+  if (lgEl) lgEl.innerHTML = lgRows;
+  if (fillEl) fillEl.style.width = totalPct + '%';
   if (textEl) textEl.textContent = `${totalPlayed} / ${totalPossible} maç`;
-  if (pctEl) pctEl.textContent = `%${pct} tamamlandı`;
+  if (pctEl) pctEl.textContent = `Toplam %${totalPct} tamamlandı`;
 }
 
 // ═══════════════════════════════════════════════════
