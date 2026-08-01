@@ -4202,16 +4202,22 @@ function _renderArchiveList() {
     const leagues = season.leagues || {};
     const ligRows = Object.entries(leagues).map(([lg, players]) => {
       if (!players || !players.length) return '';
-      const rows = players.map(p =>
-        `<tr>
+      const rows = players.map(p => {
+        const setAvg = (p.set_avg ?? 0);
+        const setAvgStr = setAvg > 0 ? `+${setAvg}` : `${setAvg}`;
+        const winPct = p.win_pct != null ? `${p.win_pct}%` : '';
+        const games = (p.won_games != null && p.lost_games != null) ? `${p.won_games}-${p.lost_games}` : '';
+        return `<tr>
           <td style="color:var(--text-muted)">${p.rank}</td>
           <td style="font-weight:600">${p.name}</td>
           <td>${p.mp ?? ''}</td>
-          <td>${p.mw ?? ''}</td>
-          <td>${p.ml ?? ''}</td>
+          <td><span style="color:var(--accent);font-size:0.75rem;font-weight:700;background:rgba(93,201,93,0.15);padding:2px 6px;border-radius:4px">${p.mw ?? ''}G</span> <span style="color:var(--red);font-size:0.75rem;font-weight:700;background:rgba(224,85,85,0.15);padding:2px 6px;border-radius:4px">${p.ml ?? ''}M</span></td>
+          <td>${winPct}</td>
+          <td style="color:${setAvg >= 0 ? 'var(--accent)' : 'var(--red)'}">${setAvgStr}</td>
+          <td style="color:var(--text-muted);font-size:0.8rem">${games}</td>
           <td style="color:var(--accent);font-weight:700">${p.pts}</td>
-        </tr>`
-      ).join('');
+        </tr>`;
+      }).join('');
 
       return `
         <div style="margin-bottom:20px">
@@ -4219,7 +4225,7 @@ function _renderArchiveList() {
             color:var(--${lg === 'super' ? 'gold' : lg === 'l2' ? 'silver' : lg === 'l3' ? 'bronze' : 'text-dim'});
             margin-bottom:8px">${ligNames[lg]}</div>
           <table class="archive-mini-table">
-            <thead><tr><th>#</th><th>Oyuncu</th><th>M</th><th>G</th><th>M</th><th>Puan</th></tr></thead>
+            <thead><tr><th>#</th><th>Oyuncu</th><th>Maç</th><th>G/M</th><th>Gal%</th><th>Set Av.</th><th>Oyun</th><th>Puan</th></tr></thead>
             <tbody>${rows}</tbody>
           </table>
         </div>`;
