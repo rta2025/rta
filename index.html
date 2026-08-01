@@ -5125,22 +5125,21 @@ function openArchivePlayer(dataStr) {
 
   const initials = p.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
 
-  const last5 = (p.matches || []).slice(-5).reverse().map(m =>
+  const played = (p.matches || []).filter(m => m.played);
+  const last5 = played.slice(-5).reverse().map(m =>
     `<div style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;background:${m.won ? 'rgba(93,201,93,0.2)' : 'rgba(224,85,85,0.2)'};color:${m.won ? 'var(--accent)' : 'var(--red)'}">${m.won ? 'G' : 'M'}</div>`
   ).join('');
 
-  // Tüm oyuncular — maç yapmayanlar da dahil (listedeki herkesle karşılaştır)
-  const allPlayers = [];
-  const leagueMatches = p.matches || [];
-  const rivalNames = new Set(leagueMatches.map(m => m.rival));
-
-  const matchRows = leagueMatches.map(m =>
-    `<div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06)">
-      <span style="font-size:0.88rem;color:var(--text);font-weight:500">${m.rival}</span>
-      <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
-        <span style="font-size:0.72rem;color:var(--text-muted)">${m.won ? '1G – 0M' : '0G – 1M'}</span>
-        <span style="font-size:0.78rem;font-weight:700;color:${m.won ? 'var(--accent)' : 'var(--red)'}">${m.won ? 'G' : 'M'} ${m.score}</span>
-      </div>
+  const matchRows = (p.matches || []).map(m =>
+    `<div style="display:flex;align-items:center;padding:9px 12px;border-radius:10px;margin-bottom:6px;background:var(--surface2)">
+      <span style="font-size:0.85rem;color:var(--text);font-weight:500;flex:1">${m.rival}</span>
+      ${m.played
+        ? `<div style="display:flex;align-items:center;gap:8px">
+            <span style="font-size:0.7rem;color:var(--text-muted)">${m.won ? '1G – 0M' : '0G – 1M'}</span>
+            <span style="font-size:0.78rem;font-weight:700;color:${m.won ? 'var(--accent)' : 'var(--red)'}">${m.won ? 'G' : 'M'} ${m.score}</span>
+           </div>`
+        : `<span style="font-size:0.72rem;color:var(--text-muted);font-style:italic">Oynanmadı</span>`
+      }
     </div>`
   ).join('');
 
@@ -5171,7 +5170,7 @@ function openArchivePlayer(dataStr) {
     <div style="display:flex;gap:6px;margin-bottom:20px">${last5}</div>
     ` : ''}
 
-    <div style="font-size:0.65rem;letter-spacing:1.5px;color:var(--text-muted);font-weight:700;margin-bottom:4px">RAKİPLER</div>
+    <div style="font-size:0.65rem;letter-spacing:1.5px;color:var(--text-muted);font-weight:700;margin-bottom:8px">RAKİPLER</div>
     <div>${matchRows}</div>
   `;
 
