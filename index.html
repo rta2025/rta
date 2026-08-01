@@ -1845,6 +1845,16 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
       <div class="kpi"><div class="kpi-val" id="kpi-week">0</div><div class="kpi-label">Bu Hafta</div></div>
       <div class="kpi"><div class="kpi-val">4</div><div class="kpi-label">Aktif Lig</div></div>
     </div>
+    <div id="completion-bar" style="margin-top:16px;background:rgba(0,0,0,0.2);border-radius:12px;padding:12px 16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:0.75rem;color:var(--text-dim);letter-spacing:0.5px">Tamamlanma Durumu</span>
+        <span id="completion-text" style="font-size:0.85rem;font-weight:700;color:var(--accent)">0 / 0 maç</span>
+      </div>
+      <div style="background:rgba(255,255,255,0.08);border-radius:6px;height:8px;overflow:hidden">
+        <div id="completion-fill" style="height:100%;border-radius:6px;background:linear-gradient(90deg,var(--accent),#7dce7d);width:0%;transition:width 0.8s ease"></div>
+      </div>
+      <div id="completion-pct" style="font-size:0.7rem;color:var(--text-muted);margin-top:5px">%0 tamamlandı</div>
+    </div>
   </div>
 
   <!-- HAFTANIN OYUNCUSU -->
@@ -3005,6 +3015,30 @@ function updateKPIs() {
   document.getElementById('kpi-matches').textContent = state.matches.length;
   const wk = Date.now() - 7*24*60*60*1000;
   document.getElementById('kpi-week').textContent = state.matches.filter(m => new Date(m.date).getTime() > wk).length;
+
+  // Tamamlanma durumu
+  const leagues = ['super','l2','l3','l4'];
+  let totalPossible = 0, totalPlayed = 0;
+  leagues.forEach(lg => {
+    const lgPlayers = state.players.filter(p => p.league === lg);
+    const n = lgPlayers.length;
+    const possible = n * (n - 1) / 2;
+    const ids = new Set(lgPlayers.map(p => p.id));
+    const played = new Set(
+      state.matches
+        .filter(m => m.league === lg && ids.has(m.winner) && ids.has(m.loser))
+        .map(m => [m.winner, m.loser].sort().join('-'))
+    ).size;
+    totalPossible += possible;
+    totalPlayed += played;
+  });
+  const pct = totalPossible > 0 ? Math.round(totalPlayed / totalPossible * 100) : 0;
+  const fillEl = document.getElementById('completion-fill');
+  const textEl = document.getElementById('completion-text');
+  const pctEl = document.getElementById('completion-pct');
+  if (fillEl) fillEl.style.width = pct + '%';
+  if (textEl) textEl.textContent = `${totalPlayed} / ${totalPossible} maç`;
+  if (pctEl) pctEl.textContent = `%${pct} tamamlandı`;
 }
 
 // ═══════════════════════════════════════════════════
@@ -3617,15 +3651,29 @@ function openProfile(playerId) {
     .map(([id, rec]) => {
       const sortedMatches = rec.matches.sort((a,b) => new Date(b.date) - new Date(a.date));
       const lastDate = sortedMatches.length ? new Date(sortedMatches[0].date) : new Date(0);
-      return { id: parseInt(id), ...rec, matches: sortedMatches, total: rec.w + rec.l, lastDate };
+      return { id: parseInt(id), ...rec, matches: sortedMatches, total: rec.w + rec.l, lastDate, played: true };
     })
     .sort((a,b) => b.lastDate - a.lastDate);
 
-  const rivalsHtml = rivals.length
-    ? `<div class="profile-rivals-list">` + rivals.map(r => {
+  // Oynamadığı lig rakiplerini bul
+  const lgPlayers = state.players.filter(p => p.league === player.league && p.id !== playerId);
+  const playedIds = new Set(rivals.map(r => r.id));
+  const unplayedRivals = lgPlayers
+    .filter(p => !playedIds.has(p.id))
+    .map(p => ({ id: p.id, w: 0, l: 0, matches: [], total: 0, lastDate: new Date(0), played: false }));
+
+  const allRivals = [...rivals, ...unplayedRivals];
+
+  const rivalsHtml = allRivals.length
+    ? `<div class="profile-rivals-list">` + allRivals.map(r => {
         const name = playerName(r.id);
-        const cls  = r.w >= r.l ? 'win' : 'loss';
-        // Son maçları listele
+        if (!r.played) {
+          return `<div class="profile-rival" style="opacity:0.5">
+            <span class="pr-name">${name}</span>
+            <span style="font-size:0.72rem;color:var(--text-muted);font-style:italic">Oynanmadı</span>
+          </div>`;
+        }
+        const cls = r.w >= r.l ? 'win' : 'loss';
         const matchRows = r.matches
           .map(m => `<span style="font-size:10px;color:${m.won ? 'var(--accent)' : 'var(--red)'};margin-left:6px">${m.won ? 'G' : 'M'} ${m.setScore}</span>`)
           .join('');
