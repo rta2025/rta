@@ -4224,10 +4224,12 @@ function _renderArchiveList() {
           <div style="font-family:'Oswald',sans-serif;font-size:0.85rem;letter-spacing:1.5px;
             color:var(--${lg === 'super' ? 'gold' : lg === 'l2' ? 'silver' : lg === 'l3' ? 'bronze' : 'text-dim'});
             margin-bottom:8px">${ligNames[lg]}</div>
+          <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
           <table class="archive-mini-table">
             <thead><tr><th>#</th><th>Oyuncu</th><th>Maç</th><th>G/M</th><th>Gal%</th><th>Set Av.</th><th>Oyun</th><th>Puan</th></tr></thead>
             <tbody>${rows}</tbody>
           </table>
+          </div>
         </div>`;
     }).join('');
 
