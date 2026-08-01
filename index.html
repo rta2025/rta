@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- RTA v7 build:20260801-1800 -->
+<!-- RTA v8 build:20260801-1900 -->
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -3374,6 +3374,7 @@ function renderLastMatches() {
   const el = document.getElementById('last-matches-section');
   if (!el) return;
   const recent = [...state.matches]
+    .filter(m => m.league === _standingLeague)
     .sort((a,b) => new Date(b.date) - new Date(a.date))
     .slice(0, 5);
   if (!recent.length) { el.innerHTML = ''; return; }
@@ -4101,6 +4102,7 @@ function setStandingLeague(lg) {
     b.classList.toggle('active', ['super','l2','l3','l4'][i] === lg));
   updateCompletionBar();
   renderStandingContent();
+  renderHomeSections();
 }
 
 function renderStandingContent() {
