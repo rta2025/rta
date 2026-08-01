@@ -4190,6 +4190,11 @@ function renderArchive() {
   }
 }
 
+function closeArchivePlayer() {
+  document.getElementById('archive-player-overlay').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
 function _renderArchiveList() {
   const isAdmin = isLoggedIn();
   const archive = loadArchive();
@@ -5118,55 +5123,60 @@ function openArchivePlayer(dataStr) {
   const overlay = document.getElementById('archive-player-overlay');
   const content = document.getElementById('archive-player-content');
 
-  const last5 = (p.matches || []).slice(-5).reverse().map(m =>
-    `<div class="form-dot ${m.won ? 'win' : 'loss'}">${m.won ? 'G' : 'M'}</div>`
-  ).join('');
-
-  const matchRows = (p.matches || []).map(m => `
-    <div class="rival-row">
-      <span class="rival-name">${m.rival}</span>
-      <div style="display:flex;align-items:center;gap:8px;margin-left:auto">
-        <span style="font-size:0.72rem;color:var(--text-muted)">${m.won ? '1G – 0M' : '0G – 1M'}</span>
-        <span style="font-size:0.75rem;color:${m.won ? 'var(--accent)' : 'var(--red)'};font-weight:600">${m.won ? 'G' : 'M'} ${m.score}</span>
-      </div>
-    </div>
-  `).join('');
-
   const initials = p.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
 
-  content.innerHTML = `
-    <div style="display:flex;flex-direction:column;align-items:center;padding:8px 0 16px">
-      <div class="profile-avatar" style="width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:var(--accent);margin-bottom:10px;background:var(--surface2)">
-        ${initials}
+  const last5 = (p.matches || []).slice(-5).reverse().map(m =>
+    `<div style="width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;background:${m.won ? 'rgba(93,201,93,0.2)' : 'rgba(224,85,85,0.2)'};color:${m.won ? 'var(--accent)' : 'var(--red)'}">${m.won ? 'G' : 'M'}</div>`
+  ).join('');
+
+  // Tüm oyuncular — maç yapmayanlar da dahil (listedeki herkesle karşılaştır)
+  const allPlayers = [];
+  const leagueMatches = p.matches || [];
+  const rivalNames = new Set(leagueMatches.map(m => m.rival));
+
+  const matchRows = leagueMatches.map(m =>
+    `<div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06)">
+      <span style="font-size:0.88rem;color:var(--text);font-weight:500">${m.rival}</span>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+        <span style="font-size:0.72rem;color:var(--text-muted)">${m.won ? '1G – 0M' : '0G – 1M'}</span>
+        <span style="font-size:0.78rem;font-weight:700;color:${m.won ? 'var(--accent)' : 'var(--red)'}">${m.won ? 'G' : 'M'} ${m.score}</span>
       </div>
+    </div>`
+  ).join('');
+
+  content.innerHTML = `
+    <div style="text-align:center;padding:12px 0 20px">
+      <div style="width:64px;height:64px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--accent);margin:0 auto 10px">${initials}</div>
       <div style="font-size:1.2rem;font-weight:800;color:var(--text)">${p.name}</div>
-      <div style="color:var(--text-muted);font-size:0.78rem;margin-top:2px">${p.rank}. sıra</div>
+      <div style="color:var(--text-muted);font-size:0.78rem;margin-top:3px">${p.rank}. sıra</div>
     </div>
 
-    <div class="profile-stats" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px">
-      <div class="pstat"><div class="pstat-val">${p.mp}</div><div class="pstat-lbl">Maç</div></div>
-      <div class="pstat"><div class="pstat-val" style="color:var(--accent)">${p.win_pct}%</div><div class="pstat-lbl">Galibiyet</div></div>
-      <div class="pstat"><div class="pstat-val" style="color:var(--accent)">${p.pts}</div><div class="pstat-lbl">Puan</div></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px">
+      <div style="background:var(--surface2);border-radius:12px;padding:12px;text-align:center">
+        <div style="font-size:1.4rem;font-weight:800;color:var(--text)">${p.mp}</div>
+        <div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px">Maç</div>
+      </div>
+      <div style="background:var(--surface2);border-radius:12px;padding:12px;text-align:center">
+        <div style="font-size:1.4rem;font-weight:800;color:var(--accent)">${p.win_pct}%</div>
+        <div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px">Galibiyet</div>
+      </div>
+      <div style="background:var(--surface2);border-radius:12px;padding:12px;text-align:center">
+        <div style="font-size:1.4rem;font-weight:800;color:var(--accent)">${p.pts}</div>
+        <div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px">Puan</div>
+      </div>
     </div>
 
     ${last5 ? `
-    <div class="section-label">SON 5 MAÇ</div>
-    <div style="display:flex;gap:6px;margin-bottom:16px">${last5}</div>
+    <div style="font-size:0.65rem;letter-spacing:1.5px;color:var(--text-muted);font-weight:700;margin-bottom:8px">SON 5 MAÇ</div>
+    <div style="display:flex;gap:6px;margin-bottom:20px">${last5}</div>
     ` : ''}
 
-    ${matchRows ? `
-    <div class="section-label">RAKİPLER</div>
-    <div class="rivals-list">${matchRows}</div>
-    ` : ''}
+    <div style="font-size:0.65rem;letter-spacing:1.5px;color:var(--text-muted);font-weight:700;margin-bottom:4px">RAKİPLER</div>
+    <div>${matchRows}</div>
   `;
 
   overlay.style.display = 'flex';
   document.body.style.overflow = 'hidden';
-}
-
-function closeArchivePlayer() {
-  document.getElementById('archive-player-overlay').style.display = 'none';
-  document.body.style.overflow = '';
 }
 function renderLastMatchTicker() {
   const ticker = document.getElementById('last-match-ticker');
