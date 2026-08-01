@@ -5124,6 +5124,9 @@ function openArchivePlayer(dataStr) {
   const content = document.getElementById('archive-player-content');
 
   const initials = p.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+  const avatarHtml = p.photo_url
+    ? `<img src="${p.photo_url}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;margin:0 auto 10px;display:block">`
+    : `<div style="width:64px;height:64px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--accent);margin:0 auto 10px">${initials}</div>`;
 
   const played = (p.matches || []).filter(m => m.played);
   const last5 = played.slice(-5).reverse().map(m =>
@@ -5145,7 +5148,7 @@ function openArchivePlayer(dataStr) {
 
   content.innerHTML = `
     <div style="text-align:center;padding:12px 0 20px">
-      <div style="width:64px;height:64px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--accent);margin:0 auto 10px">${initials}</div>
+      ${avatarHtml}
       <div style="font-size:1.2rem;font-weight:800;color:var(--text)">${p.name}</div>
       <div style="color:var(--text-muted);font-size:0.78rem;margin-top:3px">${p.rank}. sıra</div>
     </div>
