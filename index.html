@@ -3027,7 +3027,7 @@ function renderAll(fromSupabase = false) {
     if (ap.id === 'page-sonuclar')   renderResults();
     if (ap.id === 'page-fiktur')     renderFixture();
     if (ap.id === 'page-arsiv')      renderArchive();
-    if (ap.id === 'page-ranking')    renderRanking();
+    if (ap.id === 'page-ranking' && fromSupabase) renderRanking();
     if (ap.id === 'page-istatistik') renderStats();
   }
 }
