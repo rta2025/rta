@@ -1673,6 +1673,63 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
 }
 .icon-opt:hover { border-color: var(--accent); background: rgba(26,122,26,0.1); }
 .icon-opt.selected { border-color: var(--accent); background: rgba(26,122,26,0.2); }
+
+/* ── Turnuva Kartı ── */
+.tournament-card {
+  background: linear-gradient(135deg, var(--surface2), var(--surface3));
+  border: 1px solid var(--border); border-radius: 16px;
+  overflow: hidden; margin-bottom: 20px;
+}
+.tournament-header {
+  background: linear-gradient(135deg, #1a3a1a, #0d1f0d);
+  padding: 20px; border-bottom: 1px solid var(--border);
+  position: relative; overflow: hidden;
+}
+.tournament-header::before {
+  content: '🎾'; position: absolute; right: 20px; top: 50%;
+  transform: translateY(-50%); font-size: 60px; opacity: 0.1;
+}
+.tournament-status {
+  display: inline-block; font-size: 10px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  padding: 3px 10px; border-radius: 4px; margin-bottom: 10px;
+}
+.status-upcoming { background: rgba(255,200,0,0.2); color: #ffc800; border: 1px solid rgba(255,200,0,0.4); }
+.status-active   { background: rgba(93,201,93,0.2); color: #5dc95d; border: 1px solid rgba(93,201,93,0.4); }
+.status-done     { background: rgba(150,150,150,0.2); color: #999; border: 1px solid rgba(150,150,150,0.4); }
+.tournament-name {
+  font-family: 'Oswald', sans-serif; font-size: 1.5rem;
+  font-weight: 700; color: #ffc800; letter-spacing: 2px; margin-bottom: 4px;
+}
+.tournament-sub { font-size: 12px; color: var(--text-dim); }
+.tournament-body { padding: 20px; }
+.tournament-info-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;
+}
+.t-info-item {
+  background: var(--surface); border-radius: 10px; padding: 12px 14px;
+}
+.t-info-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
+.t-info-value { font-size: 14px; font-weight: 600; color: var(--text); }
+.tournament-rules {
+  background: var(--surface); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px;
+}
+.tournament-rules-title {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--accent); margin-bottom: 10px;
+}
+.tournament-rule-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 13px; color: var(--text-dim); margin-bottom: 6px; line-height: 1.5;
+}
+.tournament-prize {
+  background: linear-gradient(135deg, rgba(255,200,0,0.1), rgba(255,200,0,0.05));
+  border: 1px solid rgba(255,200,0,0.3); border-radius: 10px;
+  padding: 14px 16px; text-align: center;
+}
+.tournament-prize-title { font-size: 11px; color: #ffc800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.tournament-prize-pts { font-family: 'Oswald', sans-serif; font-size: 2rem; font-weight: 700; color: #ffc800; }
+.tournament-prize-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 </style>
 
 <!-- Supabase SDK -->
@@ -2336,8 +2393,52 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
 <!-- ══ GALERİ ══ -->
 <div id="page-galeri" class="page">
   <div class="hero" style="margin-bottom:20px">
-    <div class="hero-title" style="font-size:1.5rem">📸 GALERİ</div>
-    <div class="hero-sub">RTA Ligi'nden kareler</div>
+    <div class="hero-title" style="font-size:1.5rem">🎾 TURNUVALAR</div>
+    <div class="hero-sub">RTA Akademisi Turnuva Takvimi & Sonuçları</div>
+  </div>
+
+  <!-- TURNUVA KARTI -->
+  <div class="tournament-card">
+    <div class="tournament-header">
+      <div class="tournament-status status-upcoming">⏳ Yaklaşıyor</div>
+      <div class="tournament-name">RTA 500 TIE BREAK TURNUVASI</div>
+      <div class="tournament-sub">21'de Biten Tek Set Tie Break</div>
+    </div>
+    <div class="tournament-body">
+      <div class="tournament-info-grid">
+        <div class="t-info-item">
+          <div class="t-info-label">📅 Başlangıç</div>
+          <div class="t-info-value">14 Ağustos 2026</div>
+        </div>
+        <div class="t-info-item">
+          <div class="t-info-label">⏰ İlk Maç</div>
+          <div class="t-info-value">21:00</div>
+        </div>
+        <div class="t-info-item">
+          <div class="t-info-label">📝 Başvuru Son</div>
+          <div class="t-info-value">13 Ağustos 17:00</div>
+        </div>
+        <div class="t-info-item">
+          <div class="t-info-label">🏟️ Eleme</div>
+          <div class="t-info-value">Ön Eleme + 32'lik Ana Tablo</div>
+        </div>
+      </div>
+
+      <div class="tournament-rules">
+        <div class="tournament-rules-title">📋 Kural Açıklaması</div>
+        <div class="tournament-rule-item"><span>🎾</span><span>Tüm maçlar 21'de biten <strong>tek set tie break</strong> üzerinden oynanacaktır.</span></div>
+        <div class="tournament-rule-item"><span>🏆</span><span>Final maçı <strong>2 set</strong> üzerinden oynanacaktır.</span></div>
+        <div class="tournament-rule-item"><span>⚡</span><span>Eşitlik olması durumunda <strong>3. set tie break</strong> oynanacaktır.</span></div>
+        <div class="tournament-rule-item"><span>🏟️</span><span>Turnuva programı daha sonra duyurulacaktır.</span></div>
+      </div>
+
+      <div class="tournament-prize">
+        <div class="tournament-prize-title">🏆 Ranking Puanı</div>
+        <div class="tournament-prize-pts">500</div>
+        <div class="tournament-prize-sub">Turnuva kazananı 500 RTA Ranking puanı kazanacaktır</div>
+        <div style="margin-top:8px;font-size:12px;color:var(--text-dim)">🎁 Derecelere girenlere sürpriz ödüller!</div>
+      </div>
+    </div>
   </div>
 
   <!-- Albüm listesi -->
