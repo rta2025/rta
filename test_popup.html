@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Popup Test</title>
+<style>
+body { font-family: sans-serif; background: #111; color: #fff; padding: 40px; }
+.popup-overlay {
+  display: flex; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.8); z-index: 9999;
+  align-items: center; justify-content: center;
+}
+.popup-box {
+  background: #1a3a1a; border: 2px solid gold;
+  border-radius: 16px; padding: 30px; text-align: center;
+}
+</style>
+</head>
+<body>
+
+<h1>Bu arka plan sayfası</h1>
+<p>Eğer bir kutu görüyorsanız, popup çalışıyor demektir.</p>
+
+<div class="popup-overlay" id="test-popup">
+  <div class="popup-box">
+    <h2>🎾 TEST BAŞARILI</h2>
+    <p>Bu kutuyu görüyorsanız popup mekanizması çalışıyor.</p>
+    <button onclick="document.getElementById('test-popup').style.display='none'">Kapat</button>
+  </div>
+</div>
+
+</body>
+</html>
