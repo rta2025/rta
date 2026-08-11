@@ -1730,6 +1730,56 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
 .tournament-prize-title { font-size: 11px; color: #ffc800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
 .tournament-prize-pts { font-family: 'Oswald', sans-serif; font-size: 2rem; font-weight: 700; color: #ffc800; }
 .tournament-prize-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+/* ── Turnuva Pop-up ── */
+.tournament-popup-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.75); z-index: 9999;
+  align-items: center; justify-content: center; padding: 20px;
+}
+.tournament-popup-overlay.open { display: flex; }
+.tournament-popup {
+  background: linear-gradient(135deg, #0d1f0d, #1a3a1a);
+  border: 1px solid rgba(255,200,0,0.4); border-radius: 20px;
+  padding: 28px 24px; max-width: 340px; width: 100%;
+  position: relative; text-align: center; cursor: pointer;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 0 40px rgba(255,200,0,0.1);
+}
+.tournament-popup:hover { border-color: rgba(255,200,0,0.7); }
+.tournament-popup-close {
+  position: absolute; top: 12px; right: 14px;
+  background: none; border: none; color: var(--text-dim);
+  font-size: 20px; cursor: pointer; z-index: 1;
+}
+.tournament-popup-close:hover { color: var(--text); }
+.tournament-popup-icon { font-size: 48px; margin-bottom: 12px; }
+.tournament-popup-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: #ffc800;
+  background: rgba(255,200,0,0.1); border: 1px solid rgba(255,200,0,0.3);
+  border-radius: 4px; padding: 3px 10px; display: inline-block; margin-bottom: 12px;
+}
+.tournament-popup-title {
+  font-family: 'Oswald', sans-serif; font-size: 1.4rem;
+  font-weight: 700; color: #ffc800; letter-spacing: 2px; margin-bottom: 6px;
+}
+.tournament-popup-sub {
+  font-size: 13px; color: var(--text-dim); margin-bottom: 16px; line-height: 1.5;
+}
+.tournament-popup-date {
+  background: rgba(255,200,0,0.1); border-radius: 8px;
+  padding: 10px; margin-bottom: 16px;
+  font-size: 14px; font-weight: 600; color: #ffc800;
+}
+.tournament-popup-btn {
+  background: #ffc800; color: #111; border: none;
+  border-radius: 8px; padding: 10px 24px; font-size: 13px;
+  font-weight: 700; cursor: pointer; width: 100%;
+}
+.tournament-popup-btn:hover { background: #ffdc4d; }
+.tournament-popup-hint {
+  font-size: 11px; color: var(--text-muted); margin-top: 10px;
+}
 </style>
 
 <!-- Supabase SDK -->
@@ -2398,7 +2448,21 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
   </div>
 
   <!-- TURNUVA KARTI -->
-  <div class="tournament-card">
+  <!-- ── Turnuva Pop-up ── -->
+<div class="tournament-popup-overlay" id="tournament-popup-overlay">
+  <div class="tournament-popup" onclick="goToTournament()">
+    <button class="tournament-popup-close" onclick="closeTournamentPopup(event)">✕</button>
+    <div class="tournament-popup-icon">🎾</div>
+    <div class="tournament-popup-label">🏆 Yeni Turnuva</div>
+    <div class="tournament-popup-title">RTA 500<br>TIE BREAK</div>
+    <div class="tournament-popup-sub">21'de biten tek set tie break formatında heyecan dolu turnuva!</div>
+    <div class="tournament-popup-date">📅 14 Ağustos 2026 • Saat 21:00</div>
+    <button class="tournament-popup-btn">Turnuva Detayları →</button>
+    <div class="tournament-popup-hint">Detaylar için tıklayın</div>
+  </div>
+</div>
+
+<div class="tournament-card">
     <div class="tournament-header">
       <div class="tournament-status status-upcoming">⏳ Yaklaşıyor</div>
       <div class="tournament-name">RTA 500 TIE BREAK TURNUVASI</div>
@@ -5303,6 +5367,33 @@ document.addEventListener('keydown', e => {
 });
 
 // ═══════════════════════════════════════════════════
+// TURNUVA POP-UP
+// ═══════════════════════════════════════════════════
+function initTournamentPopup() {
+  const POPUP_KEY = 'rta_tournament_popup_rta500';
+  const lastSeen = localStorage.getItem(POPUP_KEY);
+  const today = new Date().toDateString();
+  // Günde bir kez göster, turnuva tarihinden sonra gösterme
+  const tournamentDate = new Date('2026-08-14');
+  if (new Date() > tournamentDate) return;
+  if (lastSeen === today) return;
+  setTimeout(() => {
+    document.getElementById('tournament-popup-overlay').classList.add('open');
+    localStorage.setItem(POPUP_KEY, today);
+  }, 1000);
+}
+
+function closeTournamentPopup(e) {
+  if (e) e.stopPropagation();
+  document.getElementById('tournament-popup-overlay').classList.remove('open');
+}
+
+function goToTournament() {
+  closeTournamentPopup();
+  showPage('galeri');
+}
+
+// ═══════════════════════════════════════════════════
 // TEMA (KOYU / AÇIK MOD)
 // ═══════════════════════════════════════════════════
 function toggleTheme() {
@@ -5480,6 +5571,7 @@ setAdminUI(false); // Oturum durumu initAuth() ile (Supabase'den) belirlenecek
 renderAll();
 initCountdown();
 initTheme();
+initTournamentPopup();
 
 async function initSupabase() {
   if (!window._sbReady) { setConnected(false); return; }
