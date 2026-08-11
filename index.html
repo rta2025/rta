@@ -1812,6 +1812,21 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
 </head>
 <body>
 
+<!-- ── Turnuva Pop-up ── -->
+<div class="tournament-popup-overlay" id="tournament-popup-overlay">
+  <div class="tournament-popup" onclick="goToTournament()">
+    <button class="tournament-popup-close" onclick="closeTournamentPopup(event)">✕</button>
+    <div class="tournament-popup-icon">🎾</div>
+    <div class="tournament-popup-label">🏆 Yeni Turnuva</div>
+    <div class="tournament-popup-title">RTA 500<br>TIE BREAK</div>
+    <div class="tournament-popup-sub">21'de biten tek set tie break formatında heyecan dolu turnuva!</div>
+    <div class="tournament-popup-date">📅 14 Ağustos 2026 • Saat 21:00</div>
+    <button class="tournament-popup-btn">Turnuva Detayları →</button>
+    <div class="tournament-popup-hint">Detaylar için tıklayın</div>
+  </div>
+</div>
+
+
 <!-- LOGIN OVERLAY -->
 <div class="login-overlay" id="login-overlay">
   <div class="login-box">
@@ -2448,20 +2463,6 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
   </div>
 
   <!-- TURNUVA KARTI -->
-  <!-- ── Turnuva Pop-up ── -->
-<div class="tournament-popup-overlay" id="tournament-popup-overlay">
-  <div class="tournament-popup" onclick="goToTournament()">
-    <button class="tournament-popup-close" onclick="closeTournamentPopup(event)">✕</button>
-    <div class="tournament-popup-icon">🎾</div>
-    <div class="tournament-popup-label">🏆 Yeni Turnuva</div>
-    <div class="tournament-popup-title">RTA 500<br>TIE BREAK</div>
-    <div class="tournament-popup-sub">21'de biten tek set tie break formatında heyecan dolu turnuva!</div>
-    <div class="tournament-popup-date">📅 14 Ağustos 2026 • Saat 21:00</div>
-    <button class="tournament-popup-btn">Turnuva Detayları →</button>
-    <div class="tournament-popup-hint">Detaylar için tıklayın</div>
-  </div>
-</div>
-
 <div class="tournament-card">
     <div class="tournament-header">
       <div class="tournament-status status-upcoming">⏳ Yaklaşıyor</div>
