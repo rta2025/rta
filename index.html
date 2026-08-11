@@ -5371,16 +5371,15 @@ document.addEventListener('keydown', e => {
 // TURNUVA POP-UP
 // ═══════════════════════════════════════════════════
 function initTournamentPopup() {
-  const POPUP_KEY = 'rta_tournament_popup_rta500';
-  const lastSeen = localStorage.getItem(POPUP_KEY);
-  const today = new Date().toDateString();
-  // Günde bir kez göster, turnuva tarihinden sonra gösterme
+  const overlay = document.getElementById('tournament-popup-overlay');
+  if (!overlay) { console.warn('Turnuva popup elementi bulunamadı'); return; }
+
   const tournamentDate = new Date('2026-08-14');
-  if (new Date() > tournamentDate) return;
-  if (lastSeen === today) return;
+  if (new Date() > tournamentDate) { console.log('Turnuva tarihi geçti'); return; }
+
   setTimeout(() => {
-    document.getElementById('tournament-popup-overlay').classList.add('open');
-    localStorage.setItem(POPUP_KEY, today);
+    overlay.classList.add('open');
+    console.log('Turnuva popup gösterildi');
   }, 1000);
 }
 
