@@ -1825,6 +1825,37 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
 .tournament-popup-hint {
   font-size: 11px; color: var(--text-muted); margin-top: 10px;
 }
+
+/* ── Turnuva Ağacı (Bracket) ── */
+.bracket-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 10px; }
+.bracket { display: flex; gap: 24px; min-width: 900px; padding: 10px 4px; }
+.bracket-round { display: flex; flex-direction: column; justify-content: space-around; min-width: 170px; }
+.bracket-round-title {
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+  color: var(--gold); text-align: center; margin-bottom: 10px;
+}
+.bracket-match {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  padding: 8px 10px; margin: 6px 0; font-size: 11.5px; position: relative;
+}
+.bracket-match.editable { cursor: pointer; }
+.bracket-match.editable:hover { border-color: var(--accent); }
+.bracket-slot {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 3px 0; color: var(--text-dim);
+}
+.bracket-slot.winner { color: var(--accent); font-weight: 700; }
+.bracket-slot.bye { color: var(--text-muted); font-style: italic; }
+.bracket-slot-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 120px; }
+.bracket-vs-line { height: 1px; background: var(--border); margin: 2px 0; }
+.bracket-match-num { position: absolute; top: -8px; left: 8px; background: var(--surface2); font-size: 9px; color: var(--text-muted); padding: 0 4px; border-radius: 3px; }
+.bracket-champion {
+  background: linear-gradient(135deg, rgba(255,200,0,0.15), rgba(255,200,0,0.05));
+  border: 1px solid rgba(255,200,0,0.4); border-radius: 10px;
+  padding: 16px; text-align: center; margin-top: 20px;
+}
+.bracket-champion-label { font-size: 10px; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.bracket-champion-name { font-family: 'Oswald', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--gold); }
 </style>
 
 <!-- Supabase SDK -->
@@ -2547,6 +2578,43 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
         <div class="tournament-prize-pts">500</div>
         <div class="tournament-prize-sub">Turnuva kazananı 500 RTA Ranking puanı kazanacaktır</div>
         <div style="margin-top:8px;font-size:12px;color:var(--text-dim)">🎁 Derecelere girenlere sürpriz ödüller!</div>
+      </div>
+
+      <!-- Turnuva Ağacı -->
+      <div id="bracket-section" style="display:none;margin-top:16px">
+        <div class="tournament-rules-title" style="margin-bottom:10px">🏆 Turnuva Ağacı</div>
+        <div class="bracket-wrap"><div class="bracket" id="bracket-container"></div></div>
+        <div id="bracket-champion-box"></div>
+      </div>
+
+      <!-- Admin: Bracket Yönetimi -->
+      <div class="admin-only" style="display:none;margin-top:16px;background:var(--surface);border-radius:10px;padding:14px 16px">
+        <div class="tournament-rules-title" style="margin-bottom:8px">🏆 Turnuva Ağacını Kur (Admin)</div>
+        <p style="font-size:11px;color:var(--text-dim);margin-bottom:8px;line-height:1.5">
+          32'lik Top 32 listesini gir. Her satır bir maç: <code style="background:var(--surface2);padding:1px 5px;border-radius:3px">Oyuncu1 vs Oyuncu2</code> veya bay geçen için <code style="background:var(--surface2);padding:1px 5px;border-radius:3px">Oyuncu1 vs -</code>
+        </p>
+        <textarea id="bracket-setup-input" class="finput" rows="8" placeholder="Ramazan Demirci vs -
+Tayfun Selek vs Derya Özdemir
+Özge Şimşek vs -
+..." style="font-family:monospace;font-size:11px;resize:vertical"></textarea>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn btn-green" onclick="setupBracket()" style="flex:1">🏗️ Ağacı Oluştur</button>
+          <button class="btn" style="color:var(--red)" onclick="clearBracket()" style="flex:1">✕ Sıfırla</button>
+        </div>
+        <div id="bracket-admin-status" style="margin-top:10px;font-size:11px;color:var(--text-dim)"></div>
+
+        <div id="bracket-result-entry" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+          <div class="tournament-rules-title" style="margin-bottom:8px">✏️ Maç Sonucu Gir</div>
+          <div class="fgroup">
+            <label>Maç Seç</label>
+            <select id="bracket-match-select" class="finput" onchange="onBracketMatchSelect()"></select>
+          </div>
+          <div class="fgroup">
+            <label>Kazanan</label>
+            <select id="bracket-winner-select" class="finput"></select>
+          </div>
+          <button class="btn btn-green" onclick="saveBracketResult()" style="width:100%;margin-top:8px">💾 Sonucu Kaydet</button>
+        </div>
       </div>
 
       <!-- Eşleşmeler (public görünüm) -->
@@ -5243,7 +5311,7 @@ function showPage(name) {
   if (name === 'sonuclar')   { renderResults(); }
   if (name === 'fiktur')     { renderFixture(); }
   if (name === 'arsiv')      { renderArchive(); }
-  if (name === 'galeri')     { renderGaleri(); renderTournamentMatchups(); }
+  if (name === 'galeri')     { renderGaleri(); renderTournamentMatchups(); renderBracket(); }
   if (name === 'ranking')    { renderRanking(); }
   if (name === 'istatistik') { renderStats(); }
   if (name === 'yonetim')    { renderAdminTable(); }
@@ -5384,6 +5452,231 @@ async function saveEditPlayer() {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeEditPlayer(); closeProfile(); }
 });
+
+// ═══════════════════════════════════════════════════
+// TURNUVA AĞACI (BRACKET)
+// ═══════════════════════════════════════════════════
+const BRACKET_KEY = 'rta_tournament_bracket';
+
+// 32'lik ağaç yapısı: her tur, hangi maçların hangi maçlardan beslendiğini tanımlar
+// round1: 16 maç (Top 32), round2: 8 maç (Top 16), round3: 4 maç (Çeyrek), round4: 2 maç (Yarı), round5: 1 maç (Final)
+const BRACKET_STRUCTURE = [
+  { round: 1, title: 'Top 32',      matchCount: 16 },
+  { round: 2, title: 'Top 16',      matchCount: 8  },
+  { round: 3, title: 'Çeyrek Final',matchCount: 4  },
+  { round: 4, title: 'Yarı Final',  matchCount: 2  },
+  { round: 5, title: 'Final',       matchCount: 1  },
+];
+
+function loadBracket() {
+  try { return JSON.parse(localStorage.getItem(BRACKET_KEY) || 'null'); } catch { return null; }
+}
+function saveBracketLocal(data) {
+  localStorage.setItem(BRACKET_KEY, JSON.stringify(data));
+}
+
+// Bracket veri yapısı: { matches: { 1: {p1, p2, winner}, 2: {...}, ... 31: {...} } }
+function setupBracket() {
+  const raw = document.getElementById('bracket-setup-input').value.trim();
+  const lines = raw.split('\n').map(l => l.trim()).filter(l => l.includes(' vs '));
+  if (lines.length !== 16) {
+    showToast(`16 satır olmalı, şu an ${lines.length} satır var`, 'err');
+    return;
+  }
+
+  const matches = {};
+  // Round 1: maç 1-16
+  lines.forEach((line, idx) => {
+    const [p1, p2raw] = line.split(' vs ').map(s => s.trim());
+    const p2 = (p2raw === '-' || p2raw === '') ? null : p2raw;
+    const matchNum = idx + 1;
+    matches[matchNum] = { p1, p2, winner: p2 ? null : p1 }; // bay geçen otomatik kazanan
+  });
+
+  // Round 2-5: boş, ilerledikçe dolacak
+  for (let n = 17; n <= 31; n++) {
+    matches[n] = { p1: null, p2: null, winner: null };
+  }
+
+  // Bay geçenleri otomatik ilerlet
+  advanceByes(matches);
+
+  const bracketData = { matches, createdAt: new Date().toISOString() };
+  saveBracketLocal(bracketData);
+  if (window._sbAdmin) {
+    window._sbAdmin.from('meta').update({ tournament_bracket: bracketData }).eq('id', 1)
+      .then(({ error }) => {
+        if (error) showToast('Supabase hatası: ' + error.message, 'err');
+      });
+  }
+
+  renderBracket();
+  populateBracketMatchSelect();
+  document.getElementById('bracket-result-entry').style.display = 'block';
+  document.getElementById('bracket-admin-status').textContent = '✅ Ağaç oluşturuldu, 16 maç hazır';
+  showToast('Turnuva ağacı oluşturuldu! 🏆', 'ok');
+}
+
+// Maçların hangi üst maça beslediğini hesapla (16 maçlık round1 → round2 maç 17-24, vs.)
+function getFeederMatch(matchNum) {
+  // Round1 (1-16) -> Round2 (17-24): her 2 maç 1 üst maça besler
+  if (matchNum <= 16) return 16 + Math.ceil(matchNum / 2);
+  // Round2 (17-24) -> Round3 (25-28)
+  if (matchNum <= 24) return 24 + Math.ceil((matchNum - 16) / 2);
+  // Round3 (25-28) -> Round4 (29-30)
+  if (matchNum <= 28) return 28 + Math.ceil((matchNum - 24) / 2);
+  // Round4 (29-30) -> Round5 (31)
+  if (matchNum <= 30) return 31;
+  return null; // final, üst maç yok
+}
+
+function advanceByes(matches) {
+  // Round 1'deki bay geçenleri round 2'ye taşı
+  for (let n = 1; n <= 16; n++) {
+    const m = matches[n];
+    if (m.winner) {
+      placeWinnerInNextMatch(matches, n, m.winner);
+    }
+  }
+}
+
+function placeWinnerInNextMatch(matches, matchNum, winner) {
+  const nextNum = getFeederMatch(matchNum);
+  if (!nextNum) return; // final maçıysa üst yok
+  const next = matches[nextNum];
+  // Bu maçın hangi slotuna (p1/p2) yerleşeceğini bul: tek numaralı maçlar p1'e, çift olanlar p2'ye
+  const isFirstFeeder = (matchNum % 2 === 1) ||
+    (matchNum > 16 && matchNum <= 24 && (matchNum - 16) % 2 === 1) ||
+    (matchNum > 24 && matchNum <= 28 && (matchNum - 24) % 2 === 1) ||
+    (matchNum > 28 && matchNum <= 30 && (matchNum - 28) % 2 === 1);
+  if (isFirstFeeder) next.p1 = winner; else next.p2 = winner;
+  // Eğer next maçında rakip yoksa (yani hâlâ bekleniyor) bir şey yapma
+  matches[nextNum] = next;
+}
+
+function populateBracketMatchSelect() {
+  const bracket = loadBracket();
+  if (!bracket) return;
+  const sel = document.getElementById('bracket-match-select');
+  if (!sel) return;
+  const opts = [];
+  for (let n = 1; n <= 31; n++) {
+    const m = bracket.matches[n];
+    if (!m.p1 || !m.p2) continue; // henüz iki oyuncu belli değilse gösterme
+    if (m.winner) continue; // zaten sonuçlanmışsa listeleme
+    opts.push(`<option value="${n}">Maç ${n}: ${m.p1} vs ${m.p2}</option>`);
+  }
+  sel.innerHTML = opts.length ? opts.join('') : '<option value="">Bekleyen maç yok</option>';
+  onBracketMatchSelect();
+}
+
+function onBracketMatchSelect() {
+  const sel = document.getElementById('bracket-match-select');
+  const winnerSel = document.getElementById('bracket-winner-select');
+  if (!sel || !winnerSel) return;
+  const bracket = loadBracket();
+  const matchNum = parseInt(sel.value);
+  if (!bracket || !matchNum) { winnerSel.innerHTML = ''; return; }
+  const m = bracket.matches[matchNum];
+  winnerSel.innerHTML = `<option value="${m.p1}">${m.p1}</option><option value="${m.p2}">${m.p2}</option>`;
+}
+
+function saveBracketResult() {
+  const matchNum = parseInt(document.getElementById('bracket-match-select').value);
+  const winner = document.getElementById('bracket-winner-select').value;
+  if (!matchNum || !winner) { showToast('Maç ve kazanan seçin', 'err'); return; }
+
+  const bracket = loadBracket();
+  bracket.matches[matchNum].winner = winner;
+  placeWinnerInNextMatch(bracket.matches, matchNum, winner);
+
+  saveBracketLocal(bracket);
+  if (window._sbAdmin) {
+    window._sbAdmin.from('meta').update({ tournament_bracket: bracket }).eq('id', 1)
+      .then(({ error }) => {
+        if (error) showToast('Supabase hatası: ' + error.message, 'err');
+      });
+  }
+
+  renderBracket();
+  populateBracketMatchSelect();
+  showToast(`${winner} bir üst tura yükseldi! 🎾`, 'ok');
+}
+
+function clearBracket() {
+  if (!confirm('Turnuva ağacı tamamen silinecek!')) return;
+  localStorage.removeItem(BRACKET_KEY);
+  if (window._sbAdmin) {
+    window._sbAdmin.from('meta').update({ tournament_bracket: null }).eq('id', 1).catch(() => {});
+  }
+  document.getElementById('bracket-setup-input').value = '';
+  document.getElementById('bracket-result-entry').style.display = 'none';
+  document.getElementById('bracket-admin-status').textContent = '';
+  renderBracket();
+  showToast('Turnuva ağacı sıfırlandı', 'ok');
+}
+
+function renderBracket() {
+  const sbClient = window._sbAdmin || window._sb;
+  if (window._sbReady && sbClient) {
+    sbClient.from('meta').select('tournament_bracket').eq('id', 1).single()
+      .then(({ data }) => {
+        if (data && data.tournament_bracket) {
+          saveBracketLocal(data.tournament_bracket);
+        }
+        _renderBracketDisplay();
+      })
+      .catch(() => _renderBracketDisplay());
+  } else {
+    _renderBracketDisplay();
+  }
+}
+
+function _renderBracketDisplay() {
+  const section = document.getElementById('bracket-section');
+  const container = document.getElementById('bracket-container');
+  const champBox = document.getElementById('bracket-champion-box');
+  if (!section || !container) return;
+
+  const bracket = loadBracket();
+  if (!bracket || !bracket.matches) { section.style.display = 'none'; return; }
+
+  section.style.display = 'block';
+
+  let html = '';
+  let matchIdx = 1;
+  BRACKET_STRUCTURE.forEach(round => {
+    html += `<div class="bracket-round"><div class="bracket-round-title">${round.title}</div>`;
+    for (let i = 0; i < round.matchCount; i++) {
+      const m = bracket.matches[matchIdx];
+      const p1 = m.p1 || 'Bekleniyor';
+      const p2 = m.p2 || 'Bekleniyor';
+      const p1cls = m.winner && m.winner === m.p1 ? 'winner' : (m.p1 ? '' : 'bye');
+      const p2cls = m.winner && m.winner === m.p2 ? 'winner' : (m.p2 ? '' : 'bye');
+      html += `<div class="bracket-match">
+        <span class="bracket-match-num">M${matchIdx}</span>
+        <div class="bracket-slot ${p1cls}"><span class="bracket-slot-name">${p1}</span></div>
+        <div class="bracket-vs-line"></div>
+        <div class="bracket-slot ${p2cls}"><span class="bracket-slot-name">${p2}</span></div>
+      </div>`;
+      matchIdx++;
+    }
+    html += `</div>`;
+  });
+
+  container.innerHTML = html;
+
+  // Şampiyon kutusu
+  const finalMatch = bracket.matches[31];
+  if (finalMatch && finalMatch.winner) {
+    champBox.innerHTML = `<div class="bracket-champion">
+      <div class="bracket-champion-label">🏆 Turnuva Şampiyonu</div>
+      <div class="bracket-champion-name">${finalMatch.winner}</div>
+    </div>`;
+  } else {
+    champBox.innerHTML = '';
+  }
+}
 
 // ═══════════════════════════════════════════════════
 // TURNUVA EŞLEŞMELERİ
