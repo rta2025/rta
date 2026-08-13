@@ -5391,6 +5391,22 @@ document.addEventListener('keydown', e => {
 const TOURNAMENT_MATCHUPS_KEY = 'rta_tournament_matchups';
 
 function renderTournamentMatchups() {
+  const sbClient = window._sbAdmin || window._sb;
+  if (window._sbReady && sbClient) {
+    sbClient.from('meta').select('tournament_matchups').eq('id', 1).single()
+      .then(({ data }) => {
+        if (data && data.tournament_matchups) {
+          localStorage.setItem(TOURNAMENT_MATCHUPS_KEY, data.tournament_matchups);
+        }
+        _renderTournamentMatchupsList();
+      })
+      .catch(() => _renderTournamentMatchupsList());
+  } else {
+    _renderTournamentMatchupsList();
+  }
+}
+
+function _renderTournamentMatchupsList() {
   const view = document.getElementById('tournament-matchups-view');
   const list = document.getElementById('tournament-matchups-list');
   const input = document.getElementById('tournament-matchups-input');
