@@ -2565,21 +2565,6 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
         </div>
       </div>
 
-      <div class="tournament-rules">
-        <div class="tournament-rules-title">📋 Kural Açıklaması</div>
-        <div class="tournament-rule-item"><span>🎾</span><span>Tüm maçlar 21'de biten <strong>tek set tie break</strong> üzerinden oynanacaktır.</span></div>
-        <div class="tournament-rule-item"><span>🏆</span><span>Final maçı <strong>2 set</strong> üzerinden oynanacaktır.</span></div>
-        <div class="tournament-rule-item"><span>⚡</span><span>Eşitlik olması durumunda <strong>3. set tie break</strong> oynanacaktır.</span></div>
-        <div class="tournament-rule-item"><span>🏟️</span><span>Turnuva programı daha sonra duyurulacaktır.</span></div>
-      </div>
-
-      <div class="tournament-prize">
-        <div class="tournament-prize-title">🏆 Ranking Puanı</div>
-        <div class="tournament-prize-pts">500</div>
-        <div class="tournament-prize-sub">Turnuva kazananı 500 RTA Ranking puanı kazanacaktır</div>
-        <div style="margin-top:8px;font-size:12px;color:var(--text-dim)">🎁 Derecelere girenlere sürpriz ödüller!</div>
-      </div>
-
       <!-- Turnuva Ağacı -->
       <div id="bracket-section" style="display:none;margin-top:16px">
         <div class="tournament-rules-title" style="margin-bottom:10px">🏆 Turnuva Ağacı</div>
@@ -2638,6 +2623,14 @@ Tayfun Selek vs Derya Özdemir
           <button class="btn btn-green" onclick="saveTournamentMatchups()" style="flex:1">💾 Kaydet</button>
           <button class="btn" onclick="clearTournamentMatchups()" style="flex:1">✕ Temizle</button>
         </div>
+      </div>
+
+      <div class="tournament-rules" style="margin-top:16px">
+        <div class="tournament-rules-title">📋 Kural Açıklaması</div>
+        <div class="tournament-rule-item"><span>🎾</span><span>Tüm maçlar 21'de biten <strong>tek set tie break</strong> üzerinden oynanacaktır.</span></div>
+        <div class="tournament-rule-item"><span>🏆</span><span>Final maçı <strong>2 set</strong> üzerinden oynanacaktır.</span></div>
+        <div class="tournament-rule-item"><span>⚡</span><span>Eşitlik olması durumunda <strong>3. set tie break</strong> oynanacaktır.</span></div>
+        <div class="tournament-rule-item"><span>🏟️</span><span>Turnuva programı daha sonra duyurulacaktır.</span></div>
       </div>
     </div>
   </div>
@@ -4322,13 +4315,17 @@ async function doLogin() {
 
   // Başarılı — onAuthStateChange UI'ı güncelleyecek
   _adminSession = data.session;
-  document.getElementById('login-overlay').style.display = 'none';
   document.getElementById('login-pw').value = '';
   document.getElementById('login-email').value = '';
   errEl.style.display = 'none';
   setAdminUI(true);
   renderAll();
   showToast('✅ Giriş başarılı');
+  // Overlay'i en son ve garantili şekilde kapat
+  const overlay = document.getElementById('login-overlay');
+  overlay.style.display = 'none';
+  setTimeout(() => { overlay.style.display = 'none'; }, 50);
+  setTimeout(() => { overlay.style.display = 'none'; }, 300);
 }
 
 function enterPublic() {
