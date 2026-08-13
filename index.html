@@ -1837,14 +1837,11 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
   <div class="tournament-popup" onclick="goToTournament()">
     <button class="tournament-popup-close" onclick="closeTournamentPopup(event)">✕</button>
     <div class="tournament-popup-icon">🎾</div>
-    <div class="tournament-popup-label">🏆 Yeni Turnuva</div>
+    <div class="tournament-popup-label">📋 Eşleşmeler Açıklandı</div>
     <div class="tournament-popup-title">RTA 500<br>TIE BREAK</div>
-    <div class="tournament-popup-sub">21'de biten tek set tie break formatında heyecan dolu turnuva!</div>
+    <div class="tournament-popup-sub">Turnuva eşleşmeleri belli oldu! Rakibini öğrenmek için tıkla.</div>
     <div class="tournament-popup-date">📅 14 Ağustos 2026 • Saat 21:00</div>
-    <div style="background:rgba(224,85,85,0.15);border:1px solid rgba(224,85,85,0.4);border-radius:8px;padding:8px 10px;margin-bottom:14px;font-size:12px;color:#ff8888;font-weight:600">
-      ⏰ Son başvuru: Yarın saat 21:00!
-    </div>
-    <button class="tournament-popup-btn">Turnuva Detayları →</button>
+    <button class="tournament-popup-btn">Eşleşmeleri Gör →</button>
     <div class="tournament-popup-hint">Detaylar için tıklayın</div>
   </div>
 </div>
@@ -5602,7 +5599,6 @@ try { initTheme(); } catch(e) { console.error('initTheme hatası:', e); }
 window.addEventListener('load', () => {
   try { initTournamentPopup(); } catch(e) { console.error('initTournamentPopup hatası:', e); }
 });
-// Zaten yüklüyse hemen çalıştır
 if (document.readyState === 'complete') {
   try { initTournamentPopup(); } catch(e) { console.error('initTournamentPopup hatası:', e); }
 }
