@@ -5646,10 +5646,11 @@ function _renderBracketDisplay() {
     html += `<div class="bracket-round"><div class="bracket-round-title">${round.title}</div>`;
     for (let i = 0; i < round.matchCount; i++) {
       const m = bracket.matches[matchIdx];
+      const isBye = m.p1 && !m.p2 && m.winner === m.p1;
       const p1 = m.p1 || 'Bekleniyor';
-      const p2 = m.p2 || 'Bekleniyor';
+      const p2 = isBye ? 'BAY (otomatik geçti)' : (m.p2 || 'Bekleniyor');
       const p1cls = m.winner && m.winner === m.p1 ? 'winner' : (m.p1 ? '' : 'bye');
-      const p2cls = m.winner && m.winner === m.p2 ? 'winner' : (m.p2 ? '' : 'bye');
+      const p2cls = isBye ? 'bye' : (m.winner && m.winner === m.p2 ? 'winner' : (m.p2 ? '' : 'bye'));
       html += `<div class="bracket-match">
         <span class="bracket-match-num">M${matchIdx}</span>
         <div class="bracket-slot ${p1cls}"><span class="bracket-slot-name">${p1}</span></div>
