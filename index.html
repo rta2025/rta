@@ -5445,10 +5445,19 @@ function saveTournamentMatchups() {
   localStorage.setItem(TOURNAMENT_MATCHUPS_KEY, val);
   // Supabase'e de kaydet
   if (window._sbAdmin) {
-    window._sbAdmin.from('meta').update({ tournament_matchups: val }).eq('id', 1).catch(() => {});
+    window._sbAdmin.from('meta').update({ tournament_matchups: val }).eq('id', 1)
+      .then(({ error }) => {
+        if (error) {
+          console.error('Supabase kayıt hatası:', error);
+          showToast('⚠️ Supabase hatası: ' + error.message, 'err');
+        } else {
+          showToast('Eşleşmeler kaydedildi! ✅', 'ok');
+        }
+      });
+  } else {
+    showToast('⚠️ Supabase bağlantısı yok (_sbAdmin tanımsız)', 'err');
   }
   renderTournamentMatchups();
-  showToast('Eşleşmeler kaydedildi! ✅', 'ok');
 }
 
 function clearTournamentMatchups() {
