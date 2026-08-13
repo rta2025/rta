@@ -4736,6 +4736,24 @@ function currentLeagueOf(name) {
 const RK_LG_LABEL = {super:'SÜPER', l2:'2. LİG', l3:'3. LİG', l4:'4. LİG'};
 
 function renderRanking() {
+  const sbClient = window._sbAdmin || window._sb;
+  if (window._sbReady && sbClient) {
+    sbClient.from('ranking_entries').select('*').then(({ data: ranking }) => {
+      if (ranking && ranking.length) {
+        const mapped = ranking.map(r => ({
+          id: r.id, seasonId: r.season_id, player: r.player, league: r.league,
+          rank: r.rank_no, source: r.source, label: r.label, points: r.points, date: r.earned_date
+        }));
+        localStorage.setItem(RANKING_KEY, JSON.stringify(mapped));
+      }
+      _renderRankingList();
+    }).catch(() => _renderRankingList());
+  } else {
+    _renderRankingList();
+  }
+}
+
+function _renderRankingList() {
   const isAdmin = isLoggedIn();
   const panel = document.getElementById('ranking-admin-panel');
   if (panel) panel.style.display = isAdmin ? 'block' : 'none';
