@@ -1733,6 +1733,15 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
 .tournament-prize-pts { font-family: 'Oswald', sans-serif; font-size: 2rem; font-weight: 700; color: #ffc800; }
 .tournament-prize-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
+/* ── Eşleşmeler ── */
+.matchup-item {
+  background: var(--surface); border-radius: 8px; padding: 10px 14px;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  font-size: 13px;
+}
+.matchup-player { font-weight: 500; color: var(--text); }
+.matchup-vs { font-size: 10px; color: var(--text-muted); font-weight: 700; }
+
 /* ── Turnuva Pop-up ── */
 .tournament-popup-overlay {
   display: none; position: fixed; inset: 0;
@@ -2507,6 +2516,27 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
         <div class="tournament-prize-pts">500</div>
         <div class="tournament-prize-sub">Turnuva kazananı 500 RTA Ranking puanı kazanacaktır</div>
         <div style="margin-top:8px;font-size:12px;color:var(--text-dim)">🎁 Derecelere girenlere sürpriz ödüller!</div>
+      </div>
+
+      <!-- Eşleşmeler (public görünüm) -->
+      <div id="tournament-matchups-view" style="display:none;margin-top:16px">
+        <div class="tournament-rules-title" style="margin-bottom:10px">🎾 Eşleşmeler</div>
+        <div id="tournament-matchups-list" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+
+      <!-- Admin: Eşleşme girişi -->
+      <div class="admin-only" style="display:none;margin-top:16px;background:var(--surface);border-radius:10px;padding:14px 16px">
+        <div class="tournament-rules-title" style="margin-bottom:8px">✏️ Eşleşmeleri Gir (Admin)</div>
+        <p style="font-size:11px;color:var(--text-dim);margin-bottom:8px;line-height:1.5">
+          Her satıra bir eşleşme yazın: <code style="background:var(--surface2);padding:1px 5px;border-radius:3px">Oyuncu 1 vs Oyuncu 2</code>
+        </p>
+        <textarea id="tournament-matchups-input" class="finput" rows="6" placeholder="Ahmet Yılmaz vs Mehmet Kaya
+Ayşe Demir vs Fatma Şahin
+..." style="font-family:monospace;font-size:12px;resize:vertical"></textarea>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn btn-green" onclick="saveTournamentMatchups()" style="flex:1">💾 Kaydet</button>
+          <button class="btn" onclick="clearTournamentMatchups()" style="flex:1">✕ Temizle</button>
+        </div>
       </div>
     </div>
   </div>
@@ -5230,7 +5260,7 @@ function showPage(name) {
   if (name === 'sonuclar')   { renderResults(); }
   if (name === 'fiktur')     { renderFixture(); }
   if (name === 'arsiv')      { renderArchive(); }
-  if (name === 'galeri')     { renderGaleri(); }
+  if (name === 'galeri')     { renderGaleri(); renderTournamentMatchups(); }
   if (name === 'ranking')    { renderRanking(); }
   if (name === 'istatistik') { renderStats(); }
   if (name === 'yonetim')    { renderAdminTable(); }
@@ -5371,6 +5401,55 @@ async function saveEditPlayer() {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeEditPlayer(); closeProfile(); }
 });
+
+// ═══════════════════════════════════════════════════
+// TURNUVA EŞLEŞMELERİ
+// ═══════════════════════════════════════════════════
+const TOURNAMENT_MATCHUPS_KEY = 'rta_tournament_matchups';
+
+function renderTournamentMatchups() {
+  const view = document.getElementById('tournament-matchups-view');
+  const list = document.getElementById('tournament-matchups-list');
+  const input = document.getElementById('tournament-matchups-input');
+  if (!view || !list) return;
+
+  const saved = localStorage.getItem(TOURNAMENT_MATCHUPS_KEY) || '';
+  if (input) input.value = saved;
+
+  const lines = saved.split('\n').map(l => l.trim()).filter(l => l.includes(' vs '));
+  if (!lines.length) { view.style.display = 'none'; return; }
+
+  view.style.display = 'block';
+  list.innerHTML = lines.map(line => {
+    const [p1, p2] = line.split(' vs ').map(s => s.trim());
+    return `<div class="matchup-item">
+      <span class="matchup-player">${p1}</span>
+      <span class="matchup-vs">VS</span>
+      <span class="matchup-player">${p2}</span>
+    </div>`;
+  }).join('');
+}
+
+function saveTournamentMatchups() {
+  const val = document.getElementById('tournament-matchups-input').value;
+  localStorage.setItem(TOURNAMENT_MATCHUPS_KEY, val);
+  // Supabase'e de kaydet
+  if (window._sbAdmin) {
+    window._sbAdmin.from('meta').update({ tournament_matchups: val }).eq('id', 1).catch(() => {});
+  }
+  renderTournamentMatchups();
+  showToast('Eşleşmeler kaydedildi! ✅', 'ok');
+}
+
+function clearTournamentMatchups() {
+  localStorage.removeItem(TOURNAMENT_MATCHUPS_KEY);
+  document.getElementById('tournament-matchups-input').value = '';
+  if (window._sbAdmin) {
+    window._sbAdmin.from('meta').update({ tournament_matchups: null }).eq('id', 1).catch(() => {});
+  }
+  renderTournamentMatchups();
+  showToast('Eşleşmeler temizlendi', 'ok');
+}
 
 // ═══════════════════════════════════════════════════
 // TURNUVA POP-UP
