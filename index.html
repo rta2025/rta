@@ -5690,14 +5690,7 @@ setAdminUI(false); // Oturum durumu initAuth() ile (Supabase'den) belirlenecek
 try { renderAll(); } catch(e) { console.error('renderAll hatası:', e); }
 try { initCountdown(); } catch(e) { console.error('initCountdown hatası:', e); }
 try { initTheme(); } catch(e) { console.error('initTheme hatası:', e); }
-
-// Turnuva popup'ı garantiye almak için window.onload'a da bağla
-window.addEventListener('load', () => {
-  try { initTournamentPopup(); } catch(e) { console.error('initTournamentPopup hatası:', e); }
-});
-if (document.readyState === 'complete') {
-  try { initTournamentPopup(); } catch(e) { console.error('initTournamentPopup hatası:', e); }
-}
+// Turnuva popup'ı devre dışı
 
 async function initSupabase() {
   if (!window._sbReady) { setConnected(false); return; }
