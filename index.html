@@ -2616,9 +2616,9 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
   <div class="admin-only" style="display:none;margin-bottom:16px;background:var(--surface);border-radius:10px;padding:14px 16px">
     <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleBracketSetup()">
       <div class="tournament-rules-title" style="margin-bottom:0">🏆 Turnuva Ağacını Kur (Admin)</div>
-      <span id="bracket-setup-toggle-icon" style="font-size:12px;color:var(--text-dim)">▼</span>
+      <span id="bracket-setup-toggle-icon" style="font-size:12px;color:var(--text-dim)">▶</span>
     </div>
-    <div id="bracket-setup-body" style="margin-top:10px">
+    <div id="bracket-setup-body" style="margin-top:10px;display:none">
       <p style="font-size:11px;color:var(--text-dim);margin-bottom:8px;line-height:1.5">
         32'lik Top 32 listesini gir. Her satır bir maç: <code style="background:var(--surface2);padding:1px 5px;border-radius:3px">Oyuncu1 vs Oyuncu2</code> veya bay geçen için <code style="background:var(--surface2);padding:1px 5px;border-radius:3px">Oyuncu1 vs -</code>
       </p>
@@ -5943,20 +5943,29 @@ function _renderBracketDisplay() {
   const section = document.getElementById('bracket-section');
   const container = document.getElementById('bracket-container');
   const champBox = document.getElementById('bracket-champion-box');
+  const setupBody = document.getElementById('bracket-setup-body');
+  const setupIcon = document.getElementById('bracket-setup-toggle-icon');
   if (!section || !container) return;
 
   const bracket = loadBracket();
-  if (!bracket || !bracket.matches) { section.style.display = 'none'; return; }
+  if (!bracket || !bracket.matches) {
+    section.style.display = 'none';
+    // Ağaç yoksa kurulum formunu aç
+    if (setupBody) { setupBody.style.display = 'block'; }
+    if (setupIcon) setupIcon.textContent = '▼';
+    return;
+  }
 
   section.style.display = 'block';
 
-  // Ağaç zaten kuruluysa kurulum formunu otomatik kapat
-  const setupBody = document.getElementById('bracket-setup-body');
-  const setupIcon = document.getElementById('bracket-setup-toggle-icon');
-  if (setupBody && setupBody.style.display !== 'none') {
-    setupBody.style.display = 'none';
-    if (setupIcon) setupIcon.textContent = '▶';
-  }
+  // Ağaç zaten kuruluysa kurulum formunu kapat
+  if (setupBody) { setupBody.style.display = 'none'; }
+  if (setupIcon) setupIcon.textContent = '▶';
+
+  // Sonuç girme formunu göster ve dropdown'ı doldur
+  const resultEntry = document.getElementById('bracket-result-entry');
+  if (resultEntry) resultEntry.style.display = 'block';
+  populateBracketMatchSelect();
 
   let html = '';
   let matchIdx = 1;
