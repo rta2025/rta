@@ -3345,10 +3345,15 @@ function updateCompletionBar() {
 }
 
 function updateKPIs() {
-  document.getElementById('kpi-players').textContent = state.players.length;
-  document.getElementById('kpi-matches').textContent = state.matches.length;
-  const wk = Date.now() - 7*24*60*60*1000;
-  document.getElementById('kpi-week').textContent = state.matches.filter(m => new Date(m.date).getTime() > wk).length;
+  const elPlayers = document.getElementById('kpi-players');
+  const elMatches = document.getElementById('kpi-matches');
+  const elWeek = document.getElementById('kpi-week');
+  if (elPlayers) elPlayers.textContent = state.players.length;
+  if (elMatches) elMatches.textContent = state.matches.length;
+  if (elWeek) {
+    const wk = Date.now() - 7*24*60*60*1000;
+    elWeek.textContent = state.matches.filter(m => new Date(m.date).getTime() > wk).length;
+  }
 
   // Tamamlanma durumu — ayrı fonksiyon çağırıyoruz
   updateCompletionBar();
