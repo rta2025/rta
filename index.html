@@ -1830,8 +1830,8 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
 .bracket-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 10px; }
 .bracket { display: flex; gap: 24px; min-width: 1000px; padding: 10px 4px; min-height: 480px; }
 .bracket-round {
-  display: grid; grid-template-rows: repeat(34, 1fr); min-width: 170px;
-  gap: 0; align-content: stretch;
+  display: grid; grid-template-rows: repeat(32, 1fr); min-width: 170px;
+  gap: 0; align-content: stretch; margin-top: 30px;
 }
 .bracket-round-header {
   grid-row: 1 / 3; display: flex; align-items: flex-end; justify-content: center;
@@ -5686,10 +5686,8 @@ function _renderBracketDisplay() {
   let html = '';
   let matchIdx = 1;
   BRACKET_STRUCTURE.forEach(round => {
-    // Her round'daki maçın kapladığı satır sayısı: round1=2, round2=4, round3=8, round4=16, round5=32
     const rowsPerMatch = Math.pow(2, round.round);
-    html += `<div class="bracket-round" data-round="${round.round}">
-      <div class="bracket-round-header" style="grid-row: 1 / 3"><div class="bracket-round-title">${round.title}</div></div>`;
+    html += `<div class="bracket-round" data-round="${round.round}">`;
     for (let i = 0; i < round.matchCount; i++) {
       const m = bracket.matches[matchIdx];
       const isBye = m.p1 && !m.p2 && m.winner === m.p1;
@@ -5698,12 +5696,14 @@ function _renderBracketDisplay() {
       const p1cls = m.winner && m.winner === m.p1 ? 'winner' : (m.p1 ? '' : 'bye');
       const p2cls = isBye ? 'bye' : (m.winner && m.winner === m.p2 ? 'winner' : (m.p2 ? '' : 'bye'));
       // Başlık 2 satır kapladığı için tüm maçlar +2 satır aşağıdan başlar
-      const rowStart = 3 + i * rowsPerMatch;
+      const rowStart = 1 + i * rowsPerMatch;
       const rowEnd = rowStart + rowsPerMatch;
       const isFinal = round.round === 5;
       const finalStyle = isFinal ? 'border-color:var(--gold);box-shadow:0 0 12px rgba(255,200,0,0.3)' : '';
       const trophyIcon = isFinal ? '<span style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:16px">🏆</span>' : '';
+      const roundTitleHtml = i === 0 ? `<div class="bracket-round-title" style="position:absolute;top:${isFinal ? '-38px' : '-22px'};left:0;right:0">${round.title}</div>` : '';
       html += `<div class="bracket-match" style="grid-row: ${rowStart} / ${rowEnd}; ${finalStyle}">
+        ${roundTitleHtml}
         ${trophyIcon}
         <span class="bracket-match-num">M${matchIdx}</span>
         <div class="bracket-slot ${p1cls}"><span class="bracket-slot-name">${p1}</span></div>
