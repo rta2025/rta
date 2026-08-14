@@ -1828,26 +1828,25 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
 
 /* ── Turnuva Ağacı (Bracket) ── */
 .bracket-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 10px; }
-.bracket { display: flex; gap: 24px; min-width: 1000px; padding: 10px 4px; }
-.bracket-round { display: flex; flex-direction: column; min-width: 170px; }
+.bracket { display: flex; gap: 24px; min-width: 1000px; padding: 10px 4px; min-height: 900px; }
+.bracket-round {
+  display: grid; grid-template-rows: repeat(34, 1fr); min-width: 170px;
+  gap: 0; align-content: stretch;
+}
+.bracket-round-header {
+  grid-row: 1 / 3; display: flex; align-items: flex-end; justify-content: center;
+  padding-bottom: 8px;
+}
 .bracket-round-title {
   font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
-  color: var(--gold); text-align: center; margin-bottom: 10px; height: 16px;
+  color: var(--gold); text-align: center;
 }
 .bracket-match {
   background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
   padding: 8px 10px; font-size: 11.5px; position: relative;
-  height: 52px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center;
+  display: flex; flex-direction: column; justify-content: center;
+  align-self: stretch; margin: 4px 0;
 }
-/* Her tur, alt turdaki 2 maçın tam ortasına gelecek şekilde hizalanır */
-.bracket-round[data-round="1"] .bracket-match { margin: 6px 0; }
-.bracket-round[data-round="2"] .bracket-match:first-child { margin-top: 38px; margin-bottom: 38px; }
-.bracket-round[data-round="2"] .bracket-match:not(:first-child) { margin-top: 0; margin-bottom: 38px; }
-.bracket-round[data-round="3"] .bracket-match:first-child { margin-top: 102px; margin-bottom: 102px; }
-.bracket-round[data-round="3"] .bracket-match:not(:first-child) { margin-top: 0; margin-bottom: 102px; }
-.bracket-round[data-round="4"] .bracket-match:first-child { margin-top: 230px; margin-bottom: 230px; }
-.bracket-round[data-round="4"] .bracket-match:not(:first-child) { margin-top: 0; margin-bottom: 230px; }
-.bracket-round[data-round="5"] .bracket-match { margin-top: 486px; }
 
 /* Bağlantı çizgileri - her maçtan sağa çıkan yatay çizgi */
 .bracket-round:not([data-round="5"]) .bracket-match::after {
@@ -5659,7 +5658,10 @@ function _renderBracketDisplay() {
   let html = '';
   let matchIdx = 1;
   BRACKET_STRUCTURE.forEach(round => {
-    html += `<div class="bracket-round" data-round="${round.round}"><div class="bracket-round-title">${round.title}</div>`;
+    // Her round'daki maçın kapladığı satır sayısı: round1=2, round2=4, round3=8, round4=16, round5=32
+    const rowsPerMatch = Math.pow(2, round.round);
+    html += `<div class="bracket-round" data-round="${round.round}">
+      <div class="bracket-round-header" style="grid-row: 1 / 3"><div class="bracket-round-title">${round.title}</div></div>`;
     for (let i = 0; i < round.matchCount; i++) {
       const m = bracket.matches[matchIdx];
       const isBye = m.p1 && !m.p2 && m.winner === m.p1;
@@ -5667,7 +5669,10 @@ function _renderBracketDisplay() {
       const p2 = isBye ? 'BAY (otomatik geçti)' : (m.p2 || 'Bekleniyor');
       const p1cls = m.winner && m.winner === m.p1 ? 'winner' : (m.p1 ? '' : 'bye');
       const p2cls = isBye ? 'bye' : (m.winner && m.winner === m.p2 ? 'winner' : (m.p2 ? '' : 'bye'));
-      html += `<div class="bracket-match">
+      // Başlık 2 satır kapladığı için tüm maçlar +2 satır aşağıdan başlar
+      const rowStart = 3 + i * rowsPerMatch;
+      const rowEnd = rowStart + rowsPerMatch;
+      html += `<div class="bracket-match" style="grid-row: ${rowStart} / ${rowEnd}">
         <span class="bracket-match-num">M${matchIdx}</span>
         <div class="bracket-slot ${p1cls}"><span class="bracket-slot-name">${p1}</span></div>
         <div class="bracket-vs-line"></div>
