@@ -2605,19 +2605,24 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
 
   <!-- Admin: Bracket Yönetimi -->
   <div class="admin-only" style="display:none;margin-bottom:16px;background:var(--surface);border-radius:10px;padding:14px 16px">
-    <div class="tournament-rules-title" style="margin-bottom:8px">🏆 Turnuva Ağacını Kur (Admin)</div>
-    <p style="font-size:11px;color:var(--text-dim);margin-bottom:8px;line-height:1.5">
-      32'lik Top 32 listesini gir. Her satır bir maç: <code style="background:var(--surface2);padding:1px 5px;border-radius:3px">Oyuncu1 vs Oyuncu2</code> veya bay geçen için <code style="background:var(--surface2);padding:1px 5px;border-radius:3px">Oyuncu1 vs -</code>
-    </p>
-    <textarea id="bracket-setup-input" class="finput" rows="8" placeholder="Ramazan Demirci vs -
+    <div style="display:flex;justify-content:space-between;align-items:center;cursor:pointer" onclick="toggleBracketSetup()">
+      <div class="tournament-rules-title" style="margin-bottom:0">🏆 Turnuva Ağacını Kur (Admin)</div>
+      <span id="bracket-setup-toggle-icon" style="font-size:12px;color:var(--text-dim)">▼</span>
+    </div>
+    <div id="bracket-setup-body" style="margin-top:10px">
+      <p style="font-size:11px;color:var(--text-dim);margin-bottom:8px;line-height:1.5">
+        32'lik Top 32 listesini gir. Her satır bir maç: <code style="background:var(--surface2);padding:1px 5px;border-radius:3px">Oyuncu1 vs Oyuncu2</code> veya bay geçen için <code style="background:var(--surface2);padding:1px 5px;border-radius:3px">Oyuncu1 vs -</code>
+      </p>
+      <textarea id="bracket-setup-input" class="finput" rows="8" placeholder="Ramazan Demirci vs -
 Tayfun Selek vs Derya Özdemir
 Özge Şimşek vs -
 ..." style="font-family:monospace;font-size:11px;resize:vertical"></textarea>
-    <div style="display:flex;gap:8px;margin-top:10px">
-      <button class="btn btn-green" onclick="setupBracket()" style="flex:1">🏗️ Ağacı Oluştur</button>
-      <button class="btn" style="color:var(--red)" onclick="clearBracket()" style="flex:1">✕ Sıfırla</button>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn btn-green" onclick="setupBracket()" style="flex:1">🏗️ Ağacı Oluştur</button>
+        <button class="btn" style="color:var(--red)" onclick="clearBracket()" style="flex:1">✕ Sıfırla</button>
+      </div>
+      <div id="bracket-admin-status" style="margin-top:10px;font-size:11px;color:var(--text-dim)"></div>
     </div>
-    <div id="bracket-admin-status" style="margin-top:10px;font-size:11px;color:var(--text-dim)"></div>
 
     <div id="bracket-result-entry" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
       <div class="tournament-rules-title" style="margin-bottom:8px">✏️ Maç Sonucu Gir</div>
@@ -5333,7 +5338,7 @@ function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
 
-  const pages = ['puan','ranking','skor','sonuclar','fiktur','arsiv','galeri','istatistik','kurallar','yonetim'];
+  const pages = ['puan','ranking','galeri','skor','sonuclar','fiktur','arsiv','istatistik','kurallar','yonetim'];
   document.querySelectorAll('.nav-btn').forEach((b, i) =>
     b.classList.toggle('active', pages[i] === name));
 
@@ -5713,6 +5718,14 @@ function saveBracketLocal(data) {
 }
 
 // Bracket veri yapısı: { matches: { 1: {p1, p2, winner}, 2: {...}, ... 31: {...} } }
+function toggleBracketSetup() {
+  const body = document.getElementById('bracket-setup-body');
+  const icon = document.getElementById('bracket-setup-toggle-icon');
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  icon.textContent = isOpen ? '▶' : '▼';
+}
+
 function setupBracket() {
   const raw = document.getElementById('bracket-setup-input').value.trim();
   const lines = raw.split('\n').map(l => l.trim()).filter(l => l.includes(' vs '));
@@ -5903,6 +5916,14 @@ function _renderBracketDisplay() {
   if (!bracket || !bracket.matches) { section.style.display = 'none'; return; }
 
   section.style.display = 'block';
+
+  // Ağaç zaten kuruluysa kurulum formunu otomatik kapat
+  const setupBody = document.getElementById('bracket-setup-body');
+  const setupIcon = document.getElementById('bracket-setup-toggle-icon');
+  if (setupBody && setupBody.style.display !== 'none') {
+    setupBody.style.display = 'none';
+    if (setupIcon) setupIcon.textContent = '▶';
+  }
 
   let html = '';
   let matchIdx = 1;
