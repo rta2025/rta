@@ -2554,94 +2554,116 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
     <div class="hero-sub">RTA Akademisi Turnuva Takvimi & Sonuçları</div>
   </div>
 
-  <!-- TURNUVA KARTI -->
-<div class="tournament-card">
-    <div class="tournament-header">
-      <div class="tournament-status status-upcoming">⏳ Yaklaşıyor</div>
-      <div class="tournament-name">RTA 500 TIE BREAK TURNUVASI</div>
-      <div class="tournament-sub">21'de Biten Tek Set Tie Break</div>
+  <!-- AKTİF TURNUVA KARTI (dinamik) -->
+  <div id="active-tournament-card"></div>
+
+  <!-- Admin: Turnuva Yönet -->
+  <div class="admin-only" style="display:none;margin-bottom:16px;background:var(--surface);border-radius:10px;padding:14px 16px">
+    <div class="tournament-rules-title" style="margin-bottom:8px">🎾 Turnuva Bilgilerini Yönet (Admin)</div>
+    <div class="fgroup">
+      <label>Turnuva Adı</label>
+      <input type="text" id="tm-name" class="finput" placeholder="örn. RTA 500 Tie Break Turnuvası">
     </div>
-    <div class="tournament-body">
-    <div class="tournament-body">
-      <div style="background:rgba(224,85,85,0.15);border:1px solid rgba(224,85,85,0.4);border-radius:10px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:flex-start;gap:8px">
-        <span style="font-size:16px;flex-shrink:0">⚠️</span>
-        <span style="font-size:13px;color:#ff9999;line-height:1.5"><strong>Olumsuz hava koşulları</strong> nedeniyle bugünkü turnuva programı değişebilir. Kesin bilgilendirme bu akşam saat <strong>19:00'da</strong> yapılacaktır.</span>
-      </div>
+    <div class="fgroup">
+      <label>Alt Başlık</label>
+      <input type="text" id="tm-sub" class="finput" placeholder="örn. 21'de Biten Tek Set Tie Break">
+    </div>
+    <div class="fgroup">
+      <label>Durum</label>
+      <select id="tm-status" class="finput">
+        <option value="upcoming">⏳ Yaklaşıyor</option>
+        <option value="active">🟢 Devam Ediyor</option>
+        <option value="done">⚫ Tamamlandı</option>
+      </select>
+    </div>
+    <div class="fgroup">
+      <label>Duyuru (isteğe bağlı — boşsa gösterilmez)</label>
+      <textarea id="tm-announcement" class="finput" rows="2" placeholder="örn. Olumsuz hava koşulları nedeniyle program değişebilir..."></textarea>
+    </div>
+    <div class="fgroup">
+      <label>Kurallar (her satır bir kural)</label>
+      <textarea id="tm-rules" class="finput" rows="5" placeholder="🎾 Tüm maçlar 21'de biten tek set tie break üzerinden oynanacaktır.
+🏆 Final maçı 2 set üzerinden oynanacaktır.
+⚡ Eşitlik olması durumunda 3. set tie break oynanacaktır." style="font-size:12px"></textarea>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn btn-green" onclick="saveTournamentInfo()" style="flex:1">💾 Kaydet</button>
+      <button class="btn" style="color:var(--red)" onclick="archiveTournament()" style="flex:1">📦 Turnuvayı Arşivle & Yeni Başlat</button>
+    </div>
+    <div id="tm-status-msg" style="margin-top:8px;font-size:11px;color:var(--text-dim)"></div>
+  </div>
 
-      <!-- Turnuva Ağacı -->
-      <div id="bracket-section" style="display:none;margin-top:16px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-          <div class="tournament-rules-title" style="margin-bottom:0">🏆 Turnuva Ağacı</div>
-          <button class="btn btn-sm" onclick="downloadBracketImage()" style="background:rgba(255,200,0,0.15);color:var(--gold);border:1px solid rgba(255,200,0,0.3)">📸 Görsel İndir</button>
-        </div>
-        <div class="bracket-wrap"><div class="bracket" id="bracket-container"></div></div>
-        <div id="bracket-champion-box"></div>
-      </div>
+  <!-- Turnuva Ağacı -->
+  <div id="bracket-section" style="display:none;margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div class="tournament-rules-title" style="margin-bottom:0">🏆 Turnuva Ağacı</div>
+      <button class="btn btn-sm" onclick="downloadBracketImage()" style="background:rgba(255,200,0,0.15);color:var(--gold);border:1px solid rgba(255,200,0,0.3)">📸 Görsel İndir</button>
+    </div>
+    <div class="bracket-wrap"><div class="bracket" id="bracket-container"></div></div>
+    <div id="bracket-champion-box"></div>
+  </div>
 
-      <!-- Admin: Bracket Yönetimi -->
-      <div class="admin-only" style="display:none;margin-top:16px;background:var(--surface);border-radius:10px;padding:14px 16px">
-        <div class="tournament-rules-title" style="margin-bottom:8px">🏆 Turnuva Ağacını Kur (Admin)</div>
-        <p style="font-size:11px;color:var(--text-dim);margin-bottom:8px;line-height:1.5">
-          32'lik Top 32 listesini gir. Her satır bir maç: <code style="background:var(--surface2);padding:1px 5px;border-radius:3px">Oyuncu1 vs Oyuncu2</code> veya bay geçen için <code style="background:var(--surface2);padding:1px 5px;border-radius:3px">Oyuncu1 vs -</code>
-        </p>
-        <textarea id="bracket-setup-input" class="finput" rows="8" placeholder="Ramazan Demirci vs -
+  <!-- Admin: Bracket Yönetimi -->
+  <div class="admin-only" style="display:none;margin-bottom:16px;background:var(--surface);border-radius:10px;padding:14px 16px">
+    <div class="tournament-rules-title" style="margin-bottom:8px">🏆 Turnuva Ağacını Kur (Admin)</div>
+    <p style="font-size:11px;color:var(--text-dim);margin-bottom:8px;line-height:1.5">
+      32'lik Top 32 listesini gir. Her satır bir maç: <code style="background:var(--surface2);padding:1px 5px;border-radius:3px">Oyuncu1 vs Oyuncu2</code> veya bay geçen için <code style="background:var(--surface2);padding:1px 5px;border-radius:3px">Oyuncu1 vs -</code>
+    </p>
+    <textarea id="bracket-setup-input" class="finput" rows="8" placeholder="Ramazan Demirci vs -
 Tayfun Selek vs Derya Özdemir
 Özge Şimşek vs -
 ..." style="font-family:monospace;font-size:11px;resize:vertical"></textarea>
-        <div style="display:flex;gap:8px;margin-top:10px">
-          <button class="btn btn-green" onclick="setupBracket()" style="flex:1">🏗️ Ağacı Oluştur</button>
-          <button class="btn" style="color:var(--red)" onclick="clearBracket()" style="flex:1">✕ Sıfırla</button>
-        </div>
-        <div id="bracket-admin-status" style="margin-top:10px;font-size:11px;color:var(--text-dim)"></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn btn-green" onclick="setupBracket()" style="flex:1">🏗️ Ağacı Oluştur</button>
+      <button class="btn" style="color:var(--red)" onclick="clearBracket()" style="flex:1">✕ Sıfırla</button>
+    </div>
+    <div id="bracket-admin-status" style="margin-top:10px;font-size:11px;color:var(--text-dim)"></div>
 
-        <div id="bracket-result-entry" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
-          <div class="tournament-rules-title" style="margin-bottom:8px">✏️ Maç Sonucu Gir</div>
-          <div class="fgroup">
-            <label>Maç Seç</label>
-            <select id="bracket-match-select" class="finput" onchange="onBracketMatchSelect()"></select>
-          </div>
-          <div class="fgroup">
-            <label>Kazanan</label>
-            <select id="bracket-winner-select" class="finput"></select>
-          </div>
-          <button class="btn btn-green" onclick="saveBracketResult()" style="width:100%;margin-top:8px">💾 Sonucu Kaydet</button>
-        </div>
+    <div id="bracket-result-entry" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+      <div class="tournament-rules-title" style="margin-bottom:8px">✏️ Maç Sonucu Gir</div>
+      <div class="fgroup">
+        <label>Maç Seç</label>
+        <select id="bracket-match-select" class="finput" onchange="onBracketMatchSelect()"></select>
       </div>
-
-      <!-- Eşleşmeler (public görünüm) -->
-      <div id="tournament-matchups-view" style="display:none;margin-top:16px">
-        <div class="tournament-rules-title" style="margin-bottom:10px">🎾 Eşleşmeler</div>
-        <div id="tournament-matchups-list" style="display:flex;flex-direction:column;gap:8px"></div>
+      <div class="fgroup">
+        <label>Kazanan</label>
+        <select id="bracket-winner-select" class="finput"></select>
       </div>
-
-      <!-- Admin: Eşleşme girişi -->
-      <div class="admin-only" style="display:none;margin-top:16px;background:var(--surface);border-radius:10px;padding:14px 16px">
-        <div class="tournament-rules-title" style="margin-bottom:8px">✏️ Eşleşmeleri Gir (Admin)</div>
-        <p style="font-size:11px;color:var(--text-dim);margin-bottom:8px;line-height:1.5">
-          Her satıra şu formatta yazın:<br>
-          <code style="background:var(--surface2);padding:1px 5px;border-radius:3px;display:inline-block;margin-top:4px">Gün | Saat | Kort | Oyuncu 1 vs Oyuncu 2</code>
-        </p>
-        <textarea id="tournament-matchups-input" class="finput" rows="10" placeholder="14 Ağustos Cuma | 21:00 | 2.Kort | Turushan Övgü vs Gökhan Çelik
-14 Ağustos Cuma | 21:30 | 2.Kort | Zehra Erkan vs M. Berat Özyanık
-14 Ağustos Cuma | 22:00 | 3.Kort | Osman Topaloğlu vs Ümran Güner
-..." style="font-family:monospace;font-size:11.5px;resize:vertical"></textarea>
-        <div style="display:flex;gap:8px;margin-top:10px">
-          <button class="btn btn-green" onclick="saveTournamentMatchups()" style="flex:1">💾 Kaydet</button>
-          <button class="btn" onclick="clearTournamentMatchups()" style="flex:1">✕ Temizle</button>
-        </div>
-      </div>
-
-      <div class="tournament-rules" style="margin-top:16px">
-        <div class="tournament-rules-title">📋 Kural Açıklaması</div>
-        <div class="tournament-rule-item"><span>🎾</span><span>Tüm maçlar 21'de biten <strong>tek set tie break</strong> üzerinden oynanacaktır.</span></div>
-        <div class="tournament-rule-item"><span>🏆</span><span>Final maçı <strong>2 set</strong> üzerinden oynanacaktır.</span></div>
-        <div class="tournament-rule-item"><span>⚡</span><span>Eşitlik olması durumunda <strong>3. set tie break</strong> oynanacaktır.</span></div>
-        <div class="tournament-rule-item"><span>🏟️</span><span>Turnuva programı daha sonra duyurulacaktır.</span></div>
-      </div>
+      <button class="btn btn-green" onclick="saveBracketResult()" style="width:100%;margin-top:8px">💾 Sonucu Kaydet</button>
     </div>
   </div>
 
-  <!-- Albüm listesi -->
+  <!-- Eşleşmeler (public görünüm) -->
+  <div id="tournament-matchups-view" style="display:none;margin-bottom:16px">
+    <div class="tournament-rules-title" style="margin-bottom:10px">🎾 Eşleşmeler</div>
+    <div id="tournament-matchups-list" style="display:flex;flex-direction:column;gap:8px"></div>
+  </div>
+
+  <!-- Admin: Eşleşme girişi -->
+  <div class="admin-only" style="display:none;margin-bottom:16px;background:var(--surface);border-radius:10px;padding:14px 16px">
+    <div class="tournament-rules-title" style="margin-bottom:8px">✏️ Eşleşmeleri Gir (Admin)</div>
+    <p style="font-size:11px;color:var(--text-dim);margin-bottom:8px;line-height:1.5">
+      Her satıra şu formatta yazın:<br>
+      <code style="background:var(--surface2);padding:1px 5px;border-radius:3px;display:inline-block;margin-top:4px">Gün | Saat | Kort | Oyuncu 1 vs Oyuncu 2</code>
+    </p>
+    <textarea id="tournament-matchups-input" class="finput" rows="10" placeholder="14 Ağustos Cuma | 21:00 | 2.Kort | Turushan Övgü vs Gökhan Çelik
+14 Ağustos Cuma | 21:30 | 2.Kort | Zehra Erkan vs M. Berat Özyanık
+14 Ağustos Cuma | 22:00 | 3.Kort | Osman Topaloğlu vs Ümran Güner
+..." style="font-family:monospace;font-size:11.5px;resize:vertical"></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn btn-green" onclick="saveTournamentMatchups()" style="flex:1">💾 Kaydet</button>
+      <button class="btn" onclick="clearTournamentMatchups()" style="flex:1">✕ Temizle</button>
+    </div>
+  </div>
+
+  <!-- Kurallar (dinamik) -->
+  <div id="tournament-rules-display"></div>
+
+  <!-- Geçmiş Turnuvalar Arşivi -->
+  <div id="tournament-archive-section" style="display:none;margin-top:24px">
+    <div class="tournament-rules-title" style="margin-bottom:10px">🗄️ Geçmiş Turnuvalar</div>
+    <div id="tournament-archive-list" style="display:flex;flex-direction:column;gap:10px"></div>
+  </div>
 </div>
 
 <!-- ══ ARŞİV ══ -->
@@ -5314,7 +5336,7 @@ function showPage(name) {
   if (name === 'sonuclar')   { renderResults(); }
   if (name === 'fiktur')     { renderFixture(); }
   if (name === 'arsiv')      { renderArchive(); }
-  if (name === 'galeri')     { renderGaleri(); renderTournamentMatchups(); renderBracket(); }
+  if (name === 'galeri')     { renderGaleri(); renderTournamentMatchups(); renderBracket(); renderActiveTournamentCard(); }
   if (name === 'ranking')    { renderRanking(); }
   if (name === 'istatistik') { renderStats(); }
   if (name === 'yonetim')    { renderAdminTable(); }
@@ -5455,6 +5477,213 @@ async function saveEditPlayer() {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeEditPlayer(); closeProfile(); }
 });
+
+// ═══════════════════════════════════════════════════
+// TURNUVA YÖNETİMİ (Dinamik)
+// ═══════════════════════════════════════════════════
+const TOURNAMENT_INFO_KEY = 'rta_tournament_info';
+const TOURNAMENT_ARCHIVE_KEY = 'rta_tournament_archive';
+
+const STATUS_LABELS = {
+  upcoming: { cls: 'status-upcoming', label: '⏳ Yaklaşıyor' },
+  active:   { cls: 'status-active',   label: '🟢 Devam Ediyor' },
+  done:     { cls: 'status-done',     label: '⚫ Tamamlandı' },
+};
+
+function loadTournamentInfo() {
+  try { return JSON.parse(localStorage.getItem(TOURNAMENT_INFO_KEY) || 'null'); } catch { return null; }
+}
+function saveTournamentInfoLocal(data) {
+  localStorage.setItem(TOURNAMENT_INFO_KEY, JSON.stringify(data));
+}
+function loadTournamentArchiveList() {
+  try { return JSON.parse(localStorage.getItem(TOURNAMENT_ARCHIVE_KEY) || '[]'); } catch { return []; }
+}
+function saveTournamentArchiveLocal(data) {
+  localStorage.setItem(TOURNAMENT_ARCHIVE_KEY, JSON.stringify(data));
+}
+
+function saveTournamentInfo() {
+  const name = document.getElementById('tm-name').value.trim();
+  const sub = document.getElementById('tm-sub').value.trim();
+  const status = document.getElementById('tm-status').value;
+  const announcement = document.getElementById('tm-announcement').value.trim();
+  const rulesRaw = document.getElementById('tm-rules').value.trim();
+  const rules = rulesRaw.split('\n').map(r => r.trim()).filter(r => r);
+
+  if (!name) { showToast('Turnuva adı boş olamaz', 'err'); return; }
+
+  const info = { name, sub, status, announcement, rules };
+  saveTournamentInfoLocal(info);
+
+  if (window._sbAdmin) {
+    window._sbAdmin.from('meta').update({ tournament_info: info }).eq('id', 1)
+      .then(({ error }) => {
+        if (error) { showToast('Supabase hatası: ' + error.message, 'err'); return; }
+        showToast('Turnuva bilgileri kaydedildi! ✅', 'ok');
+      });
+  }
+
+  renderActiveTournamentCard();
+  document.getElementById('tm-status-msg').textContent = '✅ Kaydedildi';
+}
+
+function archiveTournament() {
+  const info = loadTournamentInfo();
+  const bracket = loadBracket();
+  const matchups = localStorage.getItem(TOURNAMENT_MATCHUPS_KEY) || '';
+
+  if (!info) { showToast('Arşivlenecek turnuva yok', 'err'); return; }
+  if (!confirm(`"${info.name}" arşive taşınacak ve mevcut turnuva/ağaç/eşleşmeler temizlenecek. Devam?`)) return;
+
+  const archiveEntry = {
+    id: Date.now(),
+    info,
+    bracket,
+    matchups,
+    archivedDate: new Date().toISOString().split('T')[0],
+  };
+
+  const archiveList = loadTournamentArchiveList();
+  archiveList.unshift(archiveEntry);
+  saveTournamentArchiveLocal(archiveList);
+
+  // Aktif turnuvayı temizle
+  localStorage.removeItem(TOURNAMENT_INFO_KEY);
+  localStorage.removeItem(BRACKET_KEY);
+  localStorage.removeItem(TOURNAMENT_MATCHUPS_KEY);
+
+  if (window._sbAdmin) {
+    window._sbAdmin.from('meta').update({
+      tournament_info: null,
+      tournament_bracket: null,
+      tournament_matchups: null,
+      tournament_archive: archiveList,
+    }).eq('id', 1).then(({ error }) => {
+      if (error) showToast('Supabase hatası: ' + error.message, 'err');
+    });
+  }
+
+  document.getElementById('tm-name').value = '';
+  document.getElementById('tm-sub').value = '';
+  document.getElementById('tm-announcement').value = '';
+  document.getElementById('tm-rules').value = '';
+
+  renderActiveTournamentCard();
+  renderTournamentArchive();
+  showToast(`"${info.name}" arşivlendi! Yeni turnuva girebilirsiniz.`, 'ok');
+}
+
+function renderActiveTournamentCard() {
+  const sbClient = window._sbAdmin || window._sb;
+  if (window._sbReady && sbClient) {
+    sbClient.from('meta').select('tournament_info, tournament_archive').eq('id', 1).single()
+      .then(({ data }) => {
+        if (data) {
+          if (data.tournament_info) saveTournamentInfoLocal(data.tournament_info);
+          if (data.tournament_archive) saveTournamentArchiveLocal(data.tournament_archive);
+        }
+        _renderActiveTournamentCardDisplay();
+        renderTournamentArchive();
+      })
+      .catch(() => { _renderActiveTournamentCardDisplay(); renderTournamentArchive(); });
+  } else {
+    _renderActiveTournamentCardDisplay();
+    renderTournamentArchive();
+  }
+}
+
+function _renderActiveTournamentCardDisplay() {
+  const box = document.getElementById('active-tournament-card');
+  const rulesBox = document.getElementById('tournament-rules-display');
+  if (!box) return;
+
+  const info = loadTournamentInfo();
+
+  // Admin formunu doldur
+  if (info) {
+    const nameEl = document.getElementById('tm-name');
+    if (nameEl && !nameEl.value) {
+      document.getElementById('tm-name').value = info.name || '';
+      document.getElementById('tm-sub').value = info.sub || '';
+      document.getElementById('tm-status').value = info.status || 'upcoming';
+      document.getElementById('tm-announcement').value = info.announcement || '';
+      document.getElementById('tm-rules').value = (info.rules || []).join('\n');
+    }
+  }
+
+  if (!info || !info.name) {
+    box.innerHTML = '';
+    rulesBox.innerHTML = '';
+    return;
+  }
+
+  const statusInfo = STATUS_LABELS[info.status] || STATUS_LABELS.upcoming;
+
+  const announcementHtml = info.announcement ? `
+    <div style="background:rgba(224,85,85,0.15);border:1px solid rgba(224,85,85,0.4);border-radius:10px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:flex-start;gap:8px">
+      <span style="font-size:16px;flex-shrink:0">⚠️</span>
+      <span style="font-size:13px;color:#ff9999;line-height:1.5">${info.announcement}</span>
+    </div>` : '';
+
+  box.innerHTML = `
+    <div class="tournament-card">
+      <div class="tournament-header">
+        <div class="tournament-status ${statusInfo.cls}">${statusInfo.label}</div>
+        <div class="tournament-name">${info.name}</div>
+        ${info.sub ? `<div class="tournament-sub">${info.sub}</div>` : ''}
+      </div>
+      <div class="tournament-body">
+        ${announcementHtml}
+      </div>
+    </div>`;
+
+  if (info.rules && info.rules.length) {
+    rulesBox.innerHTML = `
+      <div class="tournament-rules" style="margin-bottom:16px">
+        <div class="tournament-rules-title">📋 Kural Açıklaması</div>
+        ${info.rules.map(r => `<div class="tournament-rule-item"><span>${r}</span></div>`).join('')}
+      </div>`;
+  } else {
+    rulesBox.innerHTML = '';
+  }
+}
+
+function renderTournamentArchive() {
+  const section = document.getElementById('tournament-archive-section');
+  const list = document.getElementById('tournament-archive-list');
+  if (!section || !list) return;
+
+  const archive = loadTournamentArchiveList();
+  if (!archive.length) { section.style.display = 'none'; return; }
+
+  section.style.display = 'block';
+  list.innerHTML = archive.map(entry => {
+    const champ = entry.bracket?.matches?.[31]?.winner;
+    return `<div style="background:var(--surface);border-radius:10px;padding:14px 16px;cursor:pointer" onclick="viewArchivedTournament(${entry.id})">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-weight:600;color:var(--text);font-size:13px">${entry.info.name}</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:2px">📅 ${entry.archivedDate}</div>
+        </div>
+        ${champ ? `<div style="text-align:right"><div style="font-size:10px;color:var(--gold)">🏆 ŞAMPİYON</div><div style="font-size:12px;color:var(--gold);font-weight:600">${champ}</div></div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function viewArchivedTournament(id) {
+  const archive = loadTournamentArchiveList();
+  const entry = archive.find(e => e.id === id);
+  if (!entry) return;
+
+  // Geçici olarak bracket ve bilgiyi göster (salt okunur mod)
+  saveBracketLocal(entry.bracket);
+  _renderBracketDisplay();
+  document.getElementById('bracket-section').style.display = 'block';
+  document.getElementById('bracket-section').scrollIntoView({ behavior: 'smooth' });
+  showToast(`"${entry.info.name}" ağacı gösteriliyor (arşiv)`, 'ok');
+}
 
 // ═══════════════════════════════════════════════════
 // TURNUVA AĞACI (BRACKET)
