@@ -2644,6 +2644,15 @@ Tayfun Selek vs Derya Özdemir
         <select id="bracket-winner-select" class="finput"></select>
       </div>
       <button class="btn btn-green" onclick="saveBracketResult()" style="width:100%;margin-top:8px">💾 Sonucu Kaydet</button>
+
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+        <div class="tournament-rules-title" style="margin-bottom:8px;color:var(--red)">🔄 Yanlış Sonucu Geri Al</div>
+        <div class="fgroup">
+          <label>Sonuçlanmış Maç Seç</label>
+          <select id="bracket-reset-select" class="finput"></select>
+        </div>
+        <button class="btn" style="width:100%;background:rgba(224,85,85,0.15);color:#ff8888;border:1px solid rgba(224,85,85,0.3)" onclick="resetBracketMatch()">↩️ Bu Maçı Sıfırla</button>
+      </div>
     </div>
   </div>
 
@@ -5851,6 +5860,52 @@ function populateBracketMatchSelect() {
   }
   sel.innerHTML = opts.length ? opts.join('') : '<option value="">Bekleyen maç yok</option>';
   onBracketMatchSelect();
+
+  // Sıfırlama dropdown'ını da doldur - sonuçlanmış maçlar
+  const resetSel = document.getElementById('bracket-reset-select');
+  if (resetSel) {
+    const resetOpts = [];
+    for (let n = 1; n <= 31; n++) {
+      const m = bracket.matches[n];
+      if (!m.p1 || !m.p2 || !m.winner) continue;
+      const loser = m.winner === m.p1 ? m.p2 : m.p1;
+      resetOpts.push(`<option value="${n}">Maç ${n}: ${m.winner} kazandı (${loser}'ı yendi)</option>`);
+    }
+    resetSel.innerHTML = resetOpts.length ? resetOpts.join('') : '<option value="">Sonuçlanmış maç yok</option>';
+  }
+}
+
+function resetBracketMatch() {
+  const matchNum = parseInt(document.getElementById('bracket-reset-select').value);
+  if (!matchNum) { showToast('Sıfırlanacak maç seçin', 'err'); return; }
+  if (!confirm('Bu maç sonucu sıfırlanacak. Eğer kazanan bir üst tura zaten yerleştiyse, o eşleşme de bozulacak. Devam?')) return;
+
+  const bracket = loadBracket();
+  const m = bracket.matches[matchNum];
+  const winner = m.winner;
+  m.winner = null;
+
+  // Bir üst turdaki yerleştirmeyi de geri al
+  const nextNum = getFeederMatch(matchNum);
+  if (nextNum) {
+    const next = bracket.matches[nextNum];
+    if (next.p1 === winner) next.p1 = null;
+    if (next.p2 === winner) next.p2 = null;
+    // Eğer üst maç da sonuçlanmışsa onu da sıfırla (zincirleme)
+    if (next.winner === winner) next.winner = null;
+  }
+
+  saveBracketLocal(bracket);
+  if (window._sbAdmin) {
+    window._sbAdmin.from('meta').update({ tournament_bracket: bracket }).eq('id', 1)
+      .then(({ error }) => {
+        if (error) showToast('Supabase hatası: ' + error.message, 'err');
+      });
+  }
+
+  renderBracket();
+  populateBracketMatchSelect();
+  showToast('Maç sonucu sıfırlandı ↩️', 'ok');
 }
 
 function onBracketMatchSelect() {
