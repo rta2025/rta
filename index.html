@@ -2557,40 +2557,49 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
   <!-- AKTİF TURNUVA KARTI (dinamik) -->
   <div id="active-tournament-card"></div>
 
-  <!-- Admin: Turnuva Yönet -->
-  <div class="admin-only" style="display:none;margin-bottom:16px;background:var(--surface);border-radius:10px;padding:14px 16px">
-    <div class="tournament-rules-title" style="margin-bottom:8px">🎾 Turnuva Bilgilerini Yönet (Admin)</div>
-    <div class="fgroup">
-      <label>Turnuva Adı</label>
-      <input type="text" id="tm-name" class="finput" placeholder="örn. RTA 500 Tie Break Turnuvası">
+  <!-- Admin: Turnuva Yönet Butonları -->
+  <div class="admin-only" style="display:none;margin-bottom:16px">
+    <div id="tm-action-buttons" style="display:flex;gap:8px">
+      <button class="btn btn-sm" id="tm-edit-btn" onclick="openTournamentForm('edit')" style="flex:1;display:none">✏️ Bu Turnuvayı Düzenle</button>
+      <button class="btn btn-sm" onclick="openTournamentForm('new')" style="flex:1;background:rgba(93,201,93,0.15);color:var(--accent);border:1px solid rgba(93,201,93,0.3)">🎾 Yeni Turnuva Oluştur</button>
     </div>
-    <div class="fgroup">
-      <label>Alt Başlık</label>
-      <input type="text" id="tm-sub" class="finput" placeholder="örn. 21'de Biten Tek Set Tie Break">
-    </div>
-    <div class="fgroup">
-      <label>Durum</label>
-      <select id="tm-status" class="finput">
-        <option value="upcoming">⏳ Yaklaşıyor</option>
-        <option value="active">🟢 Devam Ediyor</option>
-        <option value="done">⚫ Tamamlandı</option>
-      </select>
-    </div>
-    <div class="fgroup">
-      <label>Duyuru (isteğe bağlı — boşsa gösterilmez)</label>
-      <textarea id="tm-announcement" class="finput" rows="2" placeholder="örn. Olumsuz hava koşulları nedeniyle program değişebilir..."></textarea>
-    </div>
-    <div class="fgroup">
-      <label>Kurallar (her satır bir kural)</label>
-      <textarea id="tm-rules" class="finput" rows="5" placeholder="🎾 Tüm maçlar 21'de biten tek set tie break üzerinden oynanacaktır.
+
+    <div id="tm-form-box" style="display:none;margin-top:12px;background:var(--surface);border-radius:10px;padding:14px 16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div class="tournament-rules-title" id="tm-form-title" style="margin-bottom:0">🎾 Turnuva Bilgilerini Yönet</div>
+        <button class="btn btn-sm" onclick="closeTournamentForm()" style="padding:4px 10px">✕</button>
+      </div>
+      <div class="fgroup">
+        <label>Turnuva Adı</label>
+        <input type="text" id="tm-name" class="finput" placeholder="örn. RTA 500 Tie Break Turnuvası">
+      </div>
+      <div class="fgroup">
+        <label>Alt Başlık</label>
+        <input type="text" id="tm-sub" class="finput" placeholder="örn. 21'de Biten Tek Set Tie Break">
+      </div>
+      <div class="fgroup">
+        <label>Durum</label>
+        <select id="tm-status" class="finput">
+          <option value="upcoming">⏳ Yaklaşıyor</option>
+          <option value="active">🟢 Devam Ediyor</option>
+          <option value="done">⚫ Tamamlandı</option>
+        </select>
+      </div>
+      <div class="fgroup">
+        <label>Duyuru (isteğe bağlı — boşsa gösterilmez)</label>
+        <textarea id="tm-announcement" class="finput" rows="2" placeholder="örn. Olumsuz hava koşulları nedeniyle program değişebilir..."></textarea>
+      </div>
+      <div class="fgroup">
+        <label>Kurallar (her satır bir kural)</label>
+        <textarea id="tm-rules" class="finput" rows="5" placeholder="🎾 Tüm maçlar 21'de biten tek set tie break üzerinden oynanacaktır.
 🏆 Final maçı 2 set üzerinden oynanacaktır.
 ⚡ Eşitlik olması durumunda 3. set tie break oynanacaktır." style="font-size:12px"></textarea>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn btn-green" onclick="saveTournamentInfo()" style="flex:1">💾 Kaydet</button>
+        <button class="btn" style="color:var(--red)" id="tm-archive-btn" onclick="archiveTournament()" style="flex:1">📦 Turnuvayı Arşivle & Yeni Başlat</button>
+      </div>
     </div>
-    <div style="display:flex;gap:8px;margin-top:8px">
-      <button class="btn btn-green" onclick="saveTournamentInfo()" style="flex:1">💾 Kaydet</button>
-      <button class="btn" style="color:var(--red)" onclick="archiveTournament()" style="flex:1">📦 Turnuvayı Arşivle & Yeni Başlat</button>
-    </div>
-    <div id="tm-status-msg" style="margin-top:8px;font-size:11px;color:var(--text-dim)"></div>
   </div>
 
   <!-- Turnuva Ağacı -->
@@ -5513,6 +5522,38 @@ function saveTournamentArchiveLocal(data) {
   localStorage.setItem(TOURNAMENT_ARCHIVE_KEY, JSON.stringify(data));
 }
 
+function openTournamentForm(mode) {
+  const formBox = document.getElementById('tm-form-box');
+  const formTitle = document.getElementById('tm-form-title');
+  const archiveBtn = document.getElementById('tm-archive-btn');
+  const info = loadTournamentInfo();
+
+  if (mode === 'edit' && info) {
+    document.getElementById('tm-name').value = info.name || '';
+    document.getElementById('tm-sub').value = info.sub || '';
+    document.getElementById('tm-status').value = info.status || 'upcoming';
+    document.getElementById('tm-announcement').value = info.announcement || '';
+    document.getElementById('tm-rules').value = (info.rules || []).join('\n');
+    formTitle.textContent = '✏️ Turnuvayı Düzenle';
+    archiveBtn.style.display = 'block';
+  } else {
+    document.getElementById('tm-name').value = '';
+    document.getElementById('tm-sub').value = '';
+    document.getElementById('tm-status').value = 'upcoming';
+    document.getElementById('tm-announcement').value = '';
+    document.getElementById('tm-rules').value = '';
+    formTitle.textContent = '🎾 Yeni Turnuva Oluştur';
+    archiveBtn.style.display = info ? 'block' : 'none';
+  }
+
+  formBox.style.display = 'block';
+  formBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function closeTournamentForm() {
+  document.getElementById('tm-form-box').style.display = 'none';
+}
+
 function saveTournamentInfo() {
   const name = document.getElementById('tm-name').value.trim();
   const sub = document.getElementById('tm-sub').value.trim();
@@ -5535,7 +5576,7 @@ function saveTournamentInfo() {
   }
 
   renderActiveTournamentCard();
-  document.getElementById('tm-status-msg').textContent = '✅ Kaydedildi';
+  closeTournamentForm();
 }
 
 function archiveTournament() {
@@ -5578,6 +5619,7 @@ function archiveTournament() {
   document.getElementById('tm-sub').value = '';
   document.getElementById('tm-announcement').value = '';
   document.getElementById('tm-rules').value = '';
+  closeTournamentForm();
 
   renderActiveTournamentCard();
   renderTournamentArchive();
@@ -5606,21 +5648,12 @@ function renderActiveTournamentCard() {
 function _renderActiveTournamentCardDisplay() {
   const box = document.getElementById('active-tournament-card');
   const rulesBox = document.getElementById('tournament-rules-display');
+  const editBtn = document.getElementById('tm-edit-btn');
   if (!box) return;
 
   const info = loadTournamentInfo();
 
-  // Admin formunu doldur
-  if (info) {
-    const nameEl = document.getElementById('tm-name');
-    if (nameEl && !nameEl.value) {
-      document.getElementById('tm-name').value = info.name || '';
-      document.getElementById('tm-sub').value = info.sub || '';
-      document.getElementById('tm-status').value = info.status || 'upcoming';
-      document.getElementById('tm-announcement').value = info.announcement || '';
-      document.getElementById('tm-rules').value = (info.rules || []).join('\n');
-    }
-  }
+  if (editBtn) editBtn.style.display = (info && info.name) ? 'block' : 'none';
 
   if (!info || !info.name) {
     box.innerHTML = '';
