@@ -1900,6 +1900,7 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
   }
 </script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
@@ -2582,7 +2583,10 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
 
       <!-- Turnuva Ağacı -->
       <div id="bracket-section" style="display:none;margin-top:16px">
-        <div class="tournament-rules-title" style="margin-bottom:10px">🏆 Turnuva Ağacı</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div class="tournament-rules-title" style="margin-bottom:0">🏆 Turnuva Ağacı</div>
+          <button class="btn btn-sm" onclick="downloadBracketImage()" style="background:rgba(255,200,0,0.15);color:var(--gold);border:1px solid rgba(255,200,0,0.3)">📸 Görsel İndir</button>
+        </div>
         <div class="bracket-wrap"><div class="bracket" id="bracket-container"></div></div>
         <div id="bracket-champion-box"></div>
       </div>
@@ -5628,6 +5632,30 @@ function clearBracket() {
   showToast('Turnuva ağacı sıfırlandı', 'ok');
 }
 
+function downloadBracketImage() {
+  const el = document.getElementById('bracket-container');
+  if (!el || typeof html2canvas === 'undefined') {
+    showToast('Görsel oluşturma aracı yüklenemedi', 'err');
+    return;
+  }
+  showToast('Görsel hazırlanıyor... ⏳', 'ok');
+
+  html2canvas(el, {
+    backgroundColor: '#0d120d',
+    scale: 2,
+    useCORS: true,
+  }).then(canvas => {
+    const link = document.createElement('a');
+    link.download = 'RTA-500-Tiebreak-Turnuva-Agaci.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    showToast('Görsel indirildi! 📸', 'ok');
+  }).catch(err => {
+    console.error(err);
+    showToast('Görsel oluşturulamadı', 'err');
+  });
+}
+
 function renderBracket() {
   const sbClient = window._sbAdmin || window._sb;
   if (window._sbReady && sbClient) {
@@ -5672,7 +5700,11 @@ function _renderBracketDisplay() {
       // Başlık 2 satır kapladığı için tüm maçlar +2 satır aşağıdan başlar
       const rowStart = 3 + i * rowsPerMatch;
       const rowEnd = rowStart + rowsPerMatch;
-      html += `<div class="bracket-match" style="grid-row: ${rowStart} / ${rowEnd}">
+      const isFinal = round.round === 5;
+      const finalStyle = isFinal ? 'border-color:var(--gold);box-shadow:0 0 12px rgba(255,200,0,0.3)' : '';
+      const trophyIcon = isFinal ? '<span style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:16px">🏆</span>' : '';
+      html += `<div class="bracket-match" style="grid-row: ${rowStart} / ${rowEnd}; ${finalStyle}">
+        ${trophyIcon}
         <span class="bracket-match-num">M${matchIdx}</span>
         <div class="bracket-slot ${p1cls}"><span class="bracket-slot-name">${p1}</span></div>
         <div class="bracket-vs-line"></div>
