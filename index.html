@@ -1845,7 +1845,7 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
   background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
   padding: 8px 10px; font-size: 11.5px; position: relative;
   display: flex; flex-direction: column; justify-content: center;
-  align-self: center; height: 52px; box-sizing: border-box;
+  align-self: center; min-height: 52px; height: auto; box-sizing: border-box;
 }
 
 /* Bağlantı çizgileri - her maçtan sağa çıkan yatay çizgi */
@@ -2652,6 +2652,10 @@ Tayfun Selek vs Derya Özdemir
       <div class="fgroup">
         <label>Kazanan</label>
         <select id="bracket-winner-select" class="finput"></select>
+      </div>
+      <div class="fgroup">
+        <label>Skor (isteğe bağlı — örn. 21-15)</label>
+        <input type="text" id="bracket-score-input" class="finput" placeholder="21-15">
       </div>
       <button class="btn btn-green" onclick="saveBracketResult()" style="width:100%;margin-top:8px">💾 Sonucu Kaydet</button>
 
@@ -5942,10 +5946,12 @@ function onBracketMatchSelect() {
 function saveBracketResult() {
   const matchNum = parseInt(document.getElementById('bracket-match-select').value);
   const winner = document.getElementById('bracket-winner-select').value;
+  const score = document.getElementById('bracket-score-input').value.trim();
   if (!matchNum || !winner) { showToast('Maç ve kazanan seçin', 'err'); return; }
 
   const bracket = loadBracket();
   bracket.matches[matchNum].winner = winner;
+  bracket.matches[matchNum].score = score || '';
   placeWinnerInNextMatch(bracket.matches, matchNum, winner);
 
   saveBracketLocal(bracket);
@@ -5956,6 +5962,7 @@ function saveBracketResult() {
       });
   }
 
+  document.getElementById('bracket-score-input').value = '';
   renderBracket();
   populateBracketMatchSelect();
   showToast(`${winner} bir üst tura yükseldi! 🎾`, 'ok');
@@ -6061,6 +6068,7 @@ function _renderBracketDisplay() {
       const finalStyle = isFinal ? 'border-color:var(--gold);box-shadow:0 0 12px rgba(255,200,0,0.3)' : '';
       const trophyIcon = isFinal ? '<span style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:16px">🏆</span>' : '';
       const roundTitleHtml = i === 0 ? `<div class="bracket-round-title" style="position:absolute;top:${isFinal ? '-38px' : '-22px'};left:0;right:0">${round.title}</div>` : '';
+      const scoreHtml = (m.winner && m.score) ? `<div style="text-align:center;font-size:9px;color:var(--gold);margin-top:2px">${m.score}</div>` : '';
       html += `<div class="bracket-match" style="grid-row: ${rowStart} / ${rowEnd}; ${finalStyle}">
         ${roundTitleHtml}
         ${trophyIcon}
@@ -6068,6 +6076,7 @@ function _renderBracketDisplay() {
         <div class="bracket-slot ${p1cls}"><span class="bracket-slot-name">${p1}</span></div>
         <div class="bracket-vs-line"></div>
         <div class="bracket-slot ${p2cls}"><span class="bracket-slot-name">${p2}</span></div>
+        ${scoreHtml}
       </div>`;
       matchIdx++;
     }
