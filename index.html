@@ -2587,6 +2587,16 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
       </div>
       <div class="fgroup">
         <label>Duyuru (isteğe bağlı — boşsa gösterilmez)</label>
+        <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap">
+          <button type="button" class="btn btn-sm" onclick="insertAnnouncementEmoji('⚠️')" style="padding:4px 10px;font-size:16px">⚠️</button>
+          <button type="button" class="btn btn-sm" onclick="insertAnnouncementEmoji('📢')" style="padding:4px 10px;font-size:16px">📢</button>
+          <button type="button" class="btn btn-sm" onclick="insertAnnouncementEmoji('☕')" style="padding:4px 10px;font-size:16px">☕</button>
+          <button type="button" class="btn btn-sm" onclick="insertAnnouncementEmoji('🎾')" style="padding:4px 10px;font-size:16px">🎾</button>
+          <button type="button" class="btn btn-sm" onclick="insertAnnouncementEmoji('🏆')" style="padding:4px 10px;font-size:16px">🏆</button>
+          <button type="button" class="btn btn-sm" onclick="insertAnnouncementEmoji('⏰')" style="padding:4px 10px;font-size:16px">⏰</button>
+          <button type="button" class="btn btn-sm" onclick="insertAnnouncementEmoji('🌧️')" style="padding:4px 10px;font-size:16px">🌧️</button>
+          <button type="button" class="btn btn-sm" onclick="insertAnnouncementEmoji('✅')" style="padding:4px 10px;font-size:16px">✅</button>
+        </div>
         <textarea id="tm-announcement" class="finput" rows="2" placeholder="örn. Olumsuz hava koşulları nedeniyle program değişebilir..."></textarea>
       </div>
       <div class="fgroup">
@@ -5529,6 +5539,16 @@ function loadTournamentArchiveList() {
 }
 function saveTournamentArchiveLocal(data) {
   localStorage.setItem(TOURNAMENT_ARCHIVE_KEY, JSON.stringify(data));
+}
+
+function insertAnnouncementEmoji(emoji) {
+  const el = document.getElementById('tm-announcement');
+  let text = el.value.trim();
+  // Metnin başında zaten bir emoji varsa değiştir, yoksa başa ekle
+  const emojiRegex = /^[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]+\s*/u;
+  text = text.replace(emojiRegex, '');
+  el.value = emoji + ' ' + text;
+  el.focus();
 }
 
 function openTournamentForm(mode) {
