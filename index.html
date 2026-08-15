@@ -5819,17 +5819,18 @@ function setupBracket() {
 
   const bracketData = { matches, createdAt: new Date().toISOString() };
   saveBracketLocal(bracketData);
+
+  _renderBracketDisplay();
+  populateBracketMatchSelect();
+  document.getElementById('bracket-result-entry').style.display = 'block';
+  document.getElementById('bracket-admin-status').textContent = '✅ Ağaç oluşturuldu, 16 maç hazır';
+
   if (window._sbAdmin) {
     window._sbAdmin.from('meta').update({ tournament_bracket: bracketData }).eq('id', 1)
       .then(({ error }) => {
         if (error) showToast('Supabase hatası: ' + error.message, 'err');
       });
   }
-
-  renderBracket();
-  populateBracketMatchSelect();
-  document.getElementById('bracket-result-entry').style.display = 'block';
-  document.getElementById('bracket-admin-status').textContent = '✅ Ağaç oluşturuldu, 16 maç hazır';
   showToast('Turnuva ağacı oluşturuldu! 🏆', 'ok');
 }
 
@@ -5920,16 +5921,17 @@ function resetBracketMatch() {
   }
 
   saveBracketLocal(bracket);
+
+  _renderBracketDisplay();
+  populateBracketMatchSelect();
+  showToast('Maç sonucu sıfırlandı ↩️', 'ok');
+
   if (window._sbAdmin) {
     window._sbAdmin.from('meta').update({ tournament_bracket: bracket }).eq('id', 1)
       .then(({ error }) => {
         if (error) showToast('Supabase hatası: ' + error.message, 'err');
       });
   }
-
-  renderBracket();
-  populateBracketMatchSelect();
-  showToast('Maç sonucu sıfırlandı ↩️', 'ok');
 }
 
 function onBracketMatchSelect() {
@@ -5955,30 +5957,33 @@ function saveBracketResult() {
   placeWinnerInNextMatch(bracket.matches, matchNum, winner);
 
   saveBracketLocal(bracket);
+
+  // Önce ekranı yerel veriyle hemen güncelle (Supabase'i beklemeden)
+  document.getElementById('bracket-score-input').value = '';
+  _renderBracketDisplay();
+  populateBracketMatchSelect();
+  showToast(`${winner} bir üst tura yükseldi! 🎾`, 'ok');
+
+  // Sonra Supabase'e arka planda kaydet
   if (window._sbAdmin) {
     window._sbAdmin.from('meta').update({ tournament_bracket: bracket }).eq('id', 1)
       .then(({ error }) => {
         if (error) showToast('Supabase hatası: ' + error.message, 'err');
       });
   }
-
-  document.getElementById('bracket-score-input').value = '';
-  renderBracket();
-  populateBracketMatchSelect();
-  showToast(`${winner} bir üst tura yükseldi! 🎾`, 'ok');
 }
 
 function clearBracket() {
   if (!confirm('Turnuva ağacı tamamen silinecek!')) return;
   localStorage.removeItem(BRACKET_KEY);
-  if (window._sbAdmin) {
-    window._sbAdmin.from('meta').update({ tournament_bracket: null }).eq('id', 1).catch(() => {});
-  }
   document.getElementById('bracket-setup-input').value = '';
   document.getElementById('bracket-result-entry').style.display = 'none';
   document.getElementById('bracket-admin-status').textContent = '';
-  renderBracket();
+  _renderBracketDisplay();
   showToast('Turnuva ağacı sıfırlandı', 'ok');
+  if (window._sbAdmin) {
+    window._sbAdmin.from('meta').update({ tournament_bracket: null }).eq('id', 1).catch(() => {});
+  }
 }
 
 function downloadBracketImage() {
