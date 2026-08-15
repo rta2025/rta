@@ -1845,7 +1845,7 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
   background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
   padding: 8px 10px; font-size: 11.5px; position: relative;
   display: flex; flex-direction: column; justify-content: center;
-  align-self: center; min-height: 52px; height: auto; box-sizing: border-box;
+  align-self: center; height: 52px; box-sizing: border-box;
 }
 
 /* Bağlantı çizgileri - her maçtan sağa çıkan yatay çizgi */
@@ -6068,15 +6068,16 @@ function _renderBracketDisplay() {
       const finalStyle = isFinal ? 'border-color:var(--gold);box-shadow:0 0 12px rgba(255,200,0,0.3)' : '';
       const trophyIcon = isFinal ? '<span style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:16px">🏆</span>' : '';
       const roundTitleHtml = i === 0 ? `<div class="bracket-round-title" style="position:absolute;top:${isFinal ? '-38px' : '-22px'};left:0;right:0">${round.title}</div>` : '';
-      const scoreHtml = (m.winner && m.score) ? `<div style="text-align:center;font-size:9px;color:var(--gold);margin-top:2px">${m.score}</div>` : '';
+      const scoreTag = (m.winner && m.score) ? `<span style="font-size:9px;color:var(--gold);font-weight:600;margin-left:4px;flex-shrink:0">${m.score}</span>` : '';
+      const p1Score = (m.winner === m.p1) ? scoreTag : '';
+      const p2Score = (m.winner === m.p2) ? scoreTag : '';
       html += `<div class="bracket-match" style="grid-row: ${rowStart} / ${rowEnd}; ${finalStyle}">
         ${roundTitleHtml}
         ${trophyIcon}
         <span class="bracket-match-num">M${matchIdx}</span>
-        <div class="bracket-slot ${p1cls}"><span class="bracket-slot-name">${p1}</span></div>
+        <div class="bracket-slot ${p1cls}" style="display:flex;justify-content:space-between;align-items:center"><span class="bracket-slot-name">${p1}</span>${p1Score}</div>
         <div class="bracket-vs-line"></div>
-        <div class="bracket-slot ${p2cls}"><span class="bracket-slot-name">${p2}</span></div>
-        ${scoreHtml}
+        <div class="bracket-slot ${p2cls}" style="display:flex;justify-content:space-between;align-items:center"><span class="bracket-slot-name">${p2}</span>${p2Score}</div>
       </div>`;
       matchIdx++;
     }
