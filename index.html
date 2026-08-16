@@ -1843,9 +1843,9 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
 }
 .bracket-match {
   background: #10140f; border: 1px solid #242f24; border-radius: 6px;
-  padding: 8px 10px; font-size: 11.5px; position: relative;
+  padding: 7px 10px; font-size: 11.5px; position: relative;
   display: flex; flex-direction: column; justify-content: center;
-  align-self: center; height: 52px; box-sizing: border-box;
+  align-self: center; height: 46px; margin: 3px 0; box-sizing: border-box;
 }
 .bracket-match.decided {
   background: #10140f;
@@ -6134,7 +6134,7 @@ function _renderBracketDisplay() {
       const finalStyle = isFinal ? 'border-color:var(--gold);box-shadow:0 0 12px rgba(255,200,0,0.3)' : '';
       const trophyIcon = isFinal ? '<span style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:16px">🏆</span>' : '';
       const roundTitleHtml = i === 0 ? `<div class="bracket-round-title" style="position:absolute;top:${isFinal ? '-38px' : '-22px'};left:0;right:0">${round.title}</div>` : '';
-      const scoreTag = (m.winner && m.score) ? `<span style="display:inline-block;background:#ffc800;color:#1a1400;font-size:9px;font-weight:800;padding:1px 7px;border-radius:20px;margin-left:6px;flex-shrink:0">${m.score}</span>` : '';
+      const scoreTag = (m.winner && m.score) ? `<span style="display:inline-flex;align-items:center;justify-content:center;background:#ffc800;color:#1a1400;font-size:8.5px;font-weight:800;width:44px;height:16px;border-radius:20px;margin-left:6px;flex-shrink:0;white-space:nowrap">${m.score}</span>` : '';
       const p1Score = (m.winner === m.p1) ? scoreTag : '';
       const p2Score = (m.winner === m.p2) ? scoreTag : '';
       const decidedClass = (m.winner && !isBye) ? 'decided' : '';
