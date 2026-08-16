@@ -1842,11 +1842,14 @@ body.light-mode .zone-rel td { background: #fae3e3 !important; }
   color: var(--gold); text-align: center;
 }
 .bracket-match {
-  background: linear-gradient(90deg, rgba(74,222,128,0.08) 0%, #10140f 50%);
-  border: 1px solid #242f24; border-left: 4px solid #4ade80; border-radius: 6px;
+  background: #10140f; border: 1px solid #242f24; border-radius: 6px;
   padding: 8px 10px; font-size: 11.5px; position: relative;
   display: flex; flex-direction: column; justify-content: center;
   align-self: center; height: 52px; box-sizing: border-box;
+}
+.bracket-match.decided {
+  background: linear-gradient(90deg, rgba(74,222,128,0.08) 0%, #10140f 50%);
+  border-left: 4px solid #4ade80;
 }
 
 /* Bağlantı çizgileri - her maçtan sağa çıkan yatay çizgi */
@@ -6134,7 +6137,8 @@ function _renderBracketDisplay() {
       const scoreTag = (m.winner && m.score) ? `<span style="display:inline-block;background:#ffc800;color:#1a1400;font-size:9px;font-weight:800;padding:1px 7px;border-radius:20px;margin-left:6px;flex-shrink:0">${m.score}</span>` : '';
       const p1Score = (m.winner === m.p1) ? scoreTag : '';
       const p2Score = (m.winner === m.p2) ? scoreTag : '';
-      html += `<div class="bracket-match" style="grid-row: ${rowStart} / ${rowEnd}; ${finalStyle}">
+      const decidedClass = m.winner ? 'decided' : '';
+      html += `<div class="bracket-match ${decidedClass}" style="grid-row: ${rowStart} / ${rowEnd}; ${finalStyle}">
         ${roundTitleHtml}
         ${trophyIcon}
         <span class="bracket-match-num">M${matchIdx}</span>
