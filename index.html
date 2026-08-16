@@ -934,7 +934,7 @@ body.light-mode .po-type-btn { background:var(--surface2); }
   position: fixed;
   inset: 0;
   background: rgba(8,12,8,0.97);
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   z-index: 1000;
@@ -5404,6 +5404,7 @@ function showPage(name) {
   }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
+  localStorage.setItem('rta_last_page', name);
 
   const pages = ['puan','ranking','galeri','skor','sonuclar','fiktur','arsiv','istatistik','kurallar','yonetim'];
   document.querySelectorAll('.nav-btn').forEach((b, i) =>
@@ -6560,6 +6561,13 @@ setAdminUI(false); // Oturum durumu initAuth() ile (Supabase'den) belirlenecek
 try { renderAll(); } catch(e) { console.error('renderAll hatası:', e); }
 try { initCountdown(); } catch(e) { console.error('initCountdown hatası:', e); }
 try { initTheme(); } catch(e) { console.error('initTheme hatası:', e); }
+// Son açık sayfayı geri yükle (admin sayfaları hariç, giriş kontrolü gerektirir)
+try {
+  const lastPage = localStorage.getItem('rta_last_page');
+  if (lastPage && lastPage !== 'puan' && lastPage !== 'skor' && lastPage !== 'yonetim') {
+    showPage(lastPage);
+  }
+} catch(e) { console.error('Son sayfa geri yükleme hatası:', e); }
 // Turnuva popup'ı devre dışı
 
 async function initSupabase() {
