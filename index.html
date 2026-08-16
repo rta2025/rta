@@ -6192,10 +6192,29 @@ function populateMatchupPlayerSelects() {
   const p1Sel = document.getElementById('mu-p1');
   const p2Sel = document.getElementById('mu-p2');
   if (!p1Sel || !p2Sel) return;
-  const players = [...state.players].sort((a,b) => a.name.localeCompare(b.name, 'tr'));
-  const opts = players.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
+
+  // Önce turnuva ağacındaki (bracket) isimleri toplamayı dene
+  let names = [];
+  const bracket = loadBracket();
+  if (bracket && bracket.matches) {
+    const nameSet = new Set();
+    Object.values(bracket.matches).forEach(m => {
+      if (m.p1) nameSet.add(m.p1);
+      if (m.p2) nameSet.add(m.p2);
+    });
+    names = Array.from(nameSet);
+  }
+
+  // Bracket yoksa veya boşsa lig oyuncularına geri dön
+  if (!names.length) {
+    names = state.players.map(p => p.name);
+  }
+
+  names.sort((a,b) => a.localeCompare(b, 'tr'));
+  const opts = names.map(n => `<option value="${n}">${n}</option>`).join('');
   p1Sel.innerHTML = opts;
   p2Sel.innerHTML = opts;
+
   // Bugünün tarihini varsayılan yap
   const dateInput = document.getElementById('mu-date');
   if (dateInput && !dateInput.value) {
