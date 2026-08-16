@@ -6137,7 +6137,7 @@ function _renderBracketDisplay() {
       const scoreTag = (m.winner && m.score) ? `<span style="display:inline-block;background:#ffc800;color:#1a1400;font-size:9px;font-weight:800;padding:1px 7px;border-radius:20px;margin-left:6px;flex-shrink:0">${m.score}</span>` : '';
       const p1Score = (m.winner === m.p1) ? scoreTag : '';
       const p2Score = (m.winner === m.p2) ? scoreTag : '';
-      const decidedClass = m.winner ? 'decided' : '';
+      const decidedClass = (m.winner && !isBye) ? 'decided' : '';
       html += `<div class="bracket-match ${decidedClass}" style="grid-row: ${rowStart} / ${rowEnd}; ${finalStyle}">
         ${roundTitleHtml}
         ${trophyIcon}
