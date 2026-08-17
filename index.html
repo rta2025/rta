@@ -5648,13 +5648,94 @@ function saveTournamentInfo() {
   closeTournamentForm();
 }
 
+// Turnuva bracket'inden otomatik ranking puanı dağıt
+const TOURNAMENT_ROUND_POINTS = {
+  5: 500,  // Final kazananı = Şampiyon
+  4: 375,  // Final kaybedeni = Finalist (round 4 = final kaybedeni değil, aşağıda özel işleniyor)
+  // round bazlı elenme puanları aşağıda ayrıca hesaplanıyor
+};
+
+function distributeTournamentRankingPoints(bracket, tournamentName) {
+  if (!bracket || !bracket.matches) return [];
+
+  const entries = [];
+  const nowISO = new Date().toISOString().split('T')[0];
+  const seasonTag = 'tr_' + Date.now();
+
+  // Şampiyon ve Finalist (final maçı = M31)
+  const final = bracket.matches[31];
+  if (final && final.winner) {
+    const loser = final.winner === final.p1 ? final.p2 : final.p1;
+    entries.push({ player: final.winner, points: 500, label: `${tournamentName} — Şampiyon` });
+    if (loser) entries.push({ player: loser, points: 375, label: `${tournamentName} — Finalist` });
+  }
+
+  // Yarı finalistler (M29, M30 kaybedenleri)
+  [29, 30].forEach(n => {
+    const m = bracket.matches[n];
+    if (m && m.winner) {
+      const loser = m.winner === m.p1 ? m.p2 : m.p1;
+      if (loser) entries.push({ player: loser, points: 250, label: `${tournamentName} — Yarı Finalist` });
+    }
+  });
+
+  // Çeyrek finalistler (M25-M28 kaybedenleri)
+  [25, 26, 27, 28].forEach(n => {
+    const m = bracket.matches[n];
+    if (m && m.winner) {
+      const loser = m.winner === m.p1 ? m.p2 : m.p1;
+      if (loser) entries.push({ player: loser, points: 150, label: `${tournamentName} — Çeyrek Finalist` });
+    }
+  });
+
+  // Son 16 kaybedenleri (M17-M24 kaybedenleri)
+  for (let n = 17; n <= 24; n++) {
+    const m = bracket.matches[n];
+    if (m && m.winner) {
+      const loser = m.winner === m.p1 ? m.p2 : m.p1;
+      if (loser) entries.push({ player: loser, points: 75, label: `${tournamentName} — Son 16` });
+    }
+  }
+
+  // Son 32 kaybedenleri (M1-M16 kaybedenleri, bay geçenler hariç)
+  for (let n = 1; n <= 16; n++) {
+    const m = bracket.matches[n];
+    if (m && m.winner && m.p1 && m.p2) { // her iki oyuncu da varsa = gerçek maç, bay değil
+      const loser = m.winner === m.p1 ? m.p2 : m.p1;
+      if (loser) entries.push({ player: loser, points: 40, label: `${tournamentName} — Son 32` });
+    }
+  }
+
+  // Ranking sistemine ekle
+  const rankingEntries = loadRanking();
+  const newEntries = entries.map((e, i) => ({
+    id: seasonTag + '_' + i,
+    seasonId: null,
+    player: e.player,
+    league: currentLeagueOf(e.player),
+    rank: null,
+    source: 'tournament',
+    label: e.label,
+    points: e.points,
+    date: nowISO,
+  }));
+
+  saveRanking(rankingEntries.concat(newEntries));
+  sbUpsertRanking(newEntries);
+
+  return newEntries;
+}
+
 function archiveTournament() {
   const info = loadTournamentInfo();
   const bracket = loadBracket();
   const matchups = localStorage.getItem(TOURNAMENT_MATCHUPS_KEY) || '';
 
   if (!info) { showToast('Arşivlenecek turnuva yok', 'err'); return; }
-  if (!confirm(`"${info.name}" arşive taşınacak ve mevcut turnuva/ağaç/eşleşmeler temizlenecek. Devam?`)) return;
+  if (!confirm(`"${info.name}" arşive taşınacak, ranking puanları dağıtılacak ve mevcut turnuva/ağaç/eşleşmeler temizlenecek. Devam?`)) return;
+
+  // Ranking puanlarını dağıt
+  const distributed = distributeTournamentRankingPoints(bracket, info.name);
 
   const archiveEntry = {
     id: Date.now(),
@@ -5692,7 +5773,8 @@ function archiveTournament() {
 
   renderActiveTournamentCard();
   renderTournamentArchive();
-  showToast(`"${info.name}" arşivlendi! Yeni turnuva girebilirsiniz.`, 'ok');
+  renderRanking();
+  showToast(`"${info.name}" arşivlendi! ${distributed.length} oyuncuya ranking puanı dağıtıldı 🏆`, 'ok');
 }
 
 function renderActiveTournamentCard() {
