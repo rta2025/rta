@@ -2710,12 +2710,20 @@ Tayfun Selek vs Derya Özdemir
     <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:end">
       <div class="fgroup" style="margin-bottom:0">
         <label>Oyuncu 1</label>
-        <select id="mu-p1" class="finput"></select>
+        <select id="mu-p1" class="finput" onchange="if(this.value==='__custom__')toggleMuCustom(1,true)"></select>
+        <input type="text" id="mu-p1-custom" class="finput" placeholder="örn. A Maçı Galibi" style="display:none;margin-top:6px">
+        <div style="font-size:10px;margin-top:4px">
+          <a href="#" onclick="toggleMuCustom(1);return false" id="mu-p1-toggle-link" style="color:var(--accent);text-decoration:underline">Listede yok, elle yaz</a>
+        </div>
       </div>
       <div style="padding-bottom:10px;color:var(--text-dim);font-size:12px">vs</div>
       <div class="fgroup" style="margin-bottom:0">
         <label>Oyuncu 2</label>
-        <select id="mu-p2" class="finput"></select>
+        <select id="mu-p2" class="finput" onchange="if(this.value==='__custom__')toggleMuCustom(2,true)"></select>
+        <input type="text" id="mu-p2-custom" class="finput" placeholder="örn. B Maçı Galibi" style="display:none;margin-top:6px">
+        <div style="font-size:10px;margin-top:4px">
+          <a href="#" onclick="toggleMuCustom(2);return false" id="mu-p2-toggle-link" style="color:var(--accent);text-decoration:underline">Listede yok, elle yaz</a>
+        </div>
       </div>
     </div>
     <button class="btn btn-green" onclick="addMatchupRow()" style="width:100%;margin-top:10px">+ Listeye Ekle</button>
@@ -6304,15 +6312,43 @@ function populateMatchupPlayerSelects() {
   }
 }
 
+function toggleMuCustom(slot, forceOn) {
+  const sel = document.getElementById('mu-p' + slot);
+  const input = document.getElementById('mu-p' + slot + '-custom');
+  const link = document.getElementById('mu-p' + slot + '-toggle-link');
+  const isCustom = forceOn || input.style.display === 'none';
+
+  if (isCustom) {
+    sel.style.display = 'none';
+    input.style.display = 'block';
+    input.value = '';
+    input.focus();
+    link.textContent = 'Listeden seç';
+  } else {
+    sel.style.display = 'block';
+    input.style.display = 'none';
+    sel.value = '';
+    link.textContent = 'Listede yok, elle yaz';
+  }
+}
+
+function getMuPlayerValue(slot) {
+  const input = document.getElementById('mu-p' + slot + '-custom');
+  if (input.style.display !== 'none') {
+    return input.value.trim();
+  }
+  return document.getElementById('mu-p' + slot).value;
+}
+
 function addMatchupRow() {
   const dateVal = document.getElementById('mu-date').value;
   const timeVal = document.getElementById('mu-time').value;
   const court = document.getElementById('mu-court').value;
-  const p1 = document.getElementById('mu-p1').value;
-  const p2 = document.getElementById('mu-p2').value;
+  const p1 = getMuPlayerValue(1);
+  const p2 = getMuPlayerValue(2);
 
   if (!dateVal || !timeVal) { showToast('Tarih ve saat seçin', 'err'); return; }
-  if (!p1 || !p2) { showToast('Her iki oyuncuyu da seçin', 'err'); return; }
+  if (!p1 || !p2 || p1 === '__custom__' || p2 === '__custom__') { showToast('Her iki oyuncuyu da girin', 'err'); return; }
   if (p1 === p2) { showToast('Aynı oyuncu iki tarafta olamaz', 'err'); return; }
 
   const dayLabel = formatMatchupDate(dateVal);
@@ -6322,6 +6358,12 @@ function addMatchupRow() {
 
   renderMatchupPendingList();
   showToast('Eşleşme listeye eklendi', 'ok');
+
+  // Custom input'ları sıfırla (varsa)
+  [1, 2].forEach(slot => {
+    const input = document.getElementById('mu-p' + slot + '-custom');
+    if (input.style.display !== 'none') toggleMuCustom(slot);
+  });
 }
 
 function removeMatchupRow(idx) {
