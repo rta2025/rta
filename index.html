@@ -2689,9 +2689,15 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
         <option value="">— Seçin —</option>
       </select>
     </div>
-    <div class="fgroup">
-      <label>Skor</label>
-      <input type="text" id="tp-score" class="finput" placeholder="örn. 21-14 veya 1-1, 2-1">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div class="fgroup">
+        <label>Kazanan Skoru</label>
+        <input type="text" id="tp-score-winner" class="finput" placeholder="2 (21-16, 21-11)">
+      </div>
+      <div class="fgroup">
+        <label>Kaybeden Skoru</label>
+        <input type="text" id="tp-score-loser" class="finput" placeholder="1 (16-21)">
+      </div>
     </div>
     <button class="btn btn-green" onclick="saveThirdPlaceMatch()" style="width:100%;margin-top:8px">💾 Kaydet</button>
   </div>
@@ -2727,9 +2733,15 @@ Tayfun Selek vs Derya Özdemir
         <label>Kazanan</label>
         <select id="bracket-winner-select" class="finput"></select>
       </div>
-      <div class="fgroup">
-        <label>Skor (isteğe bağlı — örn. 21-15)</label>
-        <input type="text" id="bracket-score-input" class="finput" placeholder="21-15">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="fgroup">
+          <label>Kazanan Skoru</label>
+          <input type="text" id="bracket-score-winner" class="finput" placeholder="2 (21-16, 21-11)">
+        </div>
+        <div class="fgroup">
+          <label>Kaybeden Skoru</label>
+          <input type="text" id="bracket-score-loser" class="finput" placeholder="1 (16-21)">
+        </div>
       </div>
       <button class="btn btn-green" onclick="saveBracketResult()" style="width:100%;margin-top:8px">💾 Sonucu Kaydet</button>
 
@@ -6149,18 +6161,22 @@ function onBracketMatchSelect() {
 function saveBracketResult() {
   const matchNum = parseInt(document.getElementById('bracket-match-select').value);
   const winner = document.getElementById('bracket-winner-select').value;
-  const score = document.getElementById('bracket-score-input').value.trim();
+  const winnerScore = document.getElementById('bracket-score-winner').value.trim();
+  const loserScore = document.getElementById('bracket-score-loser').value.trim();
   if (!matchNum || !winner) { showToast('Maç ve kazanan seçin', 'err'); return; }
 
   const bracket = loadBracket();
   bracket.matches[matchNum].winner = winner;
-  bracket.matches[matchNum].score = score || '';
+  bracket.matches[matchNum].winnerScore = winnerScore || '';
+  bracket.matches[matchNum].loserScore = loserScore || '';
+  bracket.matches[matchNum].score = winnerScore || ''; // geriye dönük uyumluluk
   placeWinnerInNextMatch(bracket.matches, matchNum, winner);
 
   saveBracketLocal(bracket);
 
   // Önce ekranı yerel veriyle hemen güncelle (Supabase'i beklemeden)
-  document.getElementById('bracket-score-input').value = '';
+  document.getElementById('bracket-score-winner').value = '';
+  document.getElementById('bracket-score-loser').value = '';
   _renderBracketDisplay();
   populateBracketMatchSelect();
   showToast(`${winner} bir üst tura yükseldi! 🎾`, 'ok');
@@ -6300,8 +6316,9 @@ function populateThirdPlaceForm() {
     (p1 ? `<option value="${p1}" ${existing?.winner===p1?'selected':''}>${p1}</option>` : '') +
     (p2 ? `<option value="${p2}" ${existing?.winner===p2?'selected':''}>${p2}</option>` : '');
 
-  if (existing && existing.score) {
-    document.getElementById('tp-score').value = existing.score;
+  if (existing) {
+    document.getElementById('tp-score-winner').value = existing.winnerScore || existing.score || '';
+    document.getElementById('tp-score-loser').value = existing.loserScore || '';
   }
 }
 
@@ -6309,12 +6326,13 @@ function saveThirdPlaceMatch() {
   const p1 = document.getElementById('tp-p1').value.trim();
   const p2 = document.getElementById('tp-p2').value.trim();
   const winner = document.getElementById('tp-winner').value;
-  const score = document.getElementById('tp-score').value.trim();
+  const winnerScore = document.getElementById('tp-score-winner').value.trim();
+  const loserScore = document.getElementById('tp-score-loser').value.trim();
 
   if (!p1 || !p2) { showToast('Her iki oyuncuyu da girin', 'err'); return; }
   if (!winner) { showToast('Kazananı seçin', 'err'); return; }
 
-  const data = { p1, p2, winner, score };
+  const data = { p1, p2, winner, winnerScore, loserScore };
   saveThirdPlaceLocal(data);
   renderThirdPlaceBox();
   showToast('3.lük maçı kaydedildi! 🥉', 'ok');
@@ -6351,23 +6369,21 @@ function _renderThirdPlaceDisplay() {
   if (!data || !data.winner) { box.innerHTML = ''; return; }
 
   const loser = data.winner === data.p1 ? data.p2 : data.p1;
-  const isWalkover = data.score && /w\.?o\.?|walkover/i.test(data.score);
-  const scoreHtml = data.score
-    ? (isWalkover
-        ? `<span class="bracket-wo-tag">${data.score}</span>`
-        : `<span style="color:#ffc800;font-size:11px;font-weight:700;margin-left:8px">${data.score}</span>`)
-    : '';
+  const wScore = data.winnerScore || data.score || '';
+  const lScore = data.loserScore || '';
+  const winnerScoreHtml = wScore ? `<span style="color:#ffc800;font-size:11px;font-weight:700;margin-left:8px">${wScore}</span>` : '';
+  const loserScoreHtml = lScore ? `<span style="color:#888;font-size:10px;font-weight:600;margin-left:8px">${lScore}</span>` : '';
 
   box.innerHTML = `
     <div style="margin-top:16px;max-width:280px">
       <div style="text-align:center;font-size:11px;font-weight:700;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">🥉 3.lük Maçı</div>
       <div class="bracket-match decided" style="height:auto;padding:10px 12px">
         <div class="bracket-slot winner" style="display:flex;justify-content:space-between;align-items:center">
-          <span class="bracket-slot-name">${data.winner}</span>${!isWalkover ? scoreHtml : ''}
+          <span class="bracket-slot-name">${data.winner}</span>${winnerScoreHtml}
         </div>
         <div class="bracket-vs-line"></div>
         <div class="bracket-slot" style="display:flex;justify-content:space-between;align-items:center">
-          <span class="bracket-slot-name">${loser}</span>${isWalkover ? scoreHtml : ''}
+          <span class="bracket-slot-name">${loser}</span>${loserScoreHtml}
         </div>
       </div>
     </div>`;
@@ -6424,13 +6440,15 @@ function _renderBracketDisplay() {
       const finalStyle = isFinal ? 'border-color:var(--gold);box-shadow:0 0 12px rgba(255,200,0,0.3)' : '';
       const trophyIcon = isFinal ? '<span style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:16px">🏆</span>' : '';
       const roundTitleHtml = i === 0 ? `<div class="bracket-round-title" style="position:absolute;top:${isFinal ? '-38px' : '-22px'};left:0;right:0">${round.title}</div>` : '';
-      // Skor W.O./WO/Walkover ise kaybedene, normal skor ise kazanana yazılır
-      const isWalkover = m.score && /w\.?o\.?|walkover/i.test(m.score);
-      const normalScoreTag = (m.winner && m.score && !isWalkover) ? `<span style="color:#ffc800;font-size:10px;font-weight:700;margin-left:6px;flex-shrink:0;white-space:nowrap">${m.score}</span>` : '';
-      const woTag = (m.winner && m.score && isWalkover) ? `<span class="bracket-wo-tag">${m.score}</span>` : '';
+      // Skor: winnerScore/loserScore varsa onları kullan, yoksa eski 'score' alanına geri dön (geriye uyumluluk)
+      const wScoreRaw = m.winnerScore || m.score || '';
+      const lScoreRaw = m.loserScore || '';
+      const isWalkover = wScoreRaw && /w\.?o\.?|walkover/i.test(wScoreRaw);
+      const winnerScoreTag = wScoreRaw ? `<span style="color:#ffc800;font-size:10px;font-weight:700;margin-left:6px;flex-shrink:0;white-space:nowrap">${wScoreRaw}</span>` : '';
+      const loserScoreTag = lScoreRaw ? `<span style="color:#888;font-size:9.5px;font-weight:600;margin-left:6px;flex-shrink:0;white-space:nowrap">${lScoreRaw}</span>` : '';
       const loserName = m.winner === m.p1 ? m.p2 : m.p1;
-      const p1Score = (m.winner === m.p1) ? normalScoreTag : (loserName === m.p1 ? woTag : '');
-      const p2Score = (m.winner === m.p2) ? normalScoreTag : (loserName === m.p2 ? woTag : '');
+      const p1Score = (m.winner === m.p1) ? winnerScoreTag : (loserName === m.p1 ? loserScoreTag : '');
+      const p2Score = (m.winner === m.p2) ? winnerScoreTag : (loserName === m.p2 ? loserScoreTag : '');
       const decidedClass = (m.winner && !isBye) ? 'decided' : (isBye ? 'bye-match' : '');
       html += `<div class="bracket-match ${decidedClass}" style="grid-row: ${rowStart} / ${rowEnd}; ${finalStyle}">
         ${roundTitleHtml}
