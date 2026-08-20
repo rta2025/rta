@@ -2825,12 +2825,6 @@ Tayfun Selek vs Derya Özdemir
 
   <!-- Kurallar (dinamik) -->
   <div id="tournament-rules-display"></div>
-
-  <!-- Geçmiş Turnuvalar Arşivi -->
-  <div id="tournament-archive-section" style="display:none;margin-top:24px">
-    <div class="tournament-rules-title" style="margin-bottom:10px">🗄️ Geçmiş Turnuvalar</div>
-    <div id="tournament-archive-list" style="display:flex;flex-direction:column;gap:10px"></div>
-  </div>
 </div>
 
 <!-- ══ ARŞİV ══ -->
@@ -2838,6 +2832,12 @@ Tayfun Selek vs Derya Özdemir
   <div class="hero" style="margin-bottom:20px">
     <div class="hero-title" style="font-size:1.5rem">SEZON ARŞİVİ</div>
     <div class="hero-sub">Geçmiş sezonların puan durumu ve istatistikleri</div>
+  </div>
+
+  <!-- Geçmiş Turnuvalar Arşivi -->
+  <div id="tournament-archive-section" style="display:none;margin-bottom:24px">
+    <div class="tournament-rules-title" style="margin-bottom:10px">🏆 Geçmiş Turnuvalar</div>
+    <div id="tournament-archive-list" style="display:flex;flex-direction:column;gap:10px"></div>
   </div>
 
   <div id="archive-admin-panel" style="display:none;margin-bottom:20px">
@@ -3472,7 +3472,7 @@ function renderAll(fromSupabase = false) {
   if (ap) {
     if (ap.id === 'page-sonuclar')   renderResults();
     if (ap.id === 'page-fiktur')     renderFixture();
-    if (ap.id === 'page-arsiv')      renderArchive();
+    if (ap.id === 'page-arsiv')      { renderArchive(); renderTournamentArchive(); }
     if (ap.id === 'page-ranking' && fromSupabase) renderRanking();
     if (ap.id === 'page-istatistik') renderStats();
   }
@@ -5508,7 +5508,7 @@ function showPage(name) {
   if (name === 'skor')       { updatePlayerDropdowns(); document.getElementById('mdate').value = new Date().toISOString().split('T')[0]; }
   if (name === 'sonuclar')   { renderResults(); }
   if (name === 'fiktur')     { renderFixture(); }
-  if (name === 'arsiv')      { renderArchive(); }
+  if (name === 'arsiv')      { renderArchive(); renderTournamentArchive(); }
   if (name === 'galeri')     { renderGaleri(); renderTournamentMatchups(); renderBracket(); renderActiveTournamentCard(); }
   if (name === 'ranking')    { renderRanking(); }
   if (name === 'istatistik') { renderStats(); }
