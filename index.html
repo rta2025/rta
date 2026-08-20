@@ -2838,6 +2838,13 @@ Tayfun Selek vs Derya Özdemir
   <div id="tournament-archive-section" style="display:none;margin-bottom:24px">
     <div class="tournament-rules-title" style="margin-bottom:10px">🏆 Geçmiş Turnuvalar</div>
     <div id="tournament-archive-list" style="display:flex;flex-direction:column;gap:10px"></div>
+    <div id="archived-bracket-view" style="display:none;margin-top:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div class="tournament-rules-title" id="archived-bracket-title" style="margin-bottom:0"></div>
+        <button class="btn btn-sm" onclick="closeArchivedBracketView()" style="padding:4px 10px">✕ Kapat</button>
+      </div>
+      <div class="bracket-wrap"><div class="bracket" id="archived-bracket-container"></div></div>
+    </div>
   </div>
 
   <div id="archive-admin-panel" style="display:none;margin-bottom:20px">
@@ -5869,6 +5876,8 @@ function archiveTournament() {
   renderActiveTournamentCard();
   renderTournamentArchive();
   renderRanking();
+  _renderBracketDisplay();
+  renderTournamentMatchups();
   showToast(`"${info.name}" arşivlendi! ${distributed.length} oyuncuya ranking puanı dağıtıldı 🏆`, 'ok');
 }
 
@@ -5964,14 +5973,22 @@ function renderTournamentArchive() {
 function viewArchivedTournament(id) {
   const archive = loadTournamentArchiveList();
   const entry = archive.find(e => e.id === id);
-  if (!entry) return;
+  if (!entry || !entry.bracket) { showToast('Bu turnuvaya ait ağaç verisi bulunamadı', 'err'); return; }
 
-  // Geçici olarak bracket ve bilgiyi göster (salt okunur mod)
-  saveBracketLocal(entry.bracket);
-  _renderBracketDisplay();
-  document.getElementById('bracket-section').style.display = 'block';
-  document.getElementById('bracket-section').scrollIntoView({ behavior: 'smooth' });
-  showToast(`"${entry.info.name}" ağacı gösteriliyor (arşiv)`, 'ok');
+  const view = document.getElementById('archived-bracket-view');
+  const container = document.getElementById('archived-bracket-container');
+  const title = document.getElementById('archived-bracket-title');
+  if (!view || !container) return;
+
+  title.textContent = `🏆 ${entry.info.name} — Turnuva Ağacı`;
+  container.innerHTML = buildBracketHtml(entry.bracket);
+  view.style.display = 'block';
+  view.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function closeArchivedBracketView() {
+  const view = document.getElementById('archived-bracket-view');
+  if (view) view.style.display = 'none';
 }
 
 // ═══════════════════════════════════════════════════
@@ -6398,36 +6415,7 @@ function _renderThirdPlaceDisplay() {
 
 // ═══════════════════════════════════════════════════
 
-function _renderBracketDisplay() {
-  const section = document.getElementById('bracket-section');
-  const container = document.getElementById('bracket-container');
-  const champBox = document.getElementById('bracket-champion-box');
-  const setupBody = document.getElementById('bracket-setup-body');
-  const setupIcon = document.getElementById('bracket-setup-toggle-icon');
-  if (!section || !container) return;
-
-  const bracket = loadBracket();
-  if (!bracket || !bracket.matches) {
-    section.style.display = 'none';
-    // Ağaç yoksa kurulum formunu aç
-    if (setupBody) { setupBody.style.display = 'block'; }
-    if (setupIcon) setupIcon.textContent = '▼';
-    return;
-  }
-
-  section.style.display = 'block';
-  renderThirdPlaceBox();
-  populateThirdPlaceForm();
-
-  // Ağaç zaten kuruluysa kurulum formunu kapat
-  if (setupBody) { setupBody.style.display = 'none'; }
-  if (setupIcon) setupIcon.textContent = '▶';
-
-  // Sonuç girme formunu göster ve dropdown'ı doldur
-  const resultEntry = document.getElementById('bracket-result-entry');
-  if (resultEntry) resultEntry.style.display = 'block';
-  populateBracketMatchSelect();
-
+function buildBracketHtml(bracket) {
   let html = '';
   let matchIdx = 1;
   BRACKET_STRUCTURE.forEach(round => {
@@ -6476,7 +6464,40 @@ function _renderBracketDisplay() {
     }
     html += `</div>`;
   });
+  return html;
+}
 
+function _renderBracketDisplay() {
+  const section = document.getElementById('bracket-section');
+  const container = document.getElementById('bracket-container');
+  const champBox = document.getElementById('bracket-champion-box');
+  const setupBody = document.getElementById('bracket-setup-body');
+  const setupIcon = document.getElementById('bracket-setup-toggle-icon');
+  if (!section || !container) return;
+
+  const bracket = loadBracket();
+  if (!bracket || !bracket.matches) {
+    section.style.display = 'none';
+    // Ağaç yoksa kurulum formunu aç
+    if (setupBody) { setupBody.style.display = 'block'; }
+    if (setupIcon) setupIcon.textContent = '▼';
+    return;
+  }
+
+  section.style.display = 'block';
+  renderThirdPlaceBox();
+  populateThirdPlaceForm();
+
+  // Ağaç zaten kuruluysa kurulum formunu kapat
+  if (setupBody) { setupBody.style.display = 'none'; }
+  if (setupIcon) setupIcon.textContent = '▶';
+
+  // Sonuç girme formunu göster ve dropdown'ı doldur
+  const resultEntry = document.getElementById('bracket-result-entry');
+  if (resultEntry) resultEntry.style.display = 'block';
+  populateBracketMatchSelect();
+
+  const html = buildBracketHtml(bracket);
   container.innerHTML = html + '<div id="third-place-box"></div>';
 
   // Şampiyon kutusu
