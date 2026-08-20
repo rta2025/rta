@@ -2026,7 +2026,6 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
     <button class="nav-btn" onclick="showPage('galeri')">🎾 Turnuvalar</button>
     <button class="nav-btn admin-only" id="nav-skor" onclick="showPage('skor')">Skor Gir</button>
     <button class="nav-btn" onclick="showPage('sonuclar')">Sonuçlar</button>
-    <button class="nav-btn" onclick="showPage('fiktur')">Fikstür</button>
     <button class="nav-btn" onclick="showPage('arsiv')">Arşiv</button>
     <button class="nav-btn" onclick="showPage('istatistik')">İstatistik</button>
     <button class="nav-btn" onclick="showPage('kurallar')">Kurallar</button>
@@ -2577,21 +2576,6 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
     <div class="card-title" style="font-size:1rem">🔑 Yönetici Şifresini Değiştir</div>
     <button class="btn btn-blue" onclick="document.getElementById('pw-modal').classList.add('open')">Şifreyi Değiştir</button>
   </div>
-</div>
-
-<!-- ══ FİKSTÜR ══ -->
-<div id="page-fiktur" class="page">
-  <div class="hero" style="margin-bottom:20px">
-    <div class="hero-title" style="font-size:1.5rem">FİKSTÜR</div>
-    <div class="hero-sub">Oynanmamış maçlar lig bazında gösterilir. Her oyuncu diğeriyle en az 1 kez oynamalıdır.</div>
-  </div>
-  <div class="inner-tabs" id="fix-tabs">
-    <button class="inner-tab active" onclick="setFixLeague('super')">Süper Lig</button>
-    <button class="inner-tab" onclick="setFixLeague('l2')">2. Lig</button>
-    <button class="inner-tab" onclick="setFixLeague('l3')">3. Lig</button>
-    <button class="inner-tab" onclick="setFixLeague('l4')">4. Lig</button>
-  </div>
-  <div id="fixture-content"></div>
 </div>
 
 <!-- ══ GALERİ ══ -->
@@ -3480,7 +3464,6 @@ function renderAll(fromSupabase = false) {
   const ap = document.querySelector('.page.active');
   if (ap) {
     if (ap.id === 'page-sonuclar')   renderResults();
-    if (ap.id === 'page-fiktur')     renderFixture();
     if (ap.id === 'page-arsiv')      { renderArchive(); renderTournamentArchive(); }
     if (ap.id === 'page-ranking' && fromSupabase) renderRanking();
     if (ap.id === 'page-istatistik') renderStats();
@@ -4584,7 +4567,6 @@ async function changePassword() {
 // ═══════════════════════════════════════════════════
 // FİKSTÜR
 // ═══════════════════════════════════════════════════
-let _fixLeague = 'super';
 let _standingLeague = 'super';
 
 function setStandingLeague(lg) {
@@ -4605,109 +4587,6 @@ function renderStandingContent() {
   el.appendChild(div);
   renderStanding(_standingLeague);
   renderPlayoffs();
-}
-
-function setFixLeague(lg) {
-  _fixLeague = lg;
-  document.querySelectorAll('#fix-tabs .inner-tab').forEach((b, i) =>
-    b.classList.toggle('active', ['super','l2','l3','l4'][i] === lg));
-  renderFixture();
-}
-
-function renderFixture() {
-  const lg = _fixLeague;
-  const players = state.players.filter(p => p.league === lg);
-  const el = document.getElementById('fixture-content');
-
-  if (!players.length) {
-    el.innerHTML = '<div class="empty">Bu ligde oyuncu yok.</div>';
-    return;
-  }
-
-  const played = new Set();
-  state.matches.filter(m => m.league === lg).forEach(m => {
-    const key = [Math.min(m.winner, m.loser), Math.max(m.winner, m.loser)].join('-');
-    played.add(key);
-  });
-
-  let totalPairs = 0, donePairs = 0;
-  players.forEach(p => {
-    players.forEach(q => {
-      if (p.id >= q.id) return;
-      totalPairs++;
-      const key = `${Math.min(p.id,q.id)}-${Math.max(p.id,q.id)}`;
-      if (played.has(key)) donePairs++;
-    });
-  });
-
-  const pct = totalPairs ? Math.round(donePairs / totalPairs * 100) : 0;
-
-  let html = `
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 20px;margin-bottom:16px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <span style="font-size:0.85rem;font-weight:600">Tamamlanma Durumu</span>
-        <span style="font-family:'Oswald',sans-serif;font-size:1.1rem;color:var(--accent)">${donePairs} / ${totalPairs} maç</span>
-      </div>
-      <div style="background:var(--surface3);border-radius:20px;height:8px;overflow:hidden">
-        <div style="background:var(--accent);height:100%;width:${pct}%;transition:width 0.5s;border-radius:20px"></div>
-      </div>
-      <div style="font-size:0.75rem;color:var(--text-dim);margin-top:6px">%${pct} tamamlandı</div>
-    </div>
-    <div class="fix-legend">
-      <div class="fix-legend-item"><span class="fix-status-dot fix-done"></span>Oynandı</div>
-      <div class="fix-legend-item"><span class="fix-status-dot fix-todo"></span>Oynanmadı</div>
-    </div>
-    <div class="fix-grid">`;
-
-  players.forEach(p => {
-    const opponents = players.filter(q => q.id !== p.id);
-    const rows = opponents.map(q => {
-      const key = `${Math.min(p.id,q.id)}-${Math.max(p.id,q.id)}`;
-      const isDone = played.has(key);
-
-      let scoreStr = '';
-      if (isDone) {
-        const m = state.matches.find(m => m.league === lg &&
-          ((m.winner === p.id && m.loser === q.id) ||
-           (m.winner === q.id && m.loser === p.id)));
-        if (m) {
-          const won = m.winner === p.id;
-          let displayScore = m.score || '';
-          if (!won && displayScore) {
-            displayScore = displayScore.split('/').map(s => {
-              const parts = s.trim().split('-');
-              return parts.length === 2 ? `${parts[1]}-${parts[0]}` : s.trim();
-            }).join(' / ');
-          }
-          scoreStr = `<span style="color:${won?'var(--accent)':'var(--red)'}">${won?'G':'M'} ${displayScore}</span>`;
-        }
-      }
-
-      return `<div class="fix-row">
-        <span class="fix-status-dot ${isDone ? 'fix-done' : 'fix-todo'}"></span>
-        ${avatarHtml(q, 'av', 24, '0.62rem')}
-        <span style="${isDone ? 'color:var(--text-dim)' : ''}">${q.name}</span>
-        <span class="fix-result">${scoreStr}</span>
-      </div>`;
-    }).join('');
-
-    const playerDone = opponents.filter(q => {
-      const key = `${Math.min(p.id,q.id)}-${Math.max(p.id,q.id)}`;
-      return played.has(key);
-    }).length;
-
-    html += `<div class="fix-card">
-      <div class="fix-player-header">
-        ${avatarHtml(p, 'av', 28, '0.7rem')}
-        ${p.name}
-        <span style="margin-left:auto;font-size:0.72rem;color:var(--text-dim)">${playerDone}/${opponents.length}</span>
-      </div>
-      ${rows}
-    </div>`;
-  });
-
-  html += '</div>';
-  el.innerHTML = html;
 }
 
 // ═══════════════════════════════════════════════════
@@ -5510,13 +5389,12 @@ function showPage(name) {
   document.getElementById('page-' + name).classList.add('active');
   localStorage.setItem('rta_last_page', name);
 
-  const pages = ['puan','ranking','galeri','skor','sonuclar','fiktur','arsiv','istatistik','kurallar','yonetim'];
+  const pages = ['puan','ranking','galeri','skor','sonuclar','arsiv','istatistik','kurallar','yonetim'];
   document.querySelectorAll('.nav-btn').forEach((b, i) =>
     b.classList.toggle('active', pages[i] === name));
 
   if (name === 'skor')       { updatePlayerDropdowns(); document.getElementById('mdate').value = new Date().toISOString().split('T')[0]; }
   if (name === 'sonuclar')   { renderResults(); }
-  if (name === 'fiktur')     { renderFixture(); }
   if (name === 'arsiv')      { renderArchive(); renderTournamentArchive(); }
   if (name === 'galeri')     { renderGaleri(); renderTournamentMatchups(); renderBracket(); renderActiveTournamentCard(); }
   if (name === 'ranking')    { renderRanking(); }
