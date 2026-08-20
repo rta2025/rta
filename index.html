@@ -2024,6 +2024,7 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
     <button class="nav-btn active" onclick="showPage('puan')">Puan Durumu</button>
     <button class="nav-btn" onclick="showPage('ranking')">🏆 Ranking</button>
     <button class="nav-btn" onclick="showPage('galeri')">🎾 Turnuvalar</button>
+    <button class="nav-btn" onclick="showPage('blog')">📝 Blog</button>
     <button class="nav-btn admin-only" id="nav-skor" onclick="showPage('skor')">Skor Gir</button>
     <button class="nav-btn" onclick="showPage('sonuclar')">Sonuçlar</button>
     <button class="nav-btn" onclick="showPage('arsiv')">Arşiv</button>
@@ -2809,6 +2810,44 @@ Tayfun Selek vs Derya Özdemir
 
   <!-- Kurallar (dinamik) -->
   <div id="tournament-rules-display"></div>
+</div>
+
+<!-- ══ BLOG ══ -->
+<div id="page-blog" class="page">
+  <div class="hero" style="margin-bottom:20px">
+    <div class="hero-title" style="font-size:1.5rem">📝 Blog</div>
+    <div class="hero-sub">Sezonla ilgili düşünceler, temenniler ve haberler</div>
+  </div>
+
+  <!-- Admin: Yazı Ekle -->
+  <div class="admin-only" style="display:none;margin-bottom:16px">
+    <button class="btn btn-sm" onclick="toggleBlogForm()" style="background:rgba(93,201,93,0.15);color:var(--accent);border:1px solid rgba(93,201,93,0.3)">✏️ Yeni Yazı Ekle</button>
+
+    <div id="blog-form-box" style="display:none;margin-top:12px;background:var(--surface);border-radius:10px;padding:14px 16px">
+      <div class="fgroup">
+        <label>Başlık</label>
+        <input type="text" id="blog-title" class="finput" placeholder="örn. Yeni Sezon Öncesi Düşünceler">
+      </div>
+      <div class="fgroup">
+        <label>Kimden (isteğe bağlı)</label>
+        <input type="text" id="blog-author" class="finput" placeholder="örn. Ahmet Yılmaz">
+      </div>
+      <div class="fgroup">
+        <label>Yazı</label>
+        <textarea id="blog-content" class="finput" rows="6" placeholder="Yazınızı buraya yazın..."></textarea>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-green" onclick="saveBlogPost()" style="flex:1">💾 Yayınla</button>
+        <button class="btn" onclick="cancelBlogForm()" style="flex:1">✕ İptal</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="blog-list" style="display:flex;flex-direction:column;gap:14px"></div>
+  <div id="blog-empty" style="display:none;text-align:center;padding:40px 20px;color:var(--text-dim)">
+    <div style="font-size:32px;margin-bottom:10px">📝</div>
+    <div>Henüz yazı eklenmemiş.</div>
+  </div>
 </div>
 
 <!-- ══ ARŞİV ══ -->
@@ -4590,6 +4629,122 @@ function renderStandingContent() {
 }
 
 // ═══════════════════════════════════════════════════
+// BLOG
+// ═══════════════════════════════════════════════════
+const BLOG_KEY = 'rta_blog_posts';
+
+function loadBlogPosts() {
+  try { return JSON.parse(localStorage.getItem(BLOG_KEY) || '[]'); } catch { return []; }
+}
+function saveBlogPostsLocal(posts) {
+  localStorage.setItem(BLOG_KEY, JSON.stringify(posts));
+}
+
+function toggleBlogForm() {
+  const box = document.getElementById('blog-form-box');
+  box.style.display = box.style.display === 'none' ? 'block' : 'none';
+}
+
+function cancelBlogForm() {
+  document.getElementById('blog-title').value = '';
+  document.getElementById('blog-author').value = '';
+  document.getElementById('blog-content').value = '';
+  document.getElementById('blog-form-box').style.display = 'none';
+}
+
+function saveBlogPost() {
+  const title = document.getElementById('blog-title').value.trim();
+  const author = document.getElementById('blog-author').value.trim();
+  const content = document.getElementById('blog-content').value.trim();
+
+  if (!title || !content) { showToast('Başlık ve yazı boş olamaz', 'err'); return; }
+
+  const posts = loadBlogPosts();
+  const newPost = {
+    id: Date.now(),
+    title, author, content,
+    date: new Date().toISOString(),
+  };
+  posts.unshift(newPost);
+  saveBlogPostsLocal(posts);
+
+  cancelBlogForm();
+  renderBlogPosts();
+  showToast('Yazı yayınlandı! 📝', 'ok');
+
+  if (window._sbAdmin) {
+    window._sbAdmin.from('meta').update({ blog_posts: posts }).eq('id', 1)
+      .then(({ error }) => {
+        if (error) showToast('Supabase hatası: ' + error.message, 'err');
+      });
+  }
+}
+
+function deleteBlogPost(id) {
+  if (!confirm('Bu yazı silinecek. Emin misiniz?')) return;
+  const posts = loadBlogPosts().filter(p => p.id !== id);
+  saveBlogPostsLocal(posts);
+  renderBlogPosts();
+  showToast('Yazı silindi', 'ok');
+
+  if (window._sbAdmin) {
+    window._sbAdmin.from('meta').update({ blog_posts: posts }).eq('id', 1).catch(() => {});
+  }
+}
+
+function renderBlogPosts() {
+  const sbClient = window._sbAdmin || window._sb;
+  if (window._sbReady && sbClient) {
+    sbClient.from('meta').select('blog_posts').eq('id', 1).single()
+      .then(({ data }) => {
+        if (data && data.blog_posts) {
+          saveBlogPostsLocal(data.blog_posts);
+        } else {
+          localStorage.removeItem(BLOG_KEY);
+        }
+        _renderBlogList();
+      })
+      .catch(() => _renderBlogList());
+  } else {
+    _renderBlogList();
+  }
+}
+
+function _renderBlogList() {
+  const list = document.getElementById('blog-list');
+  const empty = document.getElementById('blog-empty');
+  if (!list) return;
+
+  const posts = loadBlogPosts();
+  if (!posts.length) {
+    list.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  const admin = isLoggedIn();
+  list.innerHTML = posts.map(p => {
+    const d = new Date(p.date);
+    const dateStr = d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+    const deleteBtn = admin ? `<button class="btn btn-sm" onclick="deleteBlogPost(${p.id})" style="color:var(--red);padding:3px 8px;flex-shrink:0">✕</button>` : '';
+    return `
+      <div style="background:var(--surface);border-radius:12px;padding:18px 20px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+          <div style="flex:1">
+            <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px">${p.title}</div>
+            <div style="font-size:11px;color:var(--text-muted)">
+              ${p.author ? `${p.author} · ` : ''}${dateStr}
+            </div>
+          </div>
+          ${deleteBtn}
+        </div>
+        <div style="margin-top:12px;font-size:13.5px;color:var(--text-dim);line-height:1.7;white-space:pre-wrap">${p.content}</div>
+      </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════
 // ARŞİV
 // ═══════════════════════════════════════════════════
 const ARCHIVE_KEY = 'rta_archive_v1';
@@ -5389,7 +5544,7 @@ function showPage(name) {
   document.getElementById('page-' + name).classList.add('active');
   localStorage.setItem('rta_last_page', name);
 
-  const pages = ['puan','ranking','galeri','skor','sonuclar','arsiv','istatistik','kurallar','yonetim'];
+  const pages = ['puan','ranking','galeri','blog','skor','sonuclar','arsiv','istatistik','kurallar','yonetim'];
   document.querySelectorAll('.nav-btn').forEach((b, i) =>
     b.classList.toggle('active', pages[i] === name));
 
@@ -5397,6 +5552,7 @@ function showPage(name) {
   if (name === 'sonuclar')   { renderResults(); }
   if (name === 'arsiv')      { renderArchive(); renderTournamentArchive(); }
   if (name === 'galeri')     { renderGaleri(); renderTournamentMatchups(); renderBracket(); renderActiveTournamentCard(); }
+  if (name === 'blog')       { renderBlogPosts(); }
   if (name === 'ranking')    { renderRanking(); }
   if (name === 'istatistik') { renderStats(); }
   if (name === 'yonetim')    { renderAdminTable(); }
