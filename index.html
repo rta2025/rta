@@ -5893,6 +5893,7 @@ function renderActiveTournamentCard() {
       .then(({ data }) => {
         if (data) {
           if (data.tournament_info) saveTournamentInfoLocal(data.tournament_info);
+          else localStorage.removeItem(TOURNAMENT_INFO_KEY);
           if (data.tournament_archive) saveTournamentArchiveLocal(data.tournament_archive);
         }
         _renderActiveTournamentCardDisplay();
@@ -6293,6 +6294,8 @@ function renderBracket() {
       .then(({ data }) => {
         if (data && data.tournament_bracket) {
           saveBracketLocal(data.tournament_bracket);
+        } else {
+          localStorage.removeItem(BRACKET_KEY);
         }
         _renderBracketDisplay();
       })
@@ -6381,6 +6384,8 @@ function renderThirdPlaceBox() {
       .then(({ data }) => {
         if (data && data.third_place_match) {
           saveThirdPlaceLocal(data.third_place_match);
+        } else {
+          localStorage.removeItem(THIRD_PLACE_KEY);
         }
         _renderThirdPlaceDisplay();
       })
@@ -6700,6 +6705,8 @@ function renderTournamentMatchups() {
       .then(({ data }) => {
         if (data && data.tournament_matchups) {
           localStorage.setItem(TOURNAMENT_MATCHUPS_KEY, data.tournament_matchups);
+        } else {
+          localStorage.removeItem(TOURNAMENT_MATCHUPS_KEY);
         }
         _renderTournamentMatchupsList();
       })
