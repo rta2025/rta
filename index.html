@@ -4669,9 +4669,11 @@ function saveBlogPost() {
   saveBlogPostsLocal(posts);
 
   cancelBlogForm();
-  renderBlogPosts();
+  // Önce ekranı yerel veriyle hemen güncelle (Supabase'i beklemeden)
+  _renderBlogList();
   showToast('Yazı yayınlandı! 📝', 'ok');
 
+  // Sonra Supabase'e arka planda kaydet
   if (window._sbAdmin) {
     window._sbAdmin.from('meta').update({ blog_posts: posts }).eq('id', 1)
       .then(({ error }) => {
@@ -4684,11 +4686,17 @@ function deleteBlogPost(id) {
   if (!confirm('Bu yazı silinecek. Emin misiniz?')) return;
   const posts = loadBlogPosts().filter(p => p.id !== id);
   saveBlogPostsLocal(posts);
-  renderBlogPosts();
+
+  // Önce ekranı yerel veriyle hemen güncelle (Supabase'i beklemeden)
+  _renderBlogList();
   showToast('Yazı silindi', 'ok');
 
+  // Sonra Supabase'e arka planda kaydet
   if (window._sbAdmin) {
-    window._sbAdmin.from('meta').update({ blog_posts: posts }).eq('id', 1).catch(() => {});
+    window._sbAdmin.from('meta').update({ blog_posts: posts }).eq('id', 1)
+      .then(({ error }) => {
+        if (error) showToast('Supabase hatası: ' + error.message, 'err');
+      });
   }
 }
 
@@ -4728,13 +4736,20 @@ function _renderBlogList() {
     const d = new Date(p.date);
     const dateStr = d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
     const deleteBtn = admin ? `<button class="btn btn-sm" onclick="deleteBlogPost(${p.id})" style="color:var(--red);padding:3px 8px;flex-shrink:0">✕</button>` : '';
+    const authorHtml = p.author
+      ? `<div style="display:inline-flex;align-items:center;gap:5px;background:rgba(93,201,93,0.12);border:1px solid rgba(93,201,93,0.3);border-radius:20px;padding:3px 10px;margin-bottom:6px">
+           <span style="font-size:11px">✍️</span>
+           <span style="font-size:12px;font-weight:700;color:var(--accent)">${p.author}</span>
+         </div>`
+      : '';
     return `
       <div style="background:var(--surface);border-radius:12px;padding:18px 20px">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
           <div style="flex:1">
+            ${authorHtml}
             <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px">${p.title}</div>
             <div style="font-size:11px;color:var(--text-muted)">
-              ${p.author ? `${p.author} · ` : ''}${dateStr}
+              ${dateStr}
             </div>
           </div>
           ${deleteBtn}
