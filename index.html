@@ -6086,7 +6086,7 @@ function viewArchivedTournament(id) {
   if (posterBox) {
     const isAdmin = isLoggedIn();
     const imgHtml = entry.posterUrl
-      ? `<img src="${_escapePosterUrl(entry.posterUrl)}" alt="Şampiyon Posteri" style="width:100%;border-radius:12px;display:block;margin-bottom:${isAdmin ? '10px' : '0'}">`
+      ? `<img src="${_escapePosterUrl(entry.posterUrl)}" alt="Şampiyon Posteri" style="display:block;max-width:320px;width:100%;margin:0 auto;border-radius:12px;margin-bottom:${isAdmin ? '10px' : '0'}">`
       : '';
     const adminHtml = isAdmin ? `
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
