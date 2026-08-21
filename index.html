@@ -2927,6 +2927,10 @@ Tayfun Selek vs Derya Özdemir
     </div>
   </div>
 
+  <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+    <button class="btn btn-sm" onclick="downloadRankingImage()" style="background:rgba(255,200,0,0.15);color:var(--gold);border:1px solid rgba(255,200,0,0.3)">📸 Top 20 Görsel İndir</button>
+  </div>
+
   <div class="league-block" style="overflow-x:auto">
     <div class="league-header">
       <span class="rank-hero-badge">RANKING</span>
@@ -2938,6 +2942,9 @@ Tayfun Selek vs Derya Özdemir
     </div>
     <div id="ranking-list"></div>
   </div>
+
+  <!-- Top 20 görsel şablonu (ekranda gizli, sadece indirme için kullanılır) -->
+  <div id="ranking-image-template" style="position:absolute;left:-9999px;top:0;width:640px;background:#0d120d;padding:28px;font-family:'Mulish',sans-serif"></div>
 
   <div class="rk-info-box">
     <div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.08)">
@@ -5130,6 +5137,7 @@ function _renderRankingList() {
   });
 
   const ranked = Object.values(byPlayer).sort((a,b) => b.total - a.total);
+  window._lastRankedList = ranked; // Görsel indirme için sakla
 
   // Turnuva listesi (admin)
   const trList = document.getElementById('rk-tournament-list');
@@ -6282,6 +6290,74 @@ function clearBracket() {
   if (window._sbAdmin) {
     window._sbAdmin.from('meta').update({ tournament_bracket: null }).eq('id', 1).catch(() => {});
   }
+}
+
+function downloadRankingImage() {
+  const ranked = window._lastRankedList;
+  if (!ranked || !ranked.length) {
+    showToast('Ranking verisi yüklenmedi, sayfayı yenileyin', 'err');
+    return;
+  }
+  if (typeof html2canvas === 'undefined') {
+    showToast('Görsel oluşturma aracı yüklenemedi', 'err');
+    return;
+  }
+
+  const top20 = ranked.slice(0, 20);
+  const medalColors = ['#f0c040', '#c0c0c0', '#cd7f32'];
+
+  const rowsHtml = top20.map((r, i) => {
+    const rank = i + 1;
+    const isTop3 = rank <= 3;
+    const rankColor = isTop3 ? medalColors[rank - 1] : '#7a9a7a';
+    const rankDisplay = isTop3 ? ['🥇', '🥈', '🥉'][rank - 1] : rank;
+    return `
+      <div style="display:flex;align-items:center;gap:12px;padding:10px 4px;${rank < 20 ? 'border-bottom:1px solid rgba(255,255,255,0.06);' : ''}">
+        <div style="width:32px;text-align:center;font-size:${isTop3 ? '20px' : '15px'};font-weight:800;color:${rankColor}">${rankDisplay}</div>
+        <div style="flex:1;font-size:15px;font-weight:${isTop3 ? '700' : '600'};color:#fff">${r.player}</div>
+        <div style="font-size:15px;font-weight:800;color:#f0c040">${r.total}</div>
+      </div>`;
+  }).join('');
+
+  const template = document.getElementById('ranking-image-template');
+  template.innerHTML = `
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:12px;letter-spacing:2px;color:#f0c040;font-weight:700;text-transform:uppercase;font-family:'Oswald',sans-serif">RTA Ligi — Rize Tenis Akademisi</div>
+      <div style="font-size:26px;font-weight:800;color:#fff;margin-top:4px;font-family:'Oswald',sans-serif">🏆 TOP 20 RANKING</div>
+    </div>
+    <div style="background:#10140f;border-radius:12px;padding:12px 16px">
+      ${rowsHtml}
+    </div>
+    <div style="text-align:center;margin-top:18px;font-size:12px;color:#5dc95d;font-weight:600">
+      Tüm sıralama için: rtaligleri.com
+    </div>`;
+
+  showToast('Görsel hazırlanıyor... ⏳', 'ok');
+
+  html2canvas(template, {
+    backgroundColor: '#0d120d',
+    scale: 2,
+    useCORS: true,
+  }).then(canvas => {
+    canvas.toBlob(blob => {
+      if (!blob) { showToast('Görsel oluşturulamadı', 'err'); return; }
+      const fileName = 'RTA-Ligi-Top20-Ranking.png';
+
+      if (navigator.share && navigator.canShare) {
+        const file = new File([blob], fileName, { type: 'image/png' });
+        if (navigator.canShare({ files: [file] })) {
+          navigator.share({ files: [file], title: 'RTA Ligi Top 20 Ranking' })
+            .then(() => showToast('Paylaşım açıldı! 📤', 'ok'))
+            .catch(() => fallbackDownload(blob, fileName));
+          return;
+        }
+      }
+      fallbackDownload(blob, fileName);
+    }, 'image/png');
+  }).catch(err => {
+    console.error(err);
+    showToast('Görsel oluşturulamadı', 'err');
+  });
 }
 
 function downloadBracketImage() {
