@@ -6061,6 +6061,12 @@ function renderTournamentArchive() {
   }).join('');
 }
 
+function _escapePosterUrl(str) {
+  const div = document.createElement('div');
+  div.textContent = str == null ? '' : String(str);
+  return div.innerHTML;
+}
+
 function viewArchivedTournament(id) {
   const archive = loadTournamentArchiveList();
   const entry = archive.find(e => e.id === id);
@@ -6080,11 +6086,11 @@ function viewArchivedTournament(id) {
   if (posterBox) {
     const isAdmin = isLoggedIn();
     const imgHtml = entry.posterUrl
-      ? `<img src="${escapeHtml(entry.posterUrl)}" alt="Şampiyon Posteri" style="width:100%;border-radius:12px;display:block;margin-bottom:${isAdmin ? '10px' : '0'}">`
+      ? `<img src="${_escapePosterUrl(entry.posterUrl)}" alt="Şampiyon Posteri" style="width:100%;border-radius:12px;display:block;margin-bottom:${isAdmin ? '10px' : '0'}">`
       : '';
     const adminHtml = isAdmin ? `
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-        <input type="text" id="archived-poster-url-${entry.id}" class="finput" placeholder="Şampiyon posteri URL'si yapıştır (GitHub raw link vb.)" value="${entry.posterUrl ? escapeHtml(entry.posterUrl) : ''}" style="flex:1;min-width:200px">
+        <input type="text" id="archived-poster-url-${entry.id}" class="finput" placeholder="Şampiyon posteri URL'si yapıştır (GitHub raw link vb.)" value="${entry.posterUrl ? _escapePosterUrl(entry.posterUrl) : ''}" style="flex:1;min-width:200px">
         <button class="btn btn-sm" onclick="saveArchivedTournamentPoster(${entry.id})">💾 Kaydet</button>
         ${entry.posterUrl ? `<button class="btn btn-sm" style="color:var(--red)" onclick="removeArchivedTournamentPoster(${entry.id})">🗑️ Kaldır</button>` : ''}
       </div>` : '';
