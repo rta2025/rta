@@ -5558,6 +5558,20 @@ function renderGaleri() {
 // ═══════════════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════════════
+const PAGE_URL_SLUGS = {
+  puan: 'puan-durumu',
+  ranking: 'ranking',
+  galeri: 'turnuvalar',
+  blog: 'blog',
+  skor: 'skor-gir',
+  sonuclar: 'sonuclar',
+  arsiv: 'arsiv',
+  istatistik: 'istatistik',
+  kurallar: 'kurallar',
+  yonetim: 'yonetim',
+};
+const URL_SLUGS_TO_PAGE = Object.fromEntries(Object.entries(PAGE_URL_SLUGS).map(([k, v]) => [v, k]));
+
 function showPage(name) {
   if (!isLoggedIn() && (name === 'skor' || name === 'yonetim')) {
     showToast('Bu sayfa sadece yöneticilere açık.', 'err');
@@ -5566,6 +5580,12 @@ function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
   localStorage.setItem('rta_last_page', name);
+
+  // URL hash'ini güncelle (kullanıcı dostu isimlerle)
+  const urlSlug = PAGE_URL_SLUGS[name] || name;
+  if (window.location.hash !== '#' + urlSlug) {
+    history.replaceState(null, '', '#' + urlSlug);
+  }
 
   const pages = ['puan','ranking','galeri','blog','skor','sonuclar','arsiv','istatistik','kurallar','yonetim'];
   document.querySelectorAll('.nav-btn').forEach((b, i) =>
@@ -7130,14 +7150,30 @@ setAdminUI(false); // Oturum durumu initAuth() ile (Supabase'den) belirlenecek
 try { renderAll(); } catch(e) { console.error('renderAll hatası:', e); }
 try { initCountdown(); } catch(e) { console.error('initCountdown hatası:', e); }
 try { initTheme(); } catch(e) { console.error('initTheme hatası:', e); }
-// Son açık sayfayı geri yükle (admin sayfaları hariç, giriş kontrolü gerektirir)
+// Açılış sayfasını belirle: önce URL hash'ine bak, yoksa son açık sayfayı geri yükle
 try {
+  const hashSlug = window.location.hash.replace('#', '');
+  const hashPage = URL_SLUGS_TO_PAGE[hashSlug];
   const lastPage = localStorage.getItem('rta_last_page');
-  if (lastPage && lastPage !== 'puan' && lastPage !== 'skor' && lastPage !== 'yonetim') {
+
+  if (hashPage && !(!isLoggedIn() && (hashPage === 'skor' || hashPage === 'yonetim'))) {
+    showPage(hashPage);
+  } else if (lastPage && lastPage !== 'puan' && lastPage !== 'skor' && lastPage !== 'yonetim') {
     showPage(lastPage);
   }
 } catch(e) { console.error('Son sayfa geri yükleme hatası:', e); }
 // Turnuva popup'ı devre dışı
+
+// Tarayıcı geri/ileri butonları ile hash değişince ilgili sayfayı aç
+window.addEventListener('hashchange', () => {
+  const hashSlug = window.location.hash.replace('#', '');
+  const hashPage = URL_SLUGS_TO_PAGE[hashSlug];
+  if (hashPage) {
+    const activeEl = document.querySelector('.page.active');
+    const activeId = activeEl ? activeEl.id.replace('page-', '') : null;
+    if (hashPage !== activeId) showPage(hashPage);
+  }
+});
 
 async function initSupabase() {
   if (!window._sbReady) { setConnected(false); return; }
