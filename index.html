@@ -2866,6 +2866,7 @@ Tayfun Selek vs Derya Özdemir
         <div class="tournament-rules-title" id="archived-bracket-title" style="margin-bottom:0"></div>
         <button class="btn btn-sm" onclick="closeArchivedBracketView()" style="padding:4px 10px">✕ Kapat</button>
       </div>
+      <div id="archived-poster-box" style="margin-bottom:16px"></div>
       <div class="bracket-wrap"><div class="bracket" id="archived-bracket-container"></div></div>
     </div>
   </div>
@@ -6068,14 +6069,66 @@ function viewArchivedTournament(id) {
   const view = document.getElementById('archived-bracket-view');
   const container = document.getElementById('archived-bracket-container');
   const title = document.getElementById('archived-bracket-title');
+  const posterBox = document.getElementById('archived-poster-box');
   if (!view || !container) return;
 
   title.textContent = `🏆 ${entry.info.name} — Turnuva Ağacı`;
   container.innerHTML = buildBracketHtml(entry.bracket) + '<div id="archived-third-place-box"></div>';
   const tpBox = document.getElementById('archived-third-place-box');
   if (tpBox && entry.thirdPlace) tpBox.innerHTML = buildThirdPlaceHtml(entry.thirdPlace);
+
+  if (posterBox) {
+    const isAdmin = isLoggedIn();
+    const imgHtml = entry.posterUrl
+      ? `<img src="${escapeHtml(entry.posterUrl)}" alt="Şampiyon Posteri" style="width:100%;border-radius:12px;display:block;margin-bottom:${isAdmin ? '10px' : '0'}">`
+      : '';
+    const adminHtml = isAdmin ? `
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <input type="text" id="archived-poster-url-${entry.id}" class="finput" placeholder="Şampiyon posteri URL'si yapıştır (GitHub raw link vb.)" value="${entry.posterUrl ? escapeHtml(entry.posterUrl) : ''}" style="flex:1;min-width:200px">
+        <button class="btn btn-sm" onclick="saveArchivedTournamentPoster(${entry.id})">💾 Kaydet</button>
+        ${entry.posterUrl ? `<button class="btn btn-sm" style="color:var(--red)" onclick="removeArchivedTournamentPoster(${entry.id})">🗑️ Kaldır</button>` : ''}
+      </div>` : '';
+    posterBox.innerHTML = imgHtml + adminHtml;
+  }
+
   view.style.display = 'block';
   view.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function saveArchivedTournamentPoster(id) {
+  const input = document.getElementById('archived-poster-url-' + id);
+  if (!input) return;
+  const url = input.value.trim();
+  const archive = loadTournamentArchiveList();
+  const entry = archive.find(e => e.id === id);
+  if (!entry) return;
+  entry.posterUrl = url || null;
+
+  // Önce local render, sonra arka planda Supabase'e yaz
+  saveTournamentArchiveLocal(archive);
+  viewArchivedTournament(id);
+  showToast('Şampiyon posteri kaydedildi 🏆', 'ok');
+
+  if (window._sbAdmin) {
+    window._sbAdmin.from('meta').update({ tournament_archive: archive }).eq('id', 1)
+      .then(({ error }) => { if (error) showToast('Supabase hatası: ' + error.message, 'err'); });
+  }
+}
+
+function removeArchivedTournamentPoster(id) {
+  const archive = loadTournamentArchiveList();
+  const entry = archive.find(e => e.id === id);
+  if (!entry) return;
+  entry.posterUrl = null;
+
+  saveTournamentArchiveLocal(archive);
+  viewArchivedTournament(id);
+  showToast('Poster kaldırıldı', 'ok');
+
+  if (window._sbAdmin) {
+    window._sbAdmin.from('meta').update({ tournament_archive: archive }).eq('id', 1)
+      .then(({ error }) => { if (error) showToast('Supabase hatası: ' + error.message, 'err'); });
+  }
 }
 
 function closeArchivedBracketView() {
