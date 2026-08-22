@@ -4850,20 +4850,22 @@ function _renderBlogList() {
     const commentItemHtml = (c, isPending) => {
       const cd = new Date(c.date);
       const cDateStr = cd.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' });
-      const badge = isPending ? `<span style="font-size:9px;font-weight:700;color:#e5a83a;background:rgba(229,168,58,0.15);border-radius:8px;padding:2px 6px;margin-left:6px">ONAY BEKLİYOR</span>` : '';
+      const badge = isPending ? `<span style="font-size:9px;font-weight:700;color:#e5a83a;background:rgba(229,168,58,0.15);border-radius:8px;padding:2px 6px;margin-left:6px;vertical-align:middle">ONAY BEKLİYOR</span>` : '';
+      const initial = _esc((c.name || '?').trim().charAt(0).toUpperCase() || '?');
       const adminBtns = admin ? `
         <div style="display:flex;gap:6px;margin-top:6px">
           ${isPending ? `<button class="btn btn-sm" style="padding:2px 8px;font-size:11px;color:var(--accent)" onclick="approveBlogComment(${p.id},${c.id})">✓ Onayla</button>` : ''}
           <button class="btn btn-sm" style="padding:2px 8px;font-size:11px;color:var(--red)" onclick="deleteBlogComment(${p.id},${c.id})">✕ Sil</button>
         </div>` : '';
       return `
-        <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:8px 12px;margin-bottom:6px">
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap">
-            <span style="font-size:12px;font-weight:700;color:var(--text)">${_esc(c.name)}${badge}</span>
-            <span style="font-size:10px;color:var(--text-muted)">${cDateStr}</span>
+        <div style="display:flex;gap:10px;margin-bottom:12px">
+          <div style="width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--bg);flex-shrink:0">${initial}</div>
+          <div style="background:rgba(255,255,255,0.04);border-radius:4px 14px 14px 14px;padding:9px 13px;flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:2px">${_esc(c.name)}${badge}</div>
+            <div style="font-size:13px;color:var(--text);line-height:1.5;white-space:pre-wrap;word-break:break-word">${_esc(c.text)}</div>
+            <div style="font-size:10px;color:var(--text-muted);margin-top:4px">${cDateStr}</div>
+            ${adminBtns}
           </div>
-          <div style="font-size:12.5px;color:var(--text-dim);margin-top:3px;line-height:1.5;white-space:pre-wrap">${_esc(c.text)}</div>
-          ${adminBtns}
         </div>`;
     };
 
@@ -4871,14 +4873,18 @@ function _renderBlogList() {
     const pendingHtml = admin ? pending.map(c => commentItemHtml(c, true)).join('') : '';
 
     const commentsBlock = `
-      <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.08)">
-        <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:8px">💬 Yorumlar (${approved.length})</div>
-        ${approvedHtml || (!admin ? '<div style="font-size:12px;color:var(--text-muted)">Henüz yorum yok, ilk yorumu sen yaz!</div>' : '')}
+      <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--text-dim);margin-bottom:10px">💬 Yorumlar (${approved.length})</div>
+        ${approvedHtml || (!admin ? '<div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">Henüz yorum yok, ilk yorumu sen yaz!</div>' : '')}
         ${pendingHtml}
-        <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">
-          <input type="text" id="comment-name-${p.id}" class="finput" placeholder="Adınız" style="font-size:13px" maxlength="60">
-          <textarea id="comment-text-${p.id}" class="finput" placeholder="Yorumunuz..." rows="2" style="font-size:13px;resize:vertical" maxlength="1000"></textarea>
-          <button class="btn btn-sm" onclick="addBlogComment(${p.id})" style="align-self:flex-end">Yorum Gönder</button>
+        <div style="margin-top:6px;background:rgba(255,255,255,0.04);border-radius:14px;padding:10px">
+          <input type="text" id="comment-name-${p.id}" placeholder="Adınız" maxlength="60"
+            style="background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-size:13px;width:100%;outline:none;margin-bottom:8px;box-sizing:border-box">
+          <textarea id="comment-text-${p.id}" placeholder="Yorumunuz..." rows="2" maxlength="1000"
+            style="background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:9px 12px;color:var(--text);font-size:13px;width:100%;outline:none;resize:vertical;min-height:40px;margin-bottom:8px;box-sizing:border-box;font-family:inherit"></textarea>
+          <div style="overflow:hidden">
+            <button onclick="addBlogComment(${p.id})" style="background:var(--accent);color:var(--bg);border:none;border-radius:9px;padding:9px 16px;font-size:13px;font-weight:800;float:right;cursor:pointer">Gönder</button>
+          </div>
         </div>
       </div>`;
 
