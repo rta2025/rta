@@ -4641,6 +4641,12 @@ function renderStandingContent() {
 // ═══════════════════════════════════════════════════
 const BLOG_KEY = 'rta_blog_posts';
 
+function _esc(str) {
+  const div = document.createElement('div');
+  div.textContent = str == null ? '' : String(str);
+  return div.innerHTML;
+}
+
 function loadBlogPosts() {
   try { return JSON.parse(localStorage.getItem(BLOG_KEY) || '[]'); } catch { return []; }
 }
@@ -4708,6 +4714,67 @@ function deleteBlogPost(id) {
   }
 }
 
+function _saveBlogPostsAndSync(posts) {
+  saveBlogPostsLocal(posts);
+  _renderBlogList();
+  const sbClient = window._sbAdmin || window._sb;
+  if (sbClient) {
+    sbClient.from('meta').update({ blog_posts: posts }).eq('id', 1)
+      .then(({ error }) => {
+        if (error) showToast('Supabase hatası: ' + error.message, 'err');
+      });
+  }
+}
+
+function addBlogComment(postId) {
+  const nameInput = document.getElementById('comment-name-' + postId);
+  const textInput = document.getElementById('comment-text-' + postId);
+  if (!nameInput || !textInput) return;
+  const name = nameInput.value.trim();
+  const text = textInput.value.trim();
+  if (!name || !text) { showToast('Adınızı ve yorumunuzu girin', 'err'); return; }
+  if (name.length > 60) { showToast('İsim çok uzun', 'err'); return; }
+  if (text.length > 1000) { showToast('Yorum çok uzun (max 1000 karakter)', 'err'); return; }
+
+  const posts = loadBlogPosts();
+  const post = posts.find(p => p.id === postId);
+  if (!post) return;
+  if (!Array.isArray(post.comments)) post.comments = [];
+  post.comments.push({
+    id: Date.now(),
+    name, text,
+    date: new Date().toISOString(),
+    approved: false
+  });
+
+  nameInput.value = '';
+  textInput.value = '';
+  _saveBlogPostsAndSync(posts);
+  showToast('Yorumun gönderildi, onaylandıktan sonra görünecek 👍', 'ok');
+}
+
+function approveBlogComment(postId, commentId) {
+  const posts = loadBlogPosts();
+  const post = posts.find(p => p.id === postId);
+  if (!post || !Array.isArray(post.comments)) return;
+  const c = post.comments.find(c => c.id === commentId);
+  if (!c) return;
+  c.approved = true;
+  _saveBlogPostsAndSync(posts);
+  showToast('Yorum onaylandı', 'ok');
+}
+
+function deleteBlogComment(postId, commentId) {
+  if (!confirm('Bu yorum silinecek. Emin misiniz?')) return;
+  const posts = loadBlogPosts();
+  const post = posts.find(p => p.id === postId);
+  if (!post || !Array.isArray(post.comments)) return;
+  post.comments = post.comments.filter(c => c.id !== commentId);
+  _saveBlogPostsAndSync(posts);
+  showToast('Yorum silindi', 'ok');
+}
+
+
 function renderBlogPosts() {
   const sbClient = window._sbAdmin || window._sb;
   if (window._sbReady && sbClient) {
@@ -4750,6 +4817,46 @@ function _renderBlogList() {
            <span style="font-size:12px;font-weight:700;color:var(--accent)">${p.author}</span>
          </div>`
       : '';
+
+    const comments = Array.isArray(p.comments) ? p.comments : [];
+    const approved = comments.filter(c => c.approved);
+    const pending = comments.filter(c => !c.approved);
+
+    const commentItemHtml = (c, isPending) => {
+      const cd = new Date(c.date);
+      const cDateStr = cd.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' });
+      const badge = isPending ? `<span style="font-size:9px;font-weight:700;color:#e5a83a;background:rgba(229,168,58,0.15);border-radius:8px;padding:2px 6px;margin-left:6px">ONAY BEKLİYOR</span>` : '';
+      const adminBtns = admin ? `
+        <div style="display:flex;gap:6px;margin-top:6px">
+          ${isPending ? `<button class="btn btn-sm" style="padding:2px 8px;font-size:11px;color:var(--accent)" onclick="approveBlogComment(${p.id},${c.id})">✓ Onayla</button>` : ''}
+          <button class="btn btn-sm" style="padding:2px 8px;font-size:11px;color:var(--red)" onclick="deleteBlogComment(${p.id},${c.id})">✕ Sil</button>
+        </div>` : '';
+      return `
+        <div style="background:rgba(255,255,255,0.04);border-radius:8px;padding:8px 12px;margin-bottom:6px">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap">
+            <span style="font-size:12px;font-weight:700;color:var(--text)">${_esc(c.name)}${badge}</span>
+            <span style="font-size:10px;color:var(--text-muted)">${cDateStr}</span>
+          </div>
+          <div style="font-size:12.5px;color:var(--text-dim);margin-top:3px;line-height:1.5;white-space:pre-wrap">${_esc(c.text)}</div>
+          ${adminBtns}
+        </div>`;
+    };
+
+    const approvedHtml = approved.map(c => commentItemHtml(c, false)).join('');
+    const pendingHtml = admin ? pending.map(c => commentItemHtml(c, true)).join('') : '';
+
+    const commentsBlock = `
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.08)">
+        <div style="font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:8px">💬 Yorumlar (${approved.length})</div>
+        ${approvedHtml || (!admin ? '<div style="font-size:12px;color:var(--text-muted)">Henüz yorum yok, ilk yorumu sen yaz!</div>' : '')}
+        ${pendingHtml}
+        <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">
+          <input type="text" id="comment-name-${p.id}" class="finput" placeholder="Adınız" style="font-size:13px" maxlength="60">
+          <textarea id="comment-text-${p.id}" class="finput" placeholder="Yeni sezon hakkında düşünceleriniz..." rows="2" style="font-size:13px;resize:vertical" maxlength="1000"></textarea>
+          <button class="btn btn-sm" onclick="addBlogComment(${p.id})" style="align-self:flex-end">Yorum Gönder</button>
+        </div>
+      </div>`;
+
     return `
       <div style="background:var(--surface);border-radius:12px;padding:18px 20px">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
@@ -4763,6 +4870,7 @@ function _renderBlogList() {
           ${deleteBtn}
         </div>
         <div style="margin-top:12px;font-size:13.5px;color:var(--text-dim);line-height:1.7;white-space:pre-wrap">${p.content}</div>
+        ${commentsBlock}
       </div>`;
   }).join('');
 }
@@ -6061,11 +6169,7 @@ function renderTournamentArchive() {
   }).join('');
 }
 
-function _escapePosterUrl(str) {
-  const div = document.createElement('div');
-  div.textContent = str == null ? '' : String(str);
-  return div.innerHTML;
-}
+function _escapePosterUrl(str) { return _esc(str); }
 
 function viewArchivedTournament(id) {
   const archive = loadTournamentArchiveList();
