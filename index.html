@@ -2024,7 +2024,7 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
     <button class="nav-btn active" onclick="showPage('puan')">Puan Durumu</button>
     <button class="nav-btn" onclick="showPage('ranking')">🏆 Ranking</button>
     <button class="nav-btn" onclick="showPage('galeri')">🎾 Turnuvalar</button>
-    <button class="nav-btn" onclick="showPage('blog')">📝 Blog</button>
+    <button class="nav-btn" onclick="showPage('blog')">🗣️ Forum</button>
     <button class="nav-btn admin-only" id="nav-skor" onclick="showPage('skor')">Skor Gir</button>
     <button class="nav-btn" onclick="showPage('sonuclar')">Sonuçlar</button>
     <button class="nav-btn" onclick="showPage('arsiv')">Arşiv</button>
@@ -2812,32 +2812,33 @@ Tayfun Selek vs Derya Özdemir
   <div id="tournament-rules-display"></div>
 </div>
 
-<!-- ══ BLOG ══ -->
+<!-- ══ FORUM ══ -->
 <div id="page-blog" class="page">
   <div class="hero" style="margin-bottom:20px">
-    <div class="hero-title" style="font-size:1.5rem">📝 Blog</div>
-    <div class="hero-sub">Sezonla ilgili düşünceler, temenniler ve haberler</div>
+    <div class="hero-title" style="font-size:1.5rem">🗣️ Forum</div>
+    <div class="hero-sub">Görüş, öneri ve dileklerinizi paylaşın — herkes başlık açabilir</div>
   </div>
 
-  <!-- Admin: Yazı Ekle -->
-  <div class="admin-only" style="display:none;margin-bottom:16px">
-    <button class="btn btn-sm" onclick="toggleBlogForm()" style="background:rgba(93,201,93,0.15);color:var(--accent);border:1px solid rgba(93,201,93,0.3)">✏️ Yeni Yazı Ekle</button>
+  <!-- Yeni Başlık Aç (herkese açık) -->
+  <div style="margin-bottom:16px">
+    <button class="btn btn-sm" onclick="toggleBlogForm()" style="background:rgba(93,201,93,0.15);color:var(--accent);border:1px solid rgba(93,201,93,0.3)">🆕 Yeni Başlık Aç</button>
 
     <div id="blog-form-box" style="display:none;margin-top:12px;background:var(--surface);border-radius:10px;padding:14px 16px">
       <div class="fgroup">
         <label>Başlık</label>
-        <input type="text" id="blog-title" class="finput" placeholder="örn. Yeni Sezon Öncesi Düşünceler">
+        <input type="text" id="blog-title" class="finput" placeholder="örn. Yeni Sezon Öncesi Düşünceler" maxlength="120">
       </div>
       <div class="fgroup">
-        <label>Kimden (isteğe bağlı)</label>
-        <input type="text" id="blog-author" class="finput" placeholder="örn. Ahmet Yılmaz">
+        <label>Adınız</label>
+        <input type="text" id="blog-author" class="finput" placeholder="örn. Ahmet Yılmaz" maxlength="60">
       </div>
       <div class="fgroup">
-        <label>Yazı</label>
-        <textarea id="blog-content" class="finput" rows="6" placeholder="Yazınızı buraya yazın..."></textarea>
+        <label>Mesajınız</label>
+        <textarea id="blog-content" class="finput" rows="6" placeholder="Yazınızı buraya yazın..." maxlength="4000"></textarea>
       </div>
+      <div class="admin-only" style="display:none;font-size:11px;color:var(--text-muted);margin-bottom:8px">Admin olarak açtığınız başlıklar direkt yayınlanır.</div>
       <div style="display:flex;gap:8px">
-        <button class="btn btn-green" onclick="saveBlogPost()" style="flex:1">💾 Yayınla</button>
+        <button class="btn btn-green" onclick="saveBlogPost()" style="flex:1">💾 Paylaş</button>
         <button class="btn" onclick="cancelBlogForm()" style="flex:1">✕ İptal</button>
       </div>
     </div>
@@ -2845,8 +2846,8 @@ Tayfun Selek vs Derya Özdemir
 
   <div id="blog-list" style="display:flex;flex-direction:column;gap:14px"></div>
   <div id="blog-empty" style="display:none;text-align:center;padding:40px 20px;color:var(--text-dim)">
-    <div style="font-size:32px;margin-bottom:10px">📝</div>
-    <div>Henüz yazı eklenmemiş.</div>
+    <div style="font-size:32px;margin-bottom:10px">🗣️</div>
+    <div>Henüz başlık açılmamış. İlk başlığı sen aç!</div>
   </div>
 </div>
 
@@ -4671,13 +4672,19 @@ function saveBlogPost() {
   const author = document.getElementById('blog-author').value.trim();
   const content = document.getElementById('blog-content').value.trim();
 
-  if (!title || !content) { showToast('Başlık ve yazı boş olamaz', 'err'); return; }
+  if (!title || !content) { showToast('Başlık ve mesaj boş olamaz', 'err'); return; }
+  if (!author) { showToast('Adınızı girin', 'err'); return; }
+  if (title.length > 120) { showToast('Başlık çok uzun', 'err'); return; }
+  if (content.length > 4000) { showToast('Mesaj çok uzun (max 4000 karakter)', 'err'); return; }
 
+  const admin = isLoggedIn();
   const posts = loadBlogPosts();
   const newPost = {
     id: Date.now(),
     title, author, content,
     date: new Date().toISOString(),
+    approved: admin,
+    comments: []
   };
   posts.unshift(newPost);
   saveBlogPostsLocal(posts);
@@ -4685,7 +4692,7 @@ function saveBlogPost() {
   cancelBlogForm();
   // Önce ekranı yerel veriyle hemen güncelle (Supabase'i beklemeden)
   _renderBlogList();
-  showToast('Yazı yayınlandı! 📝', 'ok');
+  showToast(admin ? 'Başlık yayınlandı! 🗣️' : 'Başlığın gönderildi, onaylandıktan sonra görünecek 👍', 'ok');
 
   // Sonra Supabase'e arka planda kaydet
   if (window._sbAdmin) {
@@ -4694,6 +4701,15 @@ function saveBlogPost() {
         if (error) showToast('Supabase hatası: ' + error.message, 'err');
       });
   }
+}
+
+function approveBlogPost(id) {
+  const posts = loadBlogPosts();
+  const post = posts.find(p => p.id === id);
+  if (!post) return;
+  post.approved = true;
+  _saveBlogPostsAndSync(posts);
+  showToast('Başlık onaylandı 🗣️', 'ok');
 }
 
 function deleteBlogPost(id) {
@@ -4798,7 +4814,11 @@ function _renderBlogList() {
   const empty = document.getElementById('blog-empty');
   if (!list) return;
 
-  const posts = loadBlogPosts();
+  const admin = isLoggedIn();
+  const allPosts = loadBlogPosts();
+  // approved !== false: eski yazılar (approved alanı olmayan) geriye dönük uyumlu şekilde onaylı sayılır
+  const posts = admin ? allPosts : allPosts.filter(p => p.approved !== false);
+
   if (!posts.length) {
     list.innerHTML = '';
     empty.style.display = 'block';
@@ -4806,15 +4826,20 @@ function _renderBlogList() {
   }
   empty.style.display = 'none';
 
-  const admin = isLoggedIn();
   list.innerHTML = posts.map(p => {
+    const isPendingPost = p.approved === false;
     const d = new Date(p.date);
     const dateStr = d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
-    const deleteBtn = admin ? `<button class="btn btn-sm" onclick="deleteBlogPost(${p.id})" style="color:var(--red);padding:3px 8px;flex-shrink:0">✕</button>` : '';
+    const postAdminBtns = admin ? `
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        ${isPendingPost ? `<button class="btn btn-sm" onclick="approveBlogPost(${p.id})" style="color:var(--accent);padding:3px 8px">✓ Onayla</button>` : ''}
+        <button class="btn btn-sm" onclick="deleteBlogPost(${p.id})" style="color:var(--red);padding:3px 8px">✕</button>
+      </div>` : '';
+    const pendingPostBadge = isPendingPost ? `<span style="font-size:9px;font-weight:700;color:#e5a83a;background:rgba(229,168,58,0.15);border-radius:8px;padding:2px 6px;margin-left:6px">ONAY BEKLİYOR</span>` : '';
     const authorHtml = p.author
       ? `<div style="display:inline-flex;align-items:center;gap:5px;background:rgba(93,201,93,0.12);border:1px solid rgba(93,201,93,0.3);border-radius:20px;padding:3px 10px;margin-bottom:6px">
            <span style="font-size:11px">✍️</span>
-           <span style="font-size:12px;font-weight:700;color:var(--accent)">${p.author}</span>
+           <span style="font-size:12px;font-weight:700;color:var(--accent)">${_esc(p.author)}</span>
          </div>`
       : '';
 
@@ -4852,24 +4877,24 @@ function _renderBlogList() {
         ${pendingHtml}
         <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">
           <input type="text" id="comment-name-${p.id}" class="finput" placeholder="Adınız" style="font-size:13px" maxlength="60">
-          <textarea id="comment-text-${p.id}" class="finput" placeholder="Yeni sezon hakkında düşünceleriniz..." rows="2" style="font-size:13px;resize:vertical" maxlength="1000"></textarea>
+          <textarea id="comment-text-${p.id}" class="finput" placeholder="Yorumunuz..." rows="2" style="font-size:13px;resize:vertical" maxlength="1000"></textarea>
           <button class="btn btn-sm" onclick="addBlogComment(${p.id})" style="align-self:flex-end">Yorum Gönder</button>
         </div>
       </div>`;
 
     return `
-      <div style="background:var(--surface);border-radius:12px;padding:18px 20px">
+      <div style="background:var(--surface);border-radius:12px;padding:18px 20px${isPendingPost ? ';border:1px solid rgba(229,168,58,0.4)' : ''}">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
           <div style="flex:1">
             ${authorHtml}
-            <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px">${p.title}</div>
+            <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px">${_esc(p.title)}${pendingPostBadge}</div>
             <div style="font-size:11px;color:var(--text-muted)">
               ${dateStr}
             </div>
           </div>
-          ${deleteBtn}
+          ${postAdminBtns}
         </div>
-        <div style="margin-top:12px;font-size:13.5px;color:var(--text-dim);line-height:1.7;white-space:pre-wrap">${p.content}</div>
+        <div style="margin-top:12px;font-size:13.5px;color:var(--text-dim);line-height:1.7;white-space:pre-wrap">${_esc(p.content)}</div>
         ${commentsBlock}
       </div>`;
   }).join('');
