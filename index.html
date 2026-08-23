@@ -6106,6 +6106,11 @@ function archiveTournament() {
 }
 
 function renderActiveTournamentCard() {
+  // Önce yerel veriyle ANINDA göster (Supabase'i beklemeden)
+  _renderActiveTournamentCardDisplay();
+  renderTournamentArchive();
+
+  // Sonra arka planda Supabase'den taze veriyi çek ve gerekirse güncelle
   const sbClient = window._sbAdmin || window._sb;
   if (window._sbReady && sbClient) {
     sbClient.from('meta').select('tournament_info, tournament_archive').eq('id', 1).single()
@@ -6114,14 +6119,12 @@ function renderActiveTournamentCard() {
           if (data.tournament_info) saveTournamentInfoLocal(data.tournament_info);
           else localStorage.removeItem(TOURNAMENT_INFO_KEY);
           if (data.tournament_archive) saveTournamentArchiveLocal(data.tournament_archive);
+          else localStorage.removeItem(TOURNAMENT_ARCHIVE_KEY);
+          _renderActiveTournamentCardDisplay();
+          renderTournamentArchive();
         }
-        _renderActiveTournamentCardDisplay();
-        renderTournamentArchive();
       })
-      .catch(() => { _renderActiveTournamentCardDisplay(); renderTournamentArchive(); });
-  } else {
-    _renderActiveTournamentCardDisplay();
-    renderTournamentArchive();
+      .catch(() => {});
   }
 }
 
