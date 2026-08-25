@@ -2226,12 +2226,12 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
       <div class="form-grid3" style="margin-bottom:14px">
         <div class="fgroup">
           <label id="po-p1-label">3.Lig 1.</label>
-          <input type="text" id="po-p1" class="finput" placeholder="Otomatik dolar..." readonly style="color:var(--text-dim)">
+          <input type="text" id="po-p1" class="finput" placeholder="İsim yazın veya otomatik dolsun">
         </div>
         <div class="vs-txt">VS</div>
         <div class="fgroup">
           <label id="po-p2-label">Süper Lig 8.</label>
-          <input type="text" id="po-p2" class="finput" placeholder="Otomatik dolar..." readonly style="color:var(--text-dim)">
+          <input type="text" id="po-p2" class="finput" placeholder="İsim yazın veya otomatik dolsun">
         </div>
       </div>
       <div class="po-no-pts">⚠️ Play-off maçlarından ranking puanı verilmez. Lig sıralaması etkilenmez.</div>
@@ -2421,9 +2421,14 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
     </div>
 
     <div class="rule-section">
-      <div class="rule-section-title">📊 8. Sıralama Kriterleri</div>
+      <div class="rule-section-title">📊 8. Puan Eşitliği ve Sıralama Kriterleri</div>
       <div class="rule-item"><span class="rule-icon">▸</span>Puan üstünlüğü esasına göre sıralama yapılır.</div>
-      <div class="rule-item"><span class="rule-icon">▸</span>Eşit puan halinde sırasıyla: <strong>1) Genel set averajı</strong> &nbsp;2) Genel oyun averajı &nbsp;3) İkili averaj</div>
+      <div class="rule-item"><span class="rule-icon">▸</span>Puanı eşit olan oyuncuların <strong>öncelikle kendi aralarındaki averajına</strong> bakılır.</div>
+      <div class="rule-item"><span class="rule-icon">▸</span><strong>İki oyuncunun</strong> puanı eşitse, kendi aralarında oynadıkları maç esas alınır.</div>
+      <div class="rule-item"><span class="rule-icon">▸</span><strong>Üç veya daha fazla oyuncunun</strong> puanı eşitse, yalnızca bu oyuncuların kendi aralarında oluşan <strong>mini lig</strong> dikkate alınır. Bu mini ligde sırasıyla <strong>puan → set averajı → oyun averajı</strong> esas alınır.</div>
+      <div class="rule-item"><span class="rule-icon">▸</span>Kendi aralarındaki averajla eşitlik bozulmazsa, sırasıyla <strong>genel maç galibiyeti sayısı → genel set averajı → genel oyun averajı</strong> esas alınır.</div>
+      <div class="rule-item" style="margin-top:8px"><strong>İstisna 1:</strong> Puanı eşit olan iki oyuncu sezon içinde birbirleriyle hiç maç yapmamışsa (averaj hesaplanamayacağı için), sırasıyla <strong>maç galibiyeti sayısı → genel set averajı → genel oyun averajı</strong> esas alınır.</div>
+      <div class="rule-item"><strong>İstisna 2:</strong> Üç veya daha fazla oyuncunun puanı eşit olsa da kendi aralarındaki maçlar eksikse (mini lig tamamlanamıyorsa), kendi aralarındaki averaj uygulanmaz; sırasıyla <strong>maç galibiyeti sayısı → genel set averajı → genel oyun averajı</strong> esas alınır.</div>
     </div>
 
     <div class="rule-section">
@@ -3280,27 +3285,31 @@ let state = loadState() || JSON.parse(JSON.stringify(DEFAULT));
 // ═══════════════════════════════════════════════════
 function getStandings(league) {
   const players = state.players.filter(p => p.league === league);
+  const leagueMatches = state.matches.filter(m => m.league === league);
   const st = {};
   players.forEach(p => {
     st[p.id] = {id: p.id, name: p.name, photo_url: p.photo_url || null, mp: 0, mw: 0, ml: 0, pts: 0, sw: 0, sl: 0, gw: 0, gl: 0};
   });
 
-  state.matches.filter(m => m.league === league).forEach(m => {
-    if (!st[m.winner] || !st[m.loser]) return;
-    const wst = m.sets;
-    let p1s = 0, p2s = 0, gw = 0, gl = 0;
-    if (wst) {
-      wst.forEach(([a,b], idx) => {
+  // Bir maçtaki oyun (game) skorunu, tie-break istisnasını gözeterek hesaplar (kazanan taraf perspektifiyle)
+  function _matchGames(m) {
+    let gw = 0, gl = 0;
+    if (m.sets) {
+      m.sets.forEach(([a,b], idx) => {
         const isTiebreak = idx === 2 && (a >= 10 || b >= 10);
         if (isTiebreak) {
-          if (a > b) { gw += 1; gl += 0; }
-          else       { gw += 0; gl += 1; }
+          if (a > b) gw += 1; else gl += 1;
         } else {
           gw += a; gl += b;
         }
-        if (a > b) p1s++; else if (b > a) p2s++;
       });
     }
+    return { gw, gl };
+  }
+
+  leagueMatches.forEach(m => {
+    if (!st[m.winner] || !st[m.loser]) return;
+    const { gw, gl } = _matchGames(m);
 
     st[m.winner].mp++;
     st[m.winner].mw++;
@@ -3319,18 +3328,115 @@ function getStandings(league) {
     st[m.loser].gl += gw;
   });
 
-  return Object.values(st).sort((a,b) => {
-    // 1. Puan
-    if (b.pts !== a.pts) return b.pts - a.pts;
-    // 2. Set averajı (fark)
-    const aSetAvg = a.sw - a.sl;
-    const bSetAvg = b.sw - b.sl;
+  // Genel (yedek) kıstas: maç galibiyeti → genel set averajı → genel oyun averajı
+  function _generalCompare(a, b) {
+    if (b.mw !== a.mw) return b.mw - a.mw;
+    const aSetAvg = a.sw - a.sl, bSetAvg = b.sw - b.sl;
     if (bSetAvg !== aSetAvg) return bSetAvg - aSetAvg;
-    // 3. Oyun averajı (fark)
-    const aGameAvg = a.gw - a.gl;
-    const bGameAvg = b.gw - b.gl;
+    const aGameAvg = a.gw - a.gl, bGameAvg = b.gw - b.gl;
     return bGameAvg - aGameAvg;
+  }
+
+  // İki oyuncu arasındaki (ikili) averajı sadece kendi aralarındaki maçlardan hesaplar
+  function _headToHeadStats(idA, idB) {
+    const matches = leagueMatches.filter(m =>
+      (m.winner === idA && m.loser === idB) || (m.winner === idB && m.loser === idA)
+    );
+    if (!matches.length) return null;
+    const stats = { [idA]: {sw:0, sl:0, gw:0, gl:0}, [idB]: {sw:0, sl:0, gw:0, gl:0} };
+    matches.forEach(m => {
+      const { gw, gl } = _matchGames(m);
+      stats[m.winner].sw += m.winningSets;
+      stats[m.winner].sl += m.losingSets;
+      stats[m.winner].gw += gw;
+      stats[m.winner].gl += gl;
+      stats[m.loser].sw += m.losingSets;
+      stats[m.loser].sl += m.winningSets;
+      stats[m.loser].gw += gl;
+      stats[m.loser].gl += gw;
+    });
+    return stats;
+  }
+
+  // Mini lig: sadece verilen (3+ eşit puanlı) grup içindeki oyuncuların kendi aralarındaki maçları.
+  // Round-robin tam değilse (bir çift bile oynamamışsa) null döner.
+  function _miniLeagueStats(ids) {
+    const idSet = new Set(ids);
+    const matches = leagueMatches.filter(m => idSet.has(m.winner) && idSet.has(m.loser));
+    for (let i = 0; i < ids.length; i++) {
+      for (let j = i + 1; j < ids.length; j++) {
+        const played = matches.some(m =>
+          (m.winner === ids[i] && m.loser === ids[j]) || (m.winner === ids[j] && m.loser === ids[i])
+        );
+        if (!played) return null;
+      }
+    }
+    const stats = {};
+    ids.forEach(id => { stats[id] = { pts: 0, sw: 0, sl: 0, gw: 0, gl: 0 }; });
+    matches.forEach(m => {
+      const { gw, gl } = _matchGames(m);
+      stats[m.winner].pts += m.wpts;
+      stats[m.winner].sw += m.winningSets;
+      stats[m.winner].sl += m.losingSets;
+      stats[m.winner].gw += gw;
+      stats[m.winner].gl += gl;
+      stats[m.loser].pts += m.lpts;
+      stats[m.loser].sw += m.losingSets;
+      stats[m.loser].sl += m.winningSets;
+      stats[m.loser].gw += gl;
+      stats[m.loser].gl += gw;
+    });
+    return stats;
+  }
+
+  // Puana göre grupla, her grubu kendi içinde eşitlik kuralına göre sırala
+  const allPlayers = Object.values(st);
+  const byPoints = {};
+  allPlayers.forEach(p => { (byPoints[p.pts] = byPoints[p.pts] || []).push(p); });
+  const pointGroups = Object.keys(byPoints).map(Number).sort((a,b) => b - a);
+
+  const result = [];
+  pointGroups.forEach(pts => {
+    const group = byPoints[pts];
+
+    if (group.length === 1) { result.push(group[0]); return; }
+
+    if (group.length === 2) {
+      const [a, b] = group;
+      const h2h = _headToHeadStats(a.id, b.id);
+      if (h2h) {
+        const aSetAvg = h2h[a.id].sw - h2h[a.id].sl;
+        const bSetAvg = h2h[b.id].sw - h2h[b.id].sl;
+        if (aSetAvg !== bSetAvg) { result.push(...(aSetAvg > bSetAvg ? [a, b] : [b, a])); return; }
+        const aGameAvg = h2h[a.id].gw - h2h[a.id].gl;
+        const bGameAvg = h2h[b.id].gw - h2h[b.id].gl;
+        if (aGameAvg !== bGameAvg) { result.push(...(aGameAvg > bGameAvg ? [a, b] : [b, a])); return; }
+      }
+      // İstisna 1: hiç oynanmamış ya da ikili averaj da eşitse genel kritere düş
+      result.push(...[a, b].sort(_generalCompare));
+      return;
+    }
+
+    // 3+ oyuncu eşit puanlı → mini lig
+    const ids = group.map(p => p.id);
+    const mini = _miniLeagueStats(ids);
+    if (mini) {
+      const sorted = [...group].sort((x, y) => {
+        if (mini[y.id].pts !== mini[x.id].pts) return mini[y.id].pts - mini[x.id].pts;
+        const xSet = mini[x.id].sw - mini[x.id].sl, ySet = mini[y.id].sw - mini[y.id].sl;
+        if (ySet !== xSet) return ySet - xSet;
+        const xGame = mini[x.id].gw - mini[x.id].gl, yGame = mini[y.id].gw - mini[y.id].gl;
+        if (yGame !== xGame) return yGame - xGame;
+        return _generalCompare(x, y);
+      });
+      result.push(...sorted);
+    } else {
+      // İstisna 2: mini lig tamamlanmamış → genel kritere düş
+      result.push(...[...group].sort(_generalCompare));
+    }
   });
+
+  return result;
 }
 
 function pointsForResult(winningSets, losingSets) {
@@ -5397,27 +5503,25 @@ function selectPoType(type) {
   if (type === 1) {
     document.getElementById('po-p1-label').textContent = '3.Lig 1.';
     document.getElementById('po-p2-label').textContent = 'Süper Lig 8.';
-    document.getElementById('po-p1').value = standings.l3[0]?.name || '—';
-    document.getElementById('po-p2').value = standings.super[7]?.name || '—';
+    document.getElementById('po-p1').value = standings.l3[0]?.name || '';
+    document.getElementById('po-p2').value = standings.super[7]?.name || '';
   } else {
     document.getElementById('po-p1-label').textContent = '4.Lig 1.';
     document.getElementById('po-p2-label').textContent = '2.Lig 8.';
-    document.getElementById('po-p1').value = standings.l4[0]?.name || '—';
-    document.getElementById('po-p2').value = standings.l2[7]?.name || '—';
+    document.getElementById('po-p1').value = standings.l4[0]?.name || '';
+    document.getElementById('po-p2').value = standings.l2[7]?.name || '';
   }
 }
 
-function buildPoNote(type, winner, loser) {
+function buildPoNote(type, winner, loser, challenger) {
   if (type === 1) {
-    const l3top = getStandings('l3')[0]?.name;
-    if (winner === l3top) {
+    if (winner === challenger) {
       return `⬆️ ${winner} (3.Lig 1.) Süper Lig 8.si ${loser}'i yendi → Süper Lig'e çıktı!`;
     } else {
       return `🔒 ${winner} (Süper Lig 8.) 3.Lig 1.si ${loser}'i yendi → Süper Lig'de kaldı.`;
     }
   } else {
-    const l4top = getStandings('l4')[0]?.name;
-    if (winner === l4top) {
+    if (winner === challenger) {
       return `⬆️ ${winner} (4.Lig 1.) 2.Lig 8.si ${loser}'i yendi → 2. Lig'e çıktı!`;
     } else {
       return `🔒 ${winner} (2.Lig 8.) 4.Lig 1.si ${loser}'i yendi → 2. Lig'de kaldı.`;
@@ -5432,13 +5536,11 @@ function submitPlayoff() {
   const p2 = document.getElementById('po-p2').value;
 
   if (!seasonId)     { showToast('Sezon seçin', 'err'); return; }
-  if (!p1 || p1 === '—' || !p2 || p2 === '—') {
-    showToast('Oyuncu bilgisi bulunamadı — sıralamada yeterli oyuncu var mı?', 'err'); return;
-  }
+  if (!p1 || !p2)    { showToast('İki oyuncunun da adını girin', 'err'); return; }
 
   const sets = [];
   let wSets = 0, lSets = 0;
-  [[s1a,s1b],[s2a,s2b],[s3a,s3b]].forEach(([a,b],i) => {
+  [['s1a','s1b'],['s2a','s2b'],['s3a','s3b']].forEach(([a,b],i) => {
     const ea = document.getElementById(`s${i+1}a`);
     const eb = document.getElementById(`s${i+1}b`);
     const va = parseInt(ea?.value); const vb = parseInt(eb?.value);
@@ -5457,7 +5559,7 @@ function submitPlayoff() {
   const loser  = p1Sets > p2Sets ? p2 : p1;
 
   const scoreStr = sets.map(([a,b])=>`${a}-${b}`).join(' ');
-  const note = buildPoNote(_poType, winner, loser);
+  const note = buildPoNote(_poType, winner, loser, p1);
 
   const entry = {
     id: Date.now(),
