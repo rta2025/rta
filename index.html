@@ -5579,7 +5579,6 @@ function submitPlayoff() {
   const all = loadPlayoffs();
   all.push(entry);
   savePlayoffs(all);
-  sbUpsertPlayoff(entry);
 
   // Formu sıfırla
   document.getElementById('po-checkbox').checked = false;
@@ -5587,18 +5586,25 @@ function submitPlayoff() {
   ['s1a','s1b','s2a','s2b','s3a','s3b'].forEach(id => {
     const el = document.getElementById(id); if(el) el.value='';
   });
+
+  // Önce ekranı yerel veriyle hemen güncelle (Supabase'i beklemeden)
+  renderPlayoffs();
   renderArchive();
-  showToast(`✅ Play-off sonucu kaydedildi! ${winner} kazandı.`);
+  showToast('Play-off sonucu kaydedildi! 🏆', 'ok');
+
+  // Sonra Supabase'e arka planda kaydet
+  sbUpsertPlayoff(entry);
 }
 
 async function deletePlayoff(id) {
   if (!confirm('Bu play-off sonucu silinecek!')) return;
   savePlayoffs(loadPlayoffs().filter(p => p.id !== id));
+  renderPlayoffs();
+  renderArchive();
+  showToast('Play-off sonucu silindi', 'err');
   if (window._sbReady) {
     try { await window._sbAdmin.from('playoff_matches').delete().eq('id', id); } catch(e){}
   }
-  renderArchive();
-  showToast('Play-off sonucu silindi', 'err');
 }
 
 async function sbUpsertPlayoff(entry) {
