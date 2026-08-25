@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<!-- RTA v11 build:20260826-0930 -->
-<!-- forum + tie-break + playoff-fix -->
+<!-- RTA v12 build:20260826-1010 -->
+<!-- fix: state.playoffMatches never populated -->
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -3143,7 +3143,7 @@ async function loadFromSupabase() {
       localStorage.setItem(ARCHIVE_KEY, JSON.stringify(mapped));
     }
 
-    // Playoff sonuçlarını Supabase'den al → localStorage cache
+    // Playoff sonuçlarını Supabase'den al → localStorage cache + state
     if (playoffs) {
       const mapped = playoffs.map(p => ({
         id: p.id, seasonId: p.season_id, matchType: p.match_type,
@@ -3153,6 +3153,7 @@ async function loadFromSupabase() {
         scoreStr: p.score_str, note: p.note, date: p.match_date
       }));
       localStorage.setItem(PO_KEY, JSON.stringify(mapped));
+      state.playoffMatches = mapped;
     }
 
     // Fotoğrafları Supabase'den al → localStorage cache
@@ -3280,6 +3281,12 @@ const DEFAULT = {
 };
 
 let state = loadState() || JSON.parse(JSON.stringify(DEFAULT));
+
+// Play-off sonuçlarını sayfa ilk açılırken (Supabase cevap vermeden önce) yerelden doldur
+try {
+  const _cachedPlayoffs = JSON.parse(localStorage.getItem('rta_playoffs_v1') || '[]');
+  if (Array.isArray(_cachedPlayoffs)) state.playoffMatches = _cachedPlayoffs;
+} catch (e) {}
 
 // ═══════════════════════════════════════════════════
 // CALCULATIONS
@@ -5456,7 +5463,10 @@ let _poType = 1; // 1 veya 2
 function loadPlayoffs() {
   try { return JSON.parse(localStorage.getItem(PO_KEY) || '[]'); } catch { return []; }
 }
-function savePlayoffs(data) { localStorage.setItem(PO_KEY, JSON.stringify(data)); }
+function savePlayoffs(data) {
+  localStorage.setItem(PO_KEY, JSON.stringify(data));
+  state.playoffMatches = data;
+}
 
 function togglePlayoffMode() {
   const cb = document.getElementById('po-checkbox');
@@ -5579,6 +5589,7 @@ function submitPlayoff() {
   const all = loadPlayoffs();
   all.push(entry);
   savePlayoffs(all);
+  sbUpsertPlayoff(entry);
 
   // Formu sıfırla
   document.getElementById('po-checkbox').checked = false;
@@ -5586,25 +5597,18 @@ function submitPlayoff() {
   ['s1a','s1b','s2a','s2b','s3a','s3b'].forEach(id => {
     const el = document.getElementById(id); if(el) el.value='';
   });
-
-  // Önce ekranı yerel veriyle hemen güncelle (Supabase'i beklemeden)
-  renderPlayoffs();
   renderArchive();
-  showToast('Play-off sonucu kaydedildi! 🏆', 'ok');
-
-  // Sonra Supabase'e arka planda kaydet
-  sbUpsertPlayoff(entry);
+  showToast(`✅ Play-off sonucu kaydedildi! ${winner} kazandı.`);
 }
 
 async function deletePlayoff(id) {
   if (!confirm('Bu play-off sonucu silinecek!')) return;
   savePlayoffs(loadPlayoffs().filter(p => p.id !== id));
-  renderPlayoffs();
-  renderArchive();
-  showToast('Play-off sonucu silindi', 'err');
   if (window._sbReady) {
     try { await window._sbAdmin.from('playoff_matches').delete().eq('id', id); } catch(e){}
   }
+  renderArchive();
+  showToast('Play-off sonucu silindi', 'err');
 }
 
 async function sbUpsertPlayoff(entry) {
