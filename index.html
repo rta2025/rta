@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<!-- RTA v12 build:20260826-1010 -->
-<!-- fix: state.playoffMatches never populated -->
+<!-- RTA v14 build:20260826-1045 -->
+<!-- redesign: play-off results card -->
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -864,21 +864,30 @@ initNewSeasonCountdown();
   margin-bottom:14px;text-align:center; }
 .po-archive-block { margin-top:18px;border-top:1px solid var(--border);padding-top:16px; }
 .po-archive-title { font-family:'Oswald',sans-serif;font-size:0.8rem;letter-spacing:1.5px;
-  color:var(--gold);margin-bottom:10px;text-transform:uppercase; }
-.po-result-card { background:var(--surface2);border:1px solid rgba(240,192,64,0.18);
-  border-radius:10px;padding:14px 16px;margin-bottom:10px; }
+  color:var(--gold);margin-bottom:12px;text-transform:uppercase;display:flex;align-items:center;gap:6px; }
+.po-result-card { background:linear-gradient(135deg, rgba(240,192,64,0.08), var(--surface2) 40%);
+  border:1px solid rgba(240,192,64,0.25);border-left:3px solid var(--gold);
+  border-radius:12px;padding:16px 18px;margin-bottom:12px;position:relative;overflow:hidden; }
 .po-result-card:last-child { margin-bottom:0; }
-.po-result-header { font-size:0.72rem;color:var(--text-muted);font-weight:700;
-  text-transform:uppercase;letter-spacing:1px;margin-bottom:8px; }
-.po-result-players { display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap; }
-.po-winner { font-weight:700;color:var(--accent); }
-.po-loser { color:var(--text-dim); }
-.po-score { font-family:'Oswald',sans-serif;color:var(--gold);font-size:1rem; }
-.po-note { font-size:0.78rem;color:var(--text-dim);margin-top:6px;
-  padding:6px 10px;background:rgba(93,201,93,0.07);border-radius:6px; }
-.po-empty { font-size:0.78rem;color:var(--text-muted);padding:10px 0;font-style:italic; }
+.po-result-header { display:inline-block;font-size:0.68rem;color:var(--gold);font-weight:700;
+  text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;
+  background:rgba(240,192,64,0.12);border-radius:20px;padding:3px 11px; }
+.po-result-players { display:flex;align-items:center;gap:10px;margin-bottom:4px;flex-wrap:wrap; }
+.po-vs-row { display:flex;align-items:baseline;gap:8px;flex-wrap:wrap; }
+.po-winner { font-weight:800;color:var(--accent);font-size:0.95rem;display:inline-flex;align-items:center;gap:5px; }
+.po-vs-txt { font-size:0.68rem;color:var(--text-muted);font-weight:700;letter-spacing:0.5px; }
+.po-loser { color:var(--text-dim);font-size:0.88rem; }
+.po-score { font-family:'Oswald',sans-serif;color:var(--bg);font-size:0.92rem;font-weight:700;
+  background:var(--gold);border-radius:7px;padding:3px 10px;margin-left:auto;letter-spacing:0.5px;white-space:nowrap; }
+.po-note { font-size:0.78rem;color:var(--text-dim);margin-top:12px;padding-top:10px;
+  border-top:1px dashed rgba(240,192,64,0.2);display:flex;align-items:flex-start;gap:6px;line-height:1.5; }
+.po-empty { font-size:0.8rem;color:var(--text-muted);padding:16px;font-style:italic;
+  border:1px dashed var(--border);border-radius:12px;margin-bottom:12px;
+  display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.02); }
+.po-empty:last-child { margin-bottom:0; }
 body.light-mode .po-toggle-row { background:#fbf6e6;border-color:#ecdca6; }
-body.light-mode .po-result-card { background:#f3f7f3; }
+body.light-mode .po-result-card { background:linear-gradient(135deg, rgba(240,192,64,0.1), #f3f7f3 40%); }
+body.light-mode .po-empty { background:#f7f7f2; }
 body.light-mode .po-type-btn { background:var(--surface2); }
 
 /* ── TABS inside page ── */
@@ -3123,6 +3132,12 @@ async function loadFromSupabase() {
       } else {
         localStorage.removeItem('rta_special_player');
       }
+      // Turnuva bilgisi ve turnuva arşivini de burada al (sadece Turnuvalar sekmesine
+      // uğranmasına bağlı kalmadan, hangi sekmeden girilirse girilsin hazır olsun)
+      if (meta.tournament_info) localStorage.setItem('rta_tournament_info', JSON.stringify(meta.tournament_info));
+      else localStorage.removeItem('rta_tournament_info');
+      if (meta.tournament_archive) localStorage.setItem('rta_tournament_archive', JSON.stringify(meta.tournament_archive));
+      else localStorage.removeItem('rta_tournament_archive');
     }
 
     // Ranking puanlarını Supabase'den al → localStorage cache
@@ -5189,17 +5204,21 @@ function _renderArchiveList() {
       const po2 = poMatches.find(p => p.matchType === 2);
       const poCard = (po, label) => po
         ? `<div class="po-result-card">
-            <div class="po-result-header">${label}</div>
-            <div class="po-result-players">
-              <span class="po-winner">🏆 ${po.winner}</span>
-              <span style="color:var(--text-muted)">vs</span>
-              <span class="po-loser">${po.loser}</span>
-              <span class="po-score">${po.scoreStr}</span>
-              ${isAdmin ? `<button class="btn btn-sm" style="margin-left:auto;padding:2px 8px" onclick="deletePlayoff(${po.id})">Sil</button>` : ''}
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+              <div class="po-result-header">${label}</div>
+              ${isAdmin ? `<button class="btn btn-sm" style="padding:2px 8px;flex-shrink:0" onclick="deletePlayoff(${po.id})">🗑️</button>` : ''}
             </div>
-            <div class="po-note">${po.note}</div>
+            <div class="po-result-players">
+              <div class="po-vs-row">
+                <span class="po-winner">🏆 ${po.winner}</span>
+                <span class="po-vs-txt">VS</span>
+                <span class="po-loser">${po.loser}</span>
+              </div>
+              <span class="po-score">${po.scoreStr}</span>
+            </div>
+            <div class="po-note"><span>📌</span><span>${po.note}</span></div>
           </div>`
-        : `<div class="po-empty">⏳ ${label} henüz girilmedi</div>`;
+        : `<div class="po-empty"><span>⏳</span><span>${label} henüz girilmedi</span></div>`;
 
       return `<div class="po-archive-block">
         <div class="po-archive-title">⚡ Play-off Sonuçları</div>
