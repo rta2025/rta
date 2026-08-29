@@ -2134,42 +2134,21 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
 <!-- ══ PUAN DURUMU ══ -->
 <div id="page-puan" class="page active">
 
-  <!-- YENİ SEZON YAKINDA EKRANI -->
-  <div class="hero" style="text-align:center;padding:40px 20px">
-    <img src="logo_rta.png" style="width:80px;height:80px;object-fit:contain;margin-bottom:16px" alt="RTA Logo">
-    <div class="hero-title">1. SEZON TAMAMLANDI</div>
-    <div class="hero-sub" style="margin-bottom:24px">Rize Tenis Akademisi • 76 Oyuncu • 293 Maç • 5 Lig</div>
-
-    <div style="background:rgba(93,201,93,0.08);border:1px solid rgba(93,201,93,0.2);border-radius:16px;padding:24px;max-width:400px;margin:0 auto 24px">
-      <div style="font-size:0.7rem;color:var(--accent);font-weight:700;letter-spacing:1.5px;margin-bottom:8px">YENİ SEZON</div>
-      <div id="new-season-countdown" style="font-size:2rem;font-weight:800;color:var(--accent);font-family:'Oswald',sans-serif">—</div>
-      <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px">1 Eylül 2026'da başlıyor</div>
-    </div>
-
-    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;max-width:400px;margin:0 auto 28px">
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px">
-        <div style="font-size:1.8rem;font-weight:800;color:var(--accent)">293</div>
-        <div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px">OYNANAN MAÇ</div>
-      </div>
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px">
-        <div style="font-size:1.8rem;font-weight:800;color:var(--accent)">76</div>
-        <div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px">TOPLAM OYUNCU</div>
-      </div>
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px">
-        <div style="font-size:1.8rem;font-weight:800;color:var(--accent)">5</div>
-        <div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px">LİG</div>
-      </div>
-      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px">
-        <div style="font-size:1.8rem;font-weight:800;color:var(--accent)">%19</div>
-        <div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px">3 SET ORANI</div>
-      </div>
-    </div>
-
-    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-      <button onclick="showPage('arsiv')" style="background:var(--accent);color:#000;border:none;padding:12px 24px;border-radius:10px;font-weight:700;font-size:0.9rem;cursor:pointer">📁 Sezon Arşivi</button>
-      <button onclick="showPage('ranking')" style="background:var(--surface);color:var(--text);border:1px solid var(--border);padding:12px 24px;border-radius:10px;font-weight:700;font-size:0.9rem;cursor:pointer">🏆 Ranking</button>
-    </div>
+  <div class="hero" style="margin-bottom:16px">
+    <div class="hero-title" style="font-size:1.5rem">📊 Puan Durumu</div>
+    <div class="hero-sub">2. Sezon — 5 Lig</div>
   </div>
+
+  <div id="standing-tabs" class="inner-tabs" style="margin-bottom:16px;flex-wrap:wrap">
+    <button class="inner-tab active" onclick="setStandingLeague('super')">Süper Lig</button>
+    <button class="inner-tab" onclick="setStandingLeague('l2')">2. Lig</button>
+    <button class="inner-tab" onclick="setStandingLeague('l3')">3. Lig</button>
+    <button class="inner-tab" onclick="setStandingLeague('l4')">4. Lig</button>
+    <button class="inner-tab" onclick="setStandingLeague('l5')">5. Lig</button>
+  </div>
+
+  <div id="standings-content"></div>
+  <div id="playoff-section" style="margin-top:20px"></div>
 
 </div>
 
@@ -3632,13 +3611,15 @@ function renderStanding(code) {
 }
 
 function renderPlayoffs() {
+  const psEl = document.getElementById('playoff-section');
+  if (!psEl) return; // Bu eski/otomatik playoff kartı artık kullanılmıyor (yerine Skor Gir → Play-off sistemi var)
   const superSt = getStandings('super');
   const l3St = getStandings('l3');
   const l2St = getStandings('l2');
   const l4St = getStandings('l4');
 
   const hasPlayers = superSt.length >= 8 && l3St.length >= 1 && l2St.length >= 8 && l4St.length >= 1;
-  if (!hasPlayers) { document.getElementById('playoff-section').innerHTML = ''; return; }
+  if (!hasPlayers) { psEl.innerHTML = ''; return; }
 
   const p1a = superSt[7];
   const p1b = l3St[0];
