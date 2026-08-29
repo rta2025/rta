@@ -6955,23 +6955,29 @@ function downloadStandingImage(code) {
   const scrollEl = el.querySelector('.league-block') || el;
   const prevOverflow = scrollEl.style.overflow;
   const prevWidth = scrollEl.style.width;
+  const fullWidth = scrollEl.scrollWidth;
   scrollEl.style.overflow = 'visible';
-  scrollEl.style.width = scrollEl.scrollWidth + 'px';
+  scrollEl.style.width = fullWidth + 'px';
 
   const restore = () => {
     scrollEl.style.overflow = prevOverflow;
     scrollEl.style.width = prevWidth;
   };
 
-  html2canvas(el, {
-    backgroundColor: '#0d120d',
-    scale: 2,
-    useCORS: true,
-    ignoreElements: (node) => node.classList && node.classList.contains('no-capture'),
-  }).then(canvas => {
-    restore();
-    canvas.toBlob(blob => {
-      if (!blob) { showToast('Görsel oluşturulamadı', 'err'); return; }
+  // Tarayıcının genişletmeyi gerçekten uygulaması (reflow) için bir sonraki
+  // frame'i bekle, sonra html2canvas'a da genişliği (windowWidth) açıkça
+  // bildir — yoksa html2canvas hâlâ mevcut ekran genişliğiyle sınırlı render eder.
+  requestAnimationFrame(() => {
+    html2canvas(el, {
+      backgroundColor: '#0d120d',
+      scale: 2,
+      useCORS: true,
+      windowWidth: Math.max(document.documentElement.clientWidth, fullWidth + 100),
+      ignoreElements: (node) => node.classList && node.classList.contains('no-capture'),
+    }).then(canvas => {
+      restore();
+      canvas.toBlob(blob => {
+        if (!blob) { showToast('Görsel oluşturulamadı', 'err'); return; }
 
       const lgName = leagueName(code);
       const fileName = `RTA-${lgName.replace(/\s+/g, '-')}-Puan-Durumu.png`;
@@ -6992,6 +6998,7 @@ function downloadStandingImage(code) {
     console.error(err);
     showToast('Görsel oluşturulamadı', 'err');
   });
+  }); // requestAnimationFrame
 }
 
 function fallbackDownload(blob, fileName) {
