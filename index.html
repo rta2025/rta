@@ -4312,10 +4312,22 @@ function openProfile(playerId) {
     if (!rivalMap[rivalId]) rivalMap[rivalId] = { w: 0, l: 0, matches: [] };
     if (m.winner === playerId) rivalMap[rivalId].w++;
     else rivalMap[rivalId].l++;
-    // Set skoru — oyuncunun bakış açısından göster
+
+    // Set skorunu oyuncunun kendi bakış açısından (kendi skoru → önce) göster.
+    // ÖNEMLİ: m.score/m.sets her zaman maçın girildiği "1. oyuncu - 2. oyuncu"
+    // sırasıyla saklanır, kazanan kim olursa olsun. Bu yüzden sadece "kazandı mı"
+    // bakıp string çevirmek YANLIŞ (oyuncu 2. sırada girilmişse ters döner).
+    // Doğrusu: set bazında hangi tarafın kazandığını sayıp, o taraf kayıtlı
+    // kazanan (m.winner) ile eşleşiyor mu diye bakmak.
     const won = m.winner === playerId;
     let setScore = '';
-    if (m.score) {
+    if (m.sets && m.sets.length) {
+      let slot0Wins = 0;
+      m.sets.forEach(([a, b]) => { if (a > b) slot0Wins++; });
+      const winnerIsSlot0 = slot0Wins === (m.winningSets || 0);
+      const playerIsSlot0 = won ? winnerIsSlot0 : !winnerIsSlot0;
+      setScore = m.sets.map(([a, b]) => playerIsSlot0 ? `${a}-${b}` : `${b}-${a}`).join(' / ');
+    } else if (m.score) {
       if (won) {
         setScore = m.score;
       } else {
