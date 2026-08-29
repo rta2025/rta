@@ -6950,12 +6950,26 @@ function downloadStandingImage(code) {
   }
   showToast('Görsel hazırlanıyor... ⏳', 'ok');
 
+  // Tablo mobilde yana kaydırmalı (overflow-x:auto) — ekran görüntüsü sadece
+  // görünen kısmı değil TÜM tabloyu içersin diye geçici olarak genişletiyoruz.
+  const scrollEl = el.querySelector('.league-block') || el;
+  const prevOverflow = scrollEl.style.overflow;
+  const prevWidth = scrollEl.style.width;
+  scrollEl.style.overflow = 'visible';
+  scrollEl.style.width = scrollEl.scrollWidth + 'px';
+
+  const restore = () => {
+    scrollEl.style.overflow = prevOverflow;
+    scrollEl.style.width = prevWidth;
+  };
+
   html2canvas(el, {
     backgroundColor: '#0d120d',
     scale: 2,
     useCORS: true,
     ignoreElements: (node) => node.classList && node.classList.contains('no-capture'),
   }).then(canvas => {
+    restore();
     canvas.toBlob(blob => {
       if (!blob) { showToast('Görsel oluşturulamadı', 'err'); return; }
 
@@ -6974,6 +6988,7 @@ function downloadStandingImage(code) {
       fallbackDownload(blob, fileName);
     }, 'image/png');
   }).catch(err => {
+    restore();
     console.error(err);
     showToast('Görsel oluşturulamadı', 'err');
   });
