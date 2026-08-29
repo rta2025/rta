@@ -2139,12 +2139,15 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
     <div class="hero-sub">2. Sezon — 5 Lig</div>
   </div>
 
-  <div id="standing-tabs" class="inner-tabs" style="margin-bottom:16px;flex-wrap:wrap">
-    <button class="inner-tab active" onclick="setStandingLeague('super')">Süper Lig</button>
-    <button class="inner-tab" onclick="setStandingLeague('l2')">2. Lig</button>
-    <button class="inner-tab" onclick="setStandingLeague('l3')">3. Lig</button>
-    <button class="inner-tab" onclick="setStandingLeague('l4')">4. Lig</button>
-    <button class="inner-tab" onclick="setStandingLeague('l5')">5. Lig</button>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px">
+    <div id="standing-tabs" class="inner-tabs" style="flex-wrap:wrap;margin-bottom:0">
+      <button class="inner-tab active" onclick="setStandingLeague('super')">Süper Lig</button>
+      <button class="inner-tab" onclick="setStandingLeague('l2')">2. Lig</button>
+      <button class="inner-tab" onclick="setStandingLeague('l3')">3. Lig</button>
+      <button class="inner-tab" onclick="setStandingLeague('l4')">4. Lig</button>
+      <button class="inner-tab" onclick="setStandingLeague('l5')">5. Lig</button>
+    </div>
+    <button class="btn btn-sm" onclick="downloadStandingImage(_standingLeague)" style="background:rgba(255,200,0,0.15);color:var(--gold);border:1px solid rgba(255,200,0,0.3);flex-shrink:0">📸 Tabloyu İndir</button>
   </div>
 
   <div id="standings-content"></div>
@@ -6927,6 +6930,42 @@ function downloadBracketImage() {
         const file = new File([blob], fileName, { type: 'image/png' });
         if (navigator.canShare({ files: [file] })) {
           navigator.share({ files: [file], title: 'RTA Turnuva Ağacı' })
+            .then(() => showToast('Paylaşım açıldı! 📤', 'ok'))
+            .catch(() => fallbackDownload(blob, fileName));
+          return;
+        }
+      }
+      fallbackDownload(blob, fileName);
+    }, 'image/png');
+  }).catch(err => {
+    console.error(err);
+    showToast('Görsel oluşturulamadı', 'err');
+  });
+}
+
+function downloadStandingImage(code) {
+  const el = document.getElementById('standings-' + code);
+  if (!el || typeof html2canvas === 'undefined') {
+    showToast('Görsel oluşturma aracı yüklenemedi', 'err');
+    return;
+  }
+  showToast('Görsel hazırlanıyor... ⏳', 'ok');
+
+  html2canvas(el, {
+    backgroundColor: '#0d120d',
+    scale: 2,
+    useCORS: true,
+  }).then(canvas => {
+    canvas.toBlob(blob => {
+      if (!blob) { showToast('Görsel oluşturulamadı', 'err'); return; }
+
+      const lgName = leagueName(code);
+      const fileName = `RTA-${lgName.replace(/\s+/g, '-')}-Puan-Durumu.png`;
+
+      if (navigator.share && navigator.canShare) {
+        const file = new File([blob], fileName, { type: 'image/png' });
+        if (navigator.canShare({ files: [file] })) {
+          navigator.share({ files: [file], title: `RTA ${lgName} Puan Durumu` })
             .then(() => showToast('Paylaşım açıldı! 📤', 'ok'))
             .catch(() => fallbackDownload(blob, fileName));
           return;
