@@ -50,6 +50,7 @@
   --l2: #b8c4cc;
   --l3: #d4845a;
   --l4: #8a9a8a;
+  --l5: #6d8fc4;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -275,6 +276,7 @@ body {
 .league-badge.l2 { color: var(--l2); }
 .league-badge.l3 { color: var(--l3); }
 .league-badge.l4 { color: var(--l4); }
+.league-badge.l5 { color: var(--l5); }
 
 .league-info { flex: 1; }
 .league-info .name { font-weight: 700; font-size: 1rem; }
@@ -599,6 +601,7 @@ body {
 .match-lig.l2 { color: var(--l2); }
 .match-lig.l3 { color: var(--l3); }
 .match-lig.l4 { color: var(--l4); }
+.match-lig.l5 { color: var(--l5); }
 
 .match-players { line-height: 1.5; }
 .mwinner { font-weight: 700; color: var(--accent); }
@@ -850,7 +853,8 @@ initNewSeasonCountdown();
 .po-toggle-sub { font-size:0.75rem;color:var(--text-muted);margin-top:2px; }
 #po-section { display:none; }
 #po-section.visible { display:block; }
-.po-type-grid { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px; }
+.po-type-grid { display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px; }
+@media (max-width:520px) { .po-type-grid { grid-template-columns:1fr; } }
 .po-type-btn {
   padding:12px;border:2px solid var(--border);border-radius:10px;
   background:var(--surface2);cursor:pointer;text-align:center;
@@ -1631,6 +1635,7 @@ body.light-mode {
   --l2: #4f6a7a;
   --l3: #b5642f;
   --l4: #4a7a4a;
+  --l5: #3a5f9a;
 }
 
 body.light-mode .header {
@@ -2101,6 +2106,7 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
         <option value="l2">2. Lig</option>
         <option value="l3">3. Lig</option>
         <option value="l4">4. Lig</option>
+        <option value="l5">5. Lig</option>
       </select>
     </div>
     <button class="btn btn-green" onclick="saveEditPlayer()" style="width:100%;margin-top:8px">💾 Kaydet</button>
@@ -2132,7 +2138,7 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
   <div class="hero" style="text-align:center;padding:40px 20px">
     <img src="logo_rta.png" style="width:80px;height:80px;object-fit:contain;margin-bottom:16px" alt="RTA Logo">
     <div class="hero-title">1. SEZON TAMAMLANDI</div>
-    <div class="hero-sub" style="margin-bottom:24px">Rize Tenis Akademisi • 76 Oyuncu • 293 Maç • 4 Lig</div>
+    <div class="hero-sub" style="margin-bottom:24px">Rize Tenis Akademisi • 76 Oyuncu • 293 Maç • 5 Lig</div>
 
     <div style="background:rgba(93,201,93,0.08);border:1px solid rgba(93,201,93,0.2);border-radius:16px;padding:24px;max-width:400px;margin:0 auto 24px">
       <div style="font-size:0.7rem;color:var(--accent);font-weight:700;letter-spacing:1.5px;margin-bottom:8px">YENİ SEZON</div>
@@ -2150,7 +2156,7 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
         <div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px">TOPLAM OYUNCU</div>
       </div>
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px">
-        <div style="font-size:1.8rem;font-weight:800;color:var(--accent)">4</div>
+        <div style="font-size:1.8rem;font-weight:800;color:var(--accent)">5</div>
         <div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px">LİG</div>
       </div>
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px">
@@ -2191,6 +2197,7 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
             <option value="l2">🥈 RTA 2. Ligi</option>
             <option value="l3">🥉 RTA 3. Ligi</option>
             <option value="l4">RTA 4. Ligi</option>
+            <option value="l5">RTA 5. Ligi</option>
           </select>
         </div>
         <div class="fgroup">
@@ -2231,6 +2238,10 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
         <div class="po-type-btn" id="po-btn2" onclick="selectPoType(2)">
           <div class="po-type-title">⚡ Play-off 2</div>
           <div class="po-type-sub">4.Lig 1. vs 2.Lig 8.<br>Kazanan → 2. Lig'e çıkar</div>
+        </div>
+        <div class="po-type-btn" id="po-btn3" onclick="selectPoType(3)">
+          <div class="po-type-title">⚡ Play-off 3</div>
+          <div class="po-type-sub">5.Lig 1. vs 3.Lig 8.<br>Kazanan → 3. Lig'e çıkar</div>
         </div>
       </div>
       <div class="form-grid3" style="margin-bottom:14px">
@@ -2296,6 +2307,7 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
           <option value="l2">2. Lig</option>
           <option value="l3">3. Lig</option>
           <option value="l4">4. Lig</option>
+          <option value="l5">5. Lig</option>
         </select>
       </div>
       <div></div>
@@ -2325,6 +2337,7 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
       <option value="l2">2. Lig</option>
       <option value="l3">3. Lig</option>
       <option value="l4">4. Lig</option>
+      <option value="l5">5. Lig</option>
     </select>
     <select class="filter-select" id="filter-player" onchange="renderResults()">
       <option value="">Tüm Oyuncular</option>
@@ -2515,6 +2528,7 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
           <option value="l2">2. Lig</option>
           <option value="l3">3. Lig</option>
           <option value="l4">4. Lig</option>
+          <option value="l5">5. Lig</option>
         </select>
       </div>
       <button class="btn btn-green" onclick="addPlayer()">Oyuncu Ekle</button>
@@ -2533,6 +2547,7 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
           <option value="l2">2. Lig</option>
           <option value="l3">3. Lig</option>
           <option value="l4">4. Lig</option>
+          <option value="l5">5. Lig</option>
         </select>
       </div>
       <button class="btn btn-green" onclick="movePlayer()">Lig Değiştir</button>
@@ -2545,6 +2560,15 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
       <thead><tr><th>#</th><th>Ad Soyad</th><th>Lig</th><th>O.Maç</th><th>Puan</th><th></th></tr></thead>
       <tbody id="admin-player-body"></tbody>
     </table>
+  </div>
+
+  <div class="sec-title" style="margin-top:28px">Sezon Geçişi</div>
+  <div style="background:rgba(93,201,93,0.06);border:1px solid rgba(93,201,93,0.2);border-radius:12px;padding:14px 16px;margin-bottom:16px;font-size:0.82rem;color:var(--text-dim);line-height:1.6">
+    Yeni sezona geçerken sırasıyla: <strong>1)</strong> Arşiv sekmesinden "Sezon Arşivle" &nbsp;<strong>2)</strong> Play-off sonuçlarını gir &nbsp;<strong>3)</strong> aşağıdaki "Yükselme/Düşme Uygula" &nbsp;<strong>4)</strong> en son "Maçları Temizle".
+  </div>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+    <button class="btn" style="background:rgba(93,201,93,0.15);color:var(--accent);border:1px solid rgba(93,201,93,0.35);" onclick="applySeasonPromotionRelegation()">🔄 Sezon Sonu Yükselme/Düşme Uygula</button>
+    <button class="btn" style="background:rgba(93,201,93,0.15);color:var(--accent);border:1px solid rgba(93,201,93,0.35);" onclick="applyNewSeasonRosters()">📋 Yeni Sezon Kadrolarını Uygula (Verilen Liste)</button>
   </div>
 
   <div class="sec-title" style="margin-top:28px">Veri Yönetimi</div>
@@ -3073,6 +3097,10 @@ async function saveState() {
           walkover:     m.walkover || false
         }))
       );
+    } else {
+      // Maç listesi boşsa (ör. "Maçları Temizle"), Supabase'deki eski
+      // maçları da gerçekten sil — yoksa sayfa yenilenince geri gelirler.
+      await sb.from('matches').delete().gte('id', 0);
     }
   } catch(e) { console.warn('Supabase write error:', e); }
 }
@@ -3474,11 +3502,11 @@ function playerName(id) {
 }
 
 function leagueName(code) {
-  return {super:'Süper Lig', l2:'2. Lig', l3:'3. Lig', l4:'4. Lig'}[code] || code;
+  return {super:'Süper Lig', l2:'2. Lig', l3:'3. Lig', l4:'4. Lig', l5:'5. Lig'}[code] || code;
 }
 
 function leagueClass(code) {
-  return {super:'super', l2:'l2', l3:'l3', l4:'l4'}[code] || '';
+  return {super:'super', l2:'l2', l3:'l3', l4:'l4', l5:'l5'}[code] || '';
 }
 
 const AV_COLORS = [
@@ -3517,8 +3545,12 @@ const LEAGUE_CFG = {
   super: {label:'RTA Süper Ligi', badge:'SÜPER LİG', cls:'super', desc:'Elite Division • 12 Oyuncu'},
   l2:   {label:'RTA 2. Ligi',     badge:'2. LİG',    cls:'l2',    desc:'Premier Division • 12 Oyuncu'},
   l3:   {label:'RTA 3. Ligi',     badge:'3. LİG',    cls:'l3',    desc:'Development Division • 12 Oyuncu'},
-  l4:   {label:'RTA 4. Ligi',     badge:'4. LİG',    cls:'l4',    desc:'Open Division • Sınırsız Oyuncu'},
+  l4:   {label:'RTA 4. Ligi',     badge:'4. LİG',    cls:'l4',    desc:'Open Division • 16 Oyuncu'},
+  l5:   {label:'RTA 5. Ligi',     badge:'5. LİG',    cls:'l5',    desc:'Başlangıç Division • 24 Oyuncu'},
 };
+
+// Lig başına oyuncu kapasitesi (Oyuncu Taşı ve Yeni Oyuncu eklerken kullanılıyor)
+const LEAGUE_CAP = { super: 12, l2: 12, l3: 12, l4: 16, l5: 24 };
 
 function renderStanding(code) {
   const cfg = LEAGUE_CFG[code];
@@ -3529,6 +3561,7 @@ function renderStanding(code) {
     if (i < 4) return 'promo';
     if (code === 'super' && i === 7) return 'playoff';
     if (code === 'l2' && i === 7) return 'playoff';
+    if (code === 'l3' && i === 7) return 'playoff';
     if (i >= n - 4) return 'rel';
     return '';
   }
@@ -3539,7 +3572,7 @@ function renderStanding(code) {
     let zi = '';
     if (code !== 'super' && zone === 'promo') zi = '<span class="zone-icon zi-up" title="Terfi bölgesi"></span>';
     if (zone === 'playoff') zi = '<span class="zone-icon zi-po" title="Play-off"></span>';
-    if (code !== 'l4' && zone === 'rel') zi = '<span class="zone-icon zi-dn" title="Düşme bölgesi"></span>';
+    if (code !== 'l5' && zone === 'rel') zi = '<span class="zone-icon zi-dn" title="Düşme bölgesi"></span>';
 
     const rankCls = i===0?'r1':i===1?'r2':i===2?'r3':'';
     const gal = p.mp > 0 ? Math.round(p.mw/p.mp*100) : 0;
@@ -3566,8 +3599,8 @@ function renderStanding(code) {
 
   let legendHtml = '<div class="zone-legend">';
   if (code !== 'super') legendHtml += '<div class="zl-item"><span class="zone-icon zi-up"></span> Direkt Terfi (İlk 4)</div>';
-  if (code === 'super' || code === 'l2') legendHtml += '<div class="zl-item"><span class="zone-icon zi-po"></span> Play-off (8. sıra)</div>';
-  if (code !== 'l4') legendHtml += '<div class="zl-item"><span class="zone-icon zi-dn"></span> Direkt Düşme (Son 4)</div>';
+  if (code === 'super' || code === 'l2' || code === 'l3') legendHtml += '<div class="zl-item"><span class="zone-icon zi-po"></span> Play-off (8. sıra)</div>';
+  if (code !== 'l5') legendHtml += '<div class="zl-item"><span class="zone-icon zi-dn"></span> Direkt Düşme (Son 4)</div>';
   legendHtml += '</div>';
 
   document.getElementById('standings-' + code).innerHTML = `
@@ -3898,7 +3931,7 @@ function deleteMatch(id) {
 // ═══════════════════════════════════════════════════
 function renderStats() {
   const allStats = [];
-  ['super','l2','l3','l4'].forEach(lg => {
+  ['super','l2','l3','l4','l5'].forEach(lg => {
     getStandings(lg).forEach(p => {
       allStats.push({...p, league: lg});
     });
@@ -4422,7 +4455,7 @@ const PREV_RANK_KEY = 'rta_prev_ranks';
 
 function savePrevRanks() {
   const ranks = {};
-  ['super','l2','l3','l4'].forEach(code => {
+  ['super','l2','l3','l4','l5'].forEach(code => {
     getStandings(code).forEach((p, i) => { ranks[p.id] = i + 1; });
   });
   localStorage.setItem(PREV_RANK_KEY, JSON.stringify(ranks));
@@ -4510,8 +4543,8 @@ function addPlayer() {
   const name = document.getElementById('np-name').value.trim();
   const league = document.getElementById('np-league').value;
   if (!name) { showToast('İsim girin!', 'err'); return; }
-  if (league !== 'l4' && state.players.filter(p=>p.league===league).length >= 12) {
-    showToast('Bu ligde zaten 12 oyuncu var!', 'err'); return;
+  if (state.players.filter(p=>p.league===league).length >= (LEAGUE_CAP[league] || 12)) {
+    showToast(`Bu ligde zaten ${LEAGUE_CAP[league] || 12} oyuncu var!`, 'err'); return;
   }
   state.players.push({id: state.nextPlayerId++, name, league});
   document.getElementById('np-name').value = '';
@@ -4524,8 +4557,8 @@ function movePlayer() {
   const newLg = document.getElementById('mv-league').value;
   const p = state.players.find(x=>x.id===pid);
   if (!p) return;
-  if (newLg !== 'l4' && state.players.filter(x=>x.league===newLg).length >= 12) {
-    showToast('Hedef ligde zaten 12 oyuncu var!', 'err'); return;
+  if (state.players.filter(x=>x.league===newLg).length >= (LEAGUE_CAP[newLg] || 12)) {
+    showToast(`Hedef ligde zaten ${LEAGUE_CAP[newLg] || 12} oyuncu var!`, 'err'); return;
   }
   const old = p.league;
   p.league = newLg;
@@ -4541,6 +4574,153 @@ function deletePlayer(id) {
   sbDeletePlayer(id);
   saveState(); renderAll(true); renderAdminTable();
   showToast('Oyuncu silindi', 'err');
+}
+
+// ═══════════════════════════════════════════════════
+// SEZON SONU YÜKSELME / DÜŞME OTOMASYONU
+// ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
+// YENİ SEZON KADROLARI (elle verilen kesin liste)
+// ═══════════════════════════════════════════════════
+const NEW_SEASON_ROSTERS = {
+  super: ["Şeref Tüylüoğlu","Ramazan Demirci","Furkan Toprak","Yaşar Mercan","Samet Okumuş","Besim Koçal","Burak Tuğcu","Tacettin Sulu","Rıza Tüylüoğlu","Mehmet Hacıömeroğlu","Özge Şimşek","Ferhat Tosun"],
+  l2: ["Evren Tuğcu","Burak Bingöl","İbrahim Köse","Hatice Can Furat","Atakan Büyük","Edip Kazım Aydın","Orçun Yılmaz","Gökhan Çelik","Uğur Albayrak","Fevzi Köse","Zehra Erkan","Kerem Asım Kotil"],
+  l3: ["Metin Bıçakçı","Akif Afacanlar","Turushan Övgü","Ali Kemal Okumuş","Muhammed Berat Özyanık","Serdar Dizman","Celil Tanrıkulu","Enes Balcı","Elif Durmuş","Ahmet Şamlı","Ümran Güner","İlker Yasin Memişoğlu"],
+  l4: ["Adem Doğru","Asuman Özsarı","Mehmet Fatih Aydın","Burçin Bedel","Okan Bahçe","Onur İslamoğlu","Şennur Usta","Vedat Özdemir","Ali Saim Eyüboğlu","Mehmet Akif Artar","Sevil Yağmur Gündoğdu","Enes Barlas","Safa Doruk Balaydın","Betül Özkan","Havvanur Karaman","Beyza Özkul"],
+  l5: ["Gülşah Yakşi","Muhammed Alahdab","Ahmet Şensöz","Ada Tuncay","Merve Irmak Balaydın","Başak Çap","Başar Babişko","Ensar Özer","Yücel Özçamca","Tayfun Selek","Seda Duran","Deniz Çepni","Habib Yuşa Köse","Ömer Fidancı","Tolga Kranda","Hadice Yıldırım","Serra Furat","Erdem Bekiroğlu","Ela Gümüş","Onur Yıldırım","Savaş Şaffak","Azra Büyük","Cevatcan Özgün","Esra Şamlı"],
+};
+
+function applyNewSeasonRosters() {
+  if (!isLoggedIn()) { showToast('Bu işlem için yönetici girişi gerekli.', 'err'); return; }
+  if (!confirm(
+    'Bu işlem, verdiğin kesin yeni sezon listelerine göre TÜM oyuncuları ' +
+    'doğru liglere taşıyacak. İsim eşleşmeyen (sistemde olmayan) oyuncular ' +
+    'yeni kayıt olarak eklenecek. Listede olmayan mevcut oyuncular değişmeden kalır.\n\n' +
+    'Devam etmek istiyor musunuz?'
+  )) return;
+
+  const norm = s => s.trim().toLocaleLowerCase('tr-TR').replace(/\s+/g, ' ');
+  let moved = 0, added = 0, unchanged = 0;
+  const log = [];
+
+  Object.entries(NEW_SEASON_ROSTERS).forEach(([league, names]) => {
+    names.forEach(rawName => {
+      const name = rawName.trim();
+      const key = norm(name);
+      const existing = state.players.find(x => norm(x.name) === key);
+      if (existing) {
+        if (existing.league !== league) {
+          log.push(`${existing.name}: ${leagueName(existing.league)} → ${leagueName(league)}`);
+          existing.league = league;
+          moved++;
+        } else {
+          unchanged++;
+        }
+      } else {
+        state.players.push({ id: state.nextPlayerId++, name, league });
+        log.push(`🆕 ${name} → ${leagueName(league)} (yeni kayıt)`);
+        added++;
+      }
+    });
+  });
+
+  saveState(); renderAll(true); renderAdminTable();
+
+  const summary = log.length ? log.map(l => '• ' + l).join('\n') : '(değişiklik yok)';
+  alert(`✅ Yeni sezon kadroları uygulandı!\n\n${moved} oyuncu taşındı, ${added} yeni oyuncu eklendi, ${unchanged} zaten doğru ligdeydi.\n\n${summary}`);
+  showToast(`✅ ${moved} taşındı, ${added} eklendi`, 'ok');
+}
+
+function applySeasonPromotionRelegation() {
+  if (!isLoggedIn()) { showToast('Bu işlem için yönetici girişi gerekli.', 'err'); return; }
+  if (!confirm(
+    'DİKKAT: Bu işlem, GÜNCEL puan durumuna ve girilmiş Play-off sonuçlarına bakarak ' +
+    'tüm oyuncuları otomatik olarak yeni liglere taşıyacak.\n\n' +
+    'Bunu yapmadan ÖNCE mevcut sezonu Arşiv sekmesinden arşivlediğinizden ve ' +
+    'Play-off sonuçlarını girdiğinizden emin olun.\n\n' +
+    'Devam etmek istiyor musunuz?'
+  )) return;
+
+  const standings = {
+    super: getStandings('super'),
+    l2: getStandings('l2'),
+    l3: getStandings('l3'),
+    l4: getStandings('l4'),
+    l5: getStandings('l5'),
+  };
+
+  // Girilmiş play-off sonuçlarından, her tür için EN SON kaydı al
+  const allPlayoffs = loadPlayoffs();
+  function latestPlayoff(type) {
+    const matches = allPlayoffs.filter(p => p.matchType === type);
+    return matches.length ? matches[matches.length - 1] : null;
+  }
+  const po1 = latestPlayoff(1); // 3.Lig 1. vs Süper Lig 8.  → kazanan Süper Lig'e girer
+  const po2 = latestPlayoff(2); // 4.Lig 1. vs 2.Lig 8.      → kazanan 2. Lig'e girer
+  const po3 = latestPlayoff(3); // 5.Lig 1. vs 3.Lig 8.      → kazanan 3. Lig'e girer
+
+  const moves = []; // {id, name, from, to}
+  function addMove(standingPlayer, from, to) {
+    if (!standingPlayer) return;
+    const p = state.players.find(x => x.id === standingPlayer.id);
+    if (!p || p.league === to) return;
+    moves.push({ id: p.id, name: p.name, from, to });
+  }
+
+  // ── Süper Lig: 8. sıra play-off'a bağlı, son 4 direkt düşer ──
+  if (standings.super[7]) {
+    const p8 = standings.super[7];
+    if (po1 && po1.winner !== p8.name) addMove(p8, 'super', 'l2');
+  }
+  standings.super.slice(-4).forEach(p => addMove(p, 'super', 'l2'));
+
+  // ── 2. Lig: ilk 4 çıkar, 8. sıra play-off'a bağlı, son 4 düşer ──
+  standings.l2.slice(0, 4).forEach(p => addMove(p, 'l2', 'super'));
+  if (standings.l2[7]) {
+    const p8 = standings.l2[7];
+    if (po2 && po2.winner !== p8.name) addMove(p8, 'l2', 'l3');
+  }
+  standings.l2.slice(-4).forEach(p => addMove(p, 'l2', 'l3'));
+
+  // ── 3. Lig: ilk 4 çıkar (1.si play-off1'i kazandıysa direkt Süper Lig'e),
+  //            8. sıra play-off3'e bağlı, son 4 düşer ──
+  standings.l3.slice(0, 4).forEach((p, idx) => {
+    if (idx === 0 && po1 && po1.winner === p.name) addMove(p, 'l3', 'super');
+    else addMove(p, 'l3', 'l2');
+  });
+  if (standings.l3[7]) {
+    const p8 = standings.l3[7];
+    if (po3 && po3.winner !== p8.name) addMove(p8, 'l3', 'l4');
+  }
+  standings.l3.slice(-4).forEach(p => addMove(p, 'l3', 'l4'));
+
+  // ── 4. Lig: ilk 4 çıkar (1.si play-off2'yi kazandıysa direkt 2. Lig'e),
+  //            son 4 düşer ──
+  standings.l4.slice(0, 4).forEach((p, idx) => {
+    if (idx === 0 && po2 && po2.winner === p.name) addMove(p, 'l4', 'l2');
+    else addMove(p, 'l4', 'l3');
+  });
+  standings.l4.slice(-4).forEach(p => addMove(p, 'l4', 'l5'));
+
+  // ── 5. Lig: ilk 4 çıkar (1.si play-off3'ü kazandıysa direkt 3. Lig'e).
+  //            En alt lig olduğu için düşme yok ──
+  standings.l5.slice(0, 4).forEach((p, idx) => {
+    if (idx === 0 && po3 && po3.winner === p.name) addMove(p, 'l5', 'l3');
+    else addMove(p, 'l5', 'l4');
+  });
+
+  if (!moves.length) { showToast('Taşınacak oyuncu bulunamadı — puan durumu boş olabilir.', 'err'); return; }
+
+  // Uygula
+  moves.forEach(mv => {
+    const p = state.players.find(x => x.id === mv.id);
+    if (p) p.league = mv.to;
+  });
+  saveState(); renderAll(true); renderAdminTable();
+
+  const summary = moves.map(m => `• ${m.name}: ${leagueName(m.from)} → ${leagueName(m.to)}`).join('\n');
+  alert(`✅ ${moves.length} oyuncu yeni liglere taşındı:\n\n${summary}`);
+  showToast(`${moves.length} oyuncu taşındı — şimdi "Maçları Temizle" ile devam edebilirsin`, 'ok');
 }
 
 function renderAdminTable() {
@@ -4749,7 +4929,7 @@ let _standingLeague = 'super';
 function setStandingLeague(lg) {
   _standingLeague = lg;
   document.querySelectorAll('#standing-tabs .inner-tab').forEach((b, i) =>
-    b.classList.toggle('active', ['super','l2','l3','l4'][i] === lg));
+    b.classList.toggle('active', ['super','l2','l3','l4','l5'][i] === lg));
   updateCompletionBar();
   renderStandingContent();
   renderHomeSections();
@@ -5061,7 +5241,7 @@ function archiveCurrentSeason() {
     leagues: {}
   };
 
-  ['super','l2','l3','l4'].forEach(lg => {
+  ['super','l2','l3','l4','l5'].forEach(lg => {
     snapshot.leagues[lg] = getStandings(lg).map((p, i) => ({
       rank: i + 1,
       name: p.name,
@@ -5286,7 +5466,7 @@ function distributeRankingForSeason(snapshot) {
   const nowISO = new Date().toISOString().split('T')[0];
   const newEntries = [];
 
-  ['super','l2','l3','l4'].forEach(lg => {
+  ['super','l2','l3','l4','l5'].forEach(lg => {
     (snapshot.leagues[lg] || []).forEach(p => {
       const pts = rankingPointsFor(lg, p.rank);
       if (pts <= 0) return; // 0 puanlıları kaydetme
@@ -5522,12 +5702,15 @@ function selectPoType(type) {
   _poType = type;
   document.getElementById('po-btn1').classList.toggle('selected', type === 1);
   document.getElementById('po-btn2').classList.toggle('selected', type === 2);
+  const btn3 = document.getElementById('po-btn3');
+  if (btn3) btn3.classList.toggle('selected', type === 3);
 
   const standings = {
     super: getStandings('super'),
     l2: getStandings('l2'),
     l3: getStandings('l3'),
     l4: getStandings('l4'),
+    l5: getStandings('l5'),
   };
 
   if (type === 1) {
@@ -5535,11 +5718,16 @@ function selectPoType(type) {
     document.getElementById('po-p2-label').textContent = 'Süper Lig 8.';
     document.getElementById('po-p1').value = standings.l3[0]?.name || '';
     document.getElementById('po-p2').value = standings.super[7]?.name || '';
-  } else {
+  } else if (type === 2) {
     document.getElementById('po-p1-label').textContent = '4.Lig 1.';
     document.getElementById('po-p2-label').textContent = '2.Lig 8.';
     document.getElementById('po-p1').value = standings.l4[0]?.name || '';
     document.getElementById('po-p2').value = standings.l2[7]?.name || '';
+  } else {
+    document.getElementById('po-p1-label').textContent = '5.Lig 1.';
+    document.getElementById('po-p2-label').textContent = '3.Lig 8.';
+    document.getElementById('po-p1').value = standings.l5[0]?.name || '';
+    document.getElementById('po-p2').value = standings.l3[7]?.name || '';
   }
 }
 
@@ -5550,11 +5738,17 @@ function buildPoNote(type, winner, loser, challenger) {
     } else {
       return `🔒 ${winner} (Süper Lig 8.) 3.Lig 1.si ${loser}'i yendi → Süper Lig'de kaldı.`;
     }
-  } else {
+  } else if (type === 2) {
     if (winner === challenger) {
       return `⬆️ ${winner} (4.Lig 1.) 2.Lig 8.si ${loser}'i yendi → 2. Lig'e çıktı!`;
     } else {
       return `🔒 ${winner} (2.Lig 8.) 4.Lig 1.si ${loser}'i yendi → 2. Lig'de kaldı.`;
+    }
+  } else {
+    if (winner === challenger) {
+      return `⬆️ ${winner} (5.Lig 1.) 3.Lig 8.si ${loser}'i yendi → 3. Lig'e çıktı!`;
+    } else {
+      return `🔒 ${winner} (3.Lig 8.) 5.Lig 1.si ${loser}'i yendi → 3. Lig'de kaldı.`;
     }
   }
 }
