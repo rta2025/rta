@@ -3114,8 +3114,8 @@ async function loadFromSupabase() {
       sb.from('gallery_photos').select('*').order('id')
     ]);
 
-    if (players && players.length) state.players = players;
-    if (matches && matches.length) {
+    if (players) state.players = players;
+    if (matches) {
       state.matches = matches.map(m => ({
         id:          m.id,
         league:      m.league,
@@ -5288,7 +5288,7 @@ function renderArchive() {
   const sbClient = window._sbAdmin || window.sb;
   if (window._sbReady && sbClient) {
     sbClient.from('archives').select('*').order('id', { ascending: false }).then(({ data: archives }) => {
-      if (archives && archives.length) {
+      if (archives) {
         const mapped = archives.map(a => ({
           id: a.id, name: a.name, date: a.archived_date,
           totalMatches: a.total_matches,
@@ -5545,13 +5545,13 @@ function currentLeagueOf(name) {
   return p ? p.league : null;
 }
 
-const RK_LG_LABEL = {super:'SÜPER', l2:'2. LİG', l3:'3. LİG', l4:'4. LİG'};
+const RK_LG_LABEL = {super:'SÜPER', l2:'2. LİG', l3:'3. LİG', l4:'4. LİG', l5:'5. LİG'};
 
 function renderRanking() {
   const sbClient = window._sbAdmin || window._sb;
   if (window._sbReady && sbClient) {
     sbClient.from('ranking_entries').select('*').then(({ data: ranking }) => {
-      if (ranking && ranking.length) {
+      if (ranking) {
         const mapped = ranking.map(r => ({
           id: r.id, seasonId: r.season_id, player: r.player, league: r.league,
           rank: r.rank_no, source: r.source, label: r.label, points: r.points, date: r.earned_date
