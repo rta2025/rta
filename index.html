@@ -3615,19 +3615,24 @@ function renderStanding(code) {
 
 function renderPlayoffs() {
   const psEl = document.getElementById('playoff-section');
-  if (!psEl) return; // Bu eski/otomatik playoff kartı artık kullanılmıyor (yerine Skor Gir → Play-off sistemi var)
+  if (!psEl) return;
   const superSt = getStandings('super');
-  const l3St = getStandings('l3');
   const l2St = getStandings('l2');
+  const l3St = getStandings('l3');
   const l4St = getStandings('l4');
+  const l5St = getStandings('l5');
 
-  const hasPlayers = superSt.length >= 8 && l3St.length >= 1 && l2St.length >= 8 && l4St.length >= 1;
+  const hasPlayers = superSt.length >= 9 && l3St.length >= 1 &&
+                      l2St.length >= 9 && l4St.length >= 1 &&
+                      l3St.length >= 9 && l5St.length >= 1;
   if (!hasPlayers) { psEl.innerHTML = ''; return; }
 
-  const p1a = superSt[7];
-  const p1b = l3St[0];
-  const p2a = l2St[7];
-  const p2b = l4St[0];
+  const p1a = superSt[8];  // Süper Lig 9.su
+  const p1b = l3St[0];     // 3.Lig şampiyonu
+  const p2a = l2St[8];     // 2.Lig 9.su
+  const p2b = l4St[0];     // 4.Lig şampiyonu
+  const p3a = l3St[8];     // 3.Lig 9.cusu
+  const p3b = l5St[0];     // 5.Lig şampiyonu
 
   document.getElementById('playoff-section').innerHTML = `
     <div class="sec-title">⚡ Play-off Maçları</div>
@@ -3645,6 +3650,14 @@ function renderPlayoffs() {
         <span class="pm-p" style="color:var(--l4)">${p2b.name} <span style="font-size:0.72rem;color:var(--text-dim)">(4.Lig 1.)</span></span>
         <span class="pm-vs">VS</span>
         <span class="pm-p" style="color:var(--l2)">${p2a.name} <span style="font-size:0.72rem;color:var(--text-dim)">(2.Lig 9.)</span></span>
+      </div>
+    </div>
+    <div class="playoff-card">
+      <div class="playoff-title">PLAY-OFF 3 — Kazanan 3. Lig'e Girer</div>
+      <div class="playoff-match">
+        <span class="pm-p" style="color:var(--l5)">${p3b.name} <span style="font-size:0.72rem;color:var(--text-dim)">(5.Lig 1.)</span></span>
+        <span class="pm-vs">VS</span>
+        <span class="pm-p" style="color:var(--l3)">${p3a.name} <span style="font-size:0.72rem;color:var(--text-dim)">(3.Lig 9.)</span></span>
       </div>
     </div>
   `;
