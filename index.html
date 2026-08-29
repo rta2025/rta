@@ -642,7 +642,7 @@ body {
 
 // ── YENİ SEZON GERİ SAYIMI ──
 function initNewSeasonCountdown() {
-  const TARGET = new Date(2026, 8, 1, 0, 0, 0);
+  const TARGET = new Date(2026, 8, 4, 0, 0, 0);
   function update() {
     const el = document.getElementById('new-season-countdown');
     if (!el) return;
@@ -2135,7 +2135,10 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
 <div id="page-puan" class="page active">
 
   <div class="hero" style="margin-bottom:16px">
-    <div class="hero-title" style="font-size:1.5rem">📊 Puan Durumu</div>
+    <div class="hero-title" style="font-size:1.5rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      📊 Puan Durumu
+      <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(240,192,64,0.15);color:var(--gold);border:1px solid rgba(240,192,64,0.35);border-radius:20px;padding:3px 12px;font-size:0.68rem;font-weight:800;letter-spacing:0.03em">🍂 GÜZ SEZONU</span>
+    </div>
     <div class="hero-sub">2. Sezon — 5 Lig</div>
   </div>
 
@@ -2305,7 +2308,7 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
   <div style="background:rgba(93,201,93,0.06);border:1px solid rgba(93,201,93,0.15);border-radius:12px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px">
     <div>
       <div style="font-size:0.78rem;font-weight:700;color:var(--accent)">🏁 1. SEZON SONA ERDİ</div>
-      <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px">Aşağıda sezon maç sonuçları görüntüleniyor. Yeni sezon 1 Eylül'de başlıyor.</div>
+      <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px">Aşağıda sezon maç sonuçları görüntüleniyor. Yeni sezon 4 Eylül'de başlıyor.</div>
     </div>
     <button onclick="showPage('arsiv')" style="background:var(--accent);color:#000;border:none;padding:8px 14px;border-radius:8px;font-weight:700;font-size:0.75rem;cursor:pointer;white-space:nowrap">Arşive Git</button>
   </div>
@@ -4233,7 +4236,7 @@ function clearSpecialPlayer() {
 // SEZON SAYACI
 function initCountdown() {
   const SEASON_END = new Date(2026, 6, 31, 23, 59, 59);
-  const NEXT_SEASON = new Date(2026, 8, 1, 0, 0, 0); // 1 Eylül 2026
+  const NEXT_SEASON = new Date(2026, 8, 4, 0, 0, 0); // 4 Eylül 2026
 
   function update() {
     const el = document.getElementById('season-countdown');
@@ -4277,7 +4280,7 @@ function initCountdown() {
           </div>
         </div>
       `;
-      el.title = 'Yeni sezon başlangıcına kalan süre (1 Eylül 2026)';
+      el.title = 'Yeni sezon başlangıcına kalan süre (4 Eylül 2026)';
     }
   }
   update();
