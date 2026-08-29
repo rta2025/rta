@@ -2139,15 +2139,12 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
     <div class="hero-sub">2. Sezon — 5 Lig</div>
   </div>
 
-  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px">
-    <div id="standing-tabs" class="inner-tabs" style="flex-wrap:wrap;margin-bottom:0">
-      <button class="inner-tab active" onclick="setStandingLeague('super')">Süper Lig</button>
-      <button class="inner-tab" onclick="setStandingLeague('l2')">2. Lig</button>
-      <button class="inner-tab" onclick="setStandingLeague('l3')">3. Lig</button>
-      <button class="inner-tab" onclick="setStandingLeague('l4')">4. Lig</button>
-      <button class="inner-tab" onclick="setStandingLeague('l5')">5. Lig</button>
-    </div>
-    <button class="btn btn-sm" onclick="downloadStandingImage(_standingLeague)" style="background:rgba(255,200,0,0.15);color:var(--gold);border:1px solid rgba(255,200,0,0.3);flex-shrink:0">📸 Tabloyu İndir</button>
+  <div id="standing-tabs" class="inner-tabs" style="margin-bottom:16px;flex-wrap:wrap">
+    <button class="inner-tab active" onclick="setStandingLeague('super')">Süper Lig</button>
+    <button class="inner-tab" onclick="setStandingLeague('l2')">2. Lig</button>
+    <button class="inner-tab" onclick="setStandingLeague('l3')">3. Lig</button>
+    <button class="inner-tab" onclick="setStandingLeague('l4')">4. Lig</button>
+    <button class="inner-tab" onclick="setStandingLeague('l5')">5. Lig</button>
   </div>
 
   <div id="standings-content"></div>
@@ -3595,6 +3592,8 @@ function renderStanding(code) {
           <div class="desc">${cfg.desc}</div>
         </div>
         <span class="league-count">${n} oyuncu</span>
+        <button class="no-capture" onclick="downloadStandingImage('${code}')"
+          style="background:rgba(255,200,0,0.15);color:var(--gold);border:1px solid rgba(255,200,0,0.3);border-radius:8px;padding:6px 10px;font-size:0.78rem;font-weight:700;cursor:pointer;margin-left:8px;flex-shrink:0">📸</button>
       </div>
       <table class="standings">
         <thead><tr>
@@ -6955,6 +6954,7 @@ function downloadStandingImage(code) {
     backgroundColor: '#0d120d',
     scale: 2,
     useCORS: true,
+    ignoreElements: (node) => node.classList && node.classList.contains('no-capture'),
   }).then(canvas => {
     canvas.toBlob(blob => {
       if (!blob) { showToast('Görsel oluşturulamadı', 'err'); return; }
