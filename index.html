@@ -2548,6 +2548,7 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
   <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">
     <button class="btn" style="background:rgba(93,201,93,0.15);color:var(--accent);border:1px solid rgba(93,201,93,0.35);" onclick="applySeasonPromotionRelegation()">🔄 Sezon Sonu Yükselme/Düşme Uygula</button>
     <button class="btn" style="background:rgba(93,201,93,0.15);color:var(--accent);border:1px solid rgba(93,201,93,0.35);" onclick="applyNewSeasonRosters()">📋 Yeni Sezon Kadrolarını Uygula (Verilen Liste)</button>
+    <button class="btn" style="background:rgba(240,192,64,0.15);color:#e0b030;border:1px solid rgba(240,192,64,0.35);" onclick="findUnlistedPlayers()">🔍 Listede Olmayan Eski Oyuncuları Bul</button>
   </div>
 
   <div class="sec-title" style="margin-top:28px">Veri Yönetimi</div>
@@ -4570,6 +4571,25 @@ const NEW_SEASON_ROSTERS = {
   l4: ["Adem Doğru","Asuman Özsarı","Mehmet Fatih Aydın","Burçin Bedel","Okan Bahçe","Onur İslamoğlu","Şennur Usta","Vedat Özdemir","Ali Saim Eyüboğlu","Mehmet Akif Artar","Sevil Yağmur Gündoğdu","Enes Barlas","Safa Doruk Balaydın","Betül Özkan","Havvanur Karaman","Beyza Özkul"],
   l5: ["Gülşah Yakşi","Muhammed Alahdab","Ahmet Şensöz","Ada Tuncay","Merve Irmak Balaydın","Başak Çap","Başar Babişko","Ensar Özer","Yücel Özçamca","Tayfun Selek","Seda Duran","Deniz Çepni","Habib Yuşa Köse","Ömer Fidancı","Tolga Kranda","Hadice Yıldırım","Serra Furat","Erdem Bekiroğlu","Ela Gümüş","Onur Yıldırım","Savaş Şaffak","Azra Büyük","Cevatcan Özgün","Esra Şamlı"],
 };
+
+function findUnlistedPlayers() {
+  const norm = s => s.trim().toLocaleLowerCase('tr-TR').replace(/\s+/g, ' ');
+  const allListed = new Set(Object.values(NEW_SEASON_ROSTERS).flat().map(norm));
+  const unlisted = state.players.filter(p => !allListed.has(norm(p.name)));
+
+  if (!unlisted.length) {
+    alert('✅ Sistemdeki tüm oyuncular yeni sezon listelerinde mevcut. Fazladan/eski oyuncu yok.');
+    return;
+  }
+
+  const byLeague = {};
+  unlisted.forEach(p => { (byLeague[p.league] = byLeague[p.league] || []).push(p.name); });
+  const summary = Object.entries(byLeague)
+    .map(([lg, names]) => `${leagueName(lg)} (${names.length}):\n  ${names.join(', ')}`)
+    .join('\n\n');
+
+  alert(`⚠️ Yeni sezon listelerinde OLMAYAN, sistemde kalan ${unlisted.length} oyuncu var:\n\n${summary}\n\nBunları "Yönetim → Oyuncu Listesi" bölümünden elle silebilir ya da doğru lige taşıyabilirsin.`);
+}
 
 function applyNewSeasonRosters() {
   if (!isLoggedIn()) { showToast('Bu işlem için yönetici girişi gerekli.', 'err'); return; }
