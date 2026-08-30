@@ -270,6 +270,8 @@ body {
   font-size: 1.25rem;
   font-weight: 700;
   letter-spacing: 1px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .league-badge.super { color: var(--super); }
@@ -278,9 +280,17 @@ body {
 .league-badge.l4 { color: var(--l4); }
 .league-badge.l5 { color: var(--l5); }
 
-.league-info { flex: 1; }
+.league-info { flex: 1; min-width: 0; }
 .league-info .name { font-weight: 700; font-size: 1rem; }
 .league-info .desc { font-size: 0.75rem; color: var(--text-dim); margin-top: 1px; }
+
+@media (max-width: 480px) {
+  .league-header { gap: 8px; }
+  .league-badge { font-size: 0.95rem; letter-spacing: 0.3px; }
+  .league-info .name { font-size: 0.85rem; }
+  .league-info .desc { font-size: 0.68rem; }
+  .league-count { font-size: 0.68rem; padding: 3px 9px; white-space: nowrap; }
+}
 
 .league-count {
   font-size: 0.78rem;
