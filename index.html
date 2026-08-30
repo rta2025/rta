@@ -2149,7 +2149,8 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
       📊 Puan Durumu
       <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(240,192,64,0.15);color:var(--gold);border:1px solid rgba(240,192,64,0.35);border-radius:20px;padding:3px 12px;font-size:0.68rem;font-weight:800;letter-spacing:0.03em">🍂 GÜZ SEZONU</span>
     </div>
-    <div class="hero-sub">2. Sezon — 5 Lig</div>
+    <div class="hero-sub" style="margin-bottom:14px">2. Sezon — 5 Lig</div>
+    <div id="completion-inner"></div>
   </div>
 
   <div id="standing-tabs" class="inner-tabs" style="margin-bottom:16px;flex-wrap:wrap">
@@ -3717,7 +3718,7 @@ function updateCompletionBar() {
 
   el.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-      <span style="font-size:0.85rem;font-weight:600">Tamamlanma Durumu</span>
+      <span style="font-size:0.85rem;font-weight:600">${lgNames[lg] || ''} — Sezon İlerlemesi</span>
       <span style="font-family:'Oswald',sans-serif;font-size:1.1rem;color:var(--accent)">${donePairs} / ${totalPairs} maç</span>
     </div>
     <div style="background:var(--surface3);border-radius:20px;height:8px;overflow:hidden">
