@@ -2339,6 +2339,7 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
   <div id="stat-genel">
     <div class="sec-title">En Çok Puan</div>
     <div class="score-card" style="padding:0;overflow:hidden">
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
       <table class="stat-table">
         <thead><tr>
           <th>#</th><th>Oyuncu</th><th>Lig</th><th class="right">O.Maç</th>
@@ -2347,6 +2348,7 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
         </tr></thead>
         <tbody id="stat-all-body"></tbody>
       </table>
+      </div>
     </div>
   </div>
 
@@ -2538,10 +2540,12 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
 
   <div class="sec-title">Oyuncu Listesi</div>
   <div class="score-card" style="padding:0;overflow:hidden">
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
     <table class="stat-table">
       <thead><tr><th>#</th><th>Ad Soyad</th><th>Lig</th><th>O.Maç</th><th>Puan</th><th></th></tr></thead>
       <tbody id="admin-player-body"></tbody>
     </table>
+    </div>
   </div>
 
   <div class="sec-title" style="margin-top:28px">Sezon Geçişi</div>
@@ -4024,10 +4028,12 @@ function renderPlayerDetail() {
     </div>
     <div class="sec-title">Son Maçlar</div>
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
       <table class="stat-table">
         <thead><tr><th>Tarih</th><th>Rakip</th><th>Sonuç</th><th>Skor</th><th class="right">Puan</th></tr></thead>
         <tbody>${recentRows || '<tr><td colspan="5" class="empty">Henüz maç yok.</td></tr>'}</tbody>
       </table>
+      </div>
     </div>
   `;
 }
