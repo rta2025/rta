@@ -775,13 +775,12 @@ initNewSeasonCountdown();
 }
 
 .rule-item {
-  padding: 10px 0;
+  position: relative;
+  padding: 10px 0 10px 24px;
   border-bottom: 1px solid rgba(36,48,36,0.4);
   font-size: 0.87rem;
   line-height: 1.65;
   color: var(--text);
-  display: flex;
-  gap: 12px;
   word-break: break-word;
   overflow-wrap: break-word;
 }
@@ -805,7 +804,7 @@ initNewSeasonCountdown();
 
 .rule-item:last-child { border-bottom: none; }
 
-.rule-icon { color: var(--accent); flex-shrink: 0; margin-top: 2px; }
+.rule-icon { color: var(--accent); position: absolute; left: 0; top: 10px; }
 
 .pts-table {
   width: 100%;
