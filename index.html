@@ -1566,7 +1566,7 @@ body.light-mode .bracket-wo-tag { color: #6a6a6a; }
 /* Haftanın Maçı */
 .featured-match {
   background: linear-gradient(135deg, var(--surface2) 0%, var(--surface3) 100%);
-  border: 1px solid var(--green); border-radius: 14px; padding: 20px;
+  border: 1px solid var(--green); border-radius: 12px; padding: 13px;
   text-align: center; position: relative; overflow: hidden;
 }
 .featured-match::before {
@@ -1574,26 +1574,26 @@ body.light-mode .bracket-wo-tag { color: #6a6a6a; }
   background: radial-gradient(ellipse at top, rgba(26,122,26,0.08) 0%, transparent 70%);
 }
 .featured-badge {
-  display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 1px;
+  display: inline-block; font-size: 9px; font-weight: 700; letter-spacing: 1px;
   text-transform: uppercase; color: var(--gold); background: rgba(176,140,60,0.15);
   border: 1px solid rgba(176,140,60,0.3); border-radius: 4px;
-  padding: 3px 8px; margin-bottom: 14px;
+  padding: 2px 7px; margin-bottom: 9px;
 }
 .featured-players {
-  display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 10px;
+  display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 6px;
 }
 .featured-player { text-align: center; flex: 1; }
 .featured-av {
-  width: 48px; height: 48px; border-radius: 50%;
+  width: 34px; height: 34px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-family: 'Oswald', sans-serif; font-size: 16px; font-weight: 700;
-  margin: 0 auto 6px;
+  font-family: 'Oswald', sans-serif; font-size: 13px; font-weight: 700;
+  margin: 0 auto 4px;
 }
-.featured-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.featured-name { font-size: 11.5px; font-weight: 600; color: var(--text); }
 .featured-name.winner { color: var(--accent); }
-.featured-vs { font-family: 'Oswald', sans-serif; font-size: 11px; color: var(--text-muted); }
-.featured-score { font-family: 'Oswald', sans-serif; font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
-.featured-meta { font-size: 11px; color: var(--text-dim); }
+.featured-vs { font-family: 'Oswald', sans-serif; font-size: 10px; color: var(--text-muted); }
+.featured-score { font-family: 'Oswald', sans-serif; font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.featured-meta { font-size: 10px; color: var(--text-dim); }
 
 /* Haftanın Oyuncusu */
 .player-of-week {
@@ -4128,8 +4128,6 @@ function renderFeaturedMatch() {
   const l = state.players.find(p => p.id === featured.loser);
   if (!w || !l) { el.innerHTML = ''; return; }
 
-  const [wBg, wFg] = avColor(w.name);
-  const [lBg, lFg] = avColor(l.name);
   const sets3 = featured.sets?.length === 3 ? '• 3 Set' : '';
 
   el.innerHTML = `
@@ -4138,12 +4136,12 @@ function renderFeaturedMatch() {
       <div class="featured-badge">⭐ Öne Çıkan Maç</div>
       <div class="featured-players">
         <div class="featured-player">
-          <div class="featured-av" style="background:${wBg};color:${wFg}">${initials(w.name)}</div>
+          ${avatarHtml(w, 'featured-av')}
           <div class="featured-name winner">${w.name}</div>
         </div>
         <div class="featured-vs">VS</div>
         <div class="featured-player">
-          <div class="featured-av" style="background:${lBg};color:${lFg}">${initials(l.name)}</div>
+          ${avatarHtml(l, 'featured-av')}
           <div class="featured-name">${l.name}</div>
         </div>
       </div>
