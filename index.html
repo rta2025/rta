@@ -3790,7 +3790,8 @@ function calcPoints() {
   let ws = 0, ls = 0;
   if (s1a > s1b) ws++; else if (s1b > s1a) ls++;
   if (s2a > s2b) ws++; else if (s2b > s2a) ls++;
-  if (s3aV !== '' && s3bV !== '') {
+  // Maç zaten 2-0 ile bittiyse 3. seti önizlemede de sayma
+  if ((ws < 2 && ls < 2) && s3aV !== '' && s3bV !== '') {
     const s3a = parseInt(s3aV), s3b = parseInt(s3bV);
     if (s3a > s3b) ws++; else if (s3b > s3a) ls++;
   }
@@ -3844,14 +3845,20 @@ function submitMatch() {
 
   const sets = [];
   let ws = 0, ls = 0;
-  sVals.forEach(([a,b]) => {
-    if (a === '') return;
-    const na = parseInt(a), nb = parseInt(b||0);
+  for (const [a, b] of sVals) {
+    if (a === '') continue;
+    // İlk iki set zaten 2-0 ile maçı bitirmişse, üçüncü sete girilmiş bir
+    // değer olsa bile eklenmez — gerçek tenis kuralına göre maç zaten
+    // bitmiş bir set daha oynanmaz. Yanlışlıkla girilen 3. set verisini
+    // sessizce yok sayıyoruz.
+    if (ws === 2 || ls === 2) break;
+    const na = parseInt(a), nb = parseInt(b || 0);
     sets.push([na, nb]);
     if (na > nb) ws++; else if (nb > na) ls++;
-  });
+  }
 
   if (ws < 2 && ls < 2) { showToast('Geçersiz skor! Birinin 2 set kazanması gerek.', 'err'); return; }
+  const ignoredThirdSet = (sets.length < 3 && sVals[2][0] !== '');
 
   const winningSets = Math.max(ws, ls);
   const losingSets = Math.min(ws, ls);
@@ -3871,7 +3878,7 @@ function submitMatch() {
   saveState();
   savePrevRanks();
   renderAll();
-  showToast(`✅ ${playerName(winner)} kazandı! (${wpts} puan)`);
+  showToast(`✅ ${playerName(winner)} kazandı! (${wpts} puan)` + (ignoredThirdSet ? ' — ⚠️ maç 2-0 bittiği için 3. set yok sayıldı' : ''));
   ['s1a','s1b','s2a','s2b','s3a','s3b'].forEach(id => document.getElementById(id).value='');
   document.getElementById('pp-result').textContent='—';
   document.getElementById('pp-wpts').textContent='—';
@@ -6177,9 +6184,13 @@ async function saveEditMatch() {
     showToast('1. ve 2. set zorunlu', 'err'); return;
   }
 
-  // Setleri güncelle
+  // Setleri güncelle — maç zaten 2-0 ile bitmişse 3. seti (girilmiş olsa bile) yok say
   const newSets = [[s1a, s1b], [s2a, s2b]];
-  if (s3a !== '' && s3b !== '') newSets.push([parseInt(s3a), parseInt(s3b)]);
+  let ws0 = 0, ls0 = 0;
+  if (s1a > s1b) ws0++; else if (s1b > s1a) ls0++;
+  if (s2a > s2b) ws0++; else if (s2b > s2a) ls0++;
+  const thirdSetIgnored = (ws0 < 2 && ls0 < 2) === false && s3a !== '' && s3b !== '';
+  if (ws0 < 2 && ls0 < 2 && s3a !== '' && s3b !== '') newSets.push([parseInt(s3a), parseInt(s3b)]);
 
   // Kazanılan/kaybedilen set sayısını yeniden hesapla
   let ws = 0, ls = 0;
@@ -7105,8 +7116,18 @@ function buildWeeklySummaryHtml(matches, weekOffset = 0) {
     const winnerName = playerName(m.winner);
     const loserName = playerName(m.loser);
     const lgName = leagueName(m.league);
-    const winnerSetScores = m.sets.map(([a, b]) => (a > b ? a : b));
-    const loserSetScores  = m.sets.map(([a, b]) => (a > b ? b : a));
+
+    // ÖNEMLİ: m.sets her zaman "1. oyuncu - 2. oyuncu" sırasıyla saklanır,
+    // set bazında kim kazanmış olursa olsun. Kazananın kendi skorunu her
+    // sette (kaybettiği setler dahil) doğru göstermek için, hangi tarafın
+    // genel maç kazananına karşılık geldiğini set-galibiyet sayısıyla tespit
+    // ediyoruz (sadece "büyük sayı" almak yanlış — o zaman kaybettiği seti
+    // de kazanmış gibi gösterir).
+    let slot0Wins = 0;
+    m.sets.forEach(([a, b]) => { if (a > b) slot0Wins++; });
+    const winnerIsSlot0 = slot0Wins === m.winningSets;
+    const winnerSetScores = m.sets.map(([a, b]) => (winnerIsSlot0 ? a : b));
+    const loserSetScores  = m.sets.map(([a, b]) => (winnerIsSlot0 ? b : a));
 
     const buildCols = (scores, color, weight, size) => {
       let html = '';
