@@ -7160,6 +7160,9 @@ function buildWeeklySummaryHtml(matches, weekOffset = 0) {
 
   return `
     <div style="background:#0c1020;padding:56px 70px;font-family:'Public Sans',sans-serif;color:#fff;width:1080px;box-sizing:border-box">
+      <div style="text-align:center;margin-bottom:20px">
+        <img src="logo_rta.png" style="width:56px;height:56px;object-fit:contain" alt="RTA Logo">
+      </div>
       <div style="display:flex;justify-content:space-between;align-items:baseline">
         <div style="font-size:32px;font-weight:800;color:${BAR}">RTA LİGİ</div>
         <div style="font-size:18px;font-weight:700;color:${GOLD}">HAFTALIK ÖZET</div>
@@ -7189,7 +7192,19 @@ function downloadWeeklySummaryImage(weekOffset = 0) {
   const container = document.getElementById('weekly-summary-capture');
   container.innerHTML = buildWeeklySummaryHtml(matches, weekOffset);
 
-  requestAnimationFrame(() => {
+  // Logo görselinin (varsa) tam yüklenmesini bekle — yoksa html2canvas
+  // bazen resim daha yüklenmeden önce görüntüyü yakalayabiliyor.
+  const waitForImages = () => {
+    const imgs = container.querySelectorAll('img');
+    const pending = Array.from(imgs).filter(img => !img.complete);
+    if (!pending.length) return Promise.resolve();
+    return Promise.all(pending.map(img => new Promise(res => {
+      img.onload = img.onerror = res;
+      setTimeout(res, 1500); // güvenlik: en fazla 1.5sn bekle
+    })));
+  };
+
+  waitForImages().then(() => requestAnimationFrame(() => {
     html2canvas(container, {
       backgroundColor: '#0c1020',
       scale: 2,
@@ -7214,7 +7229,7 @@ function downloadWeeklySummaryImage(weekOffset = 0) {
       console.error(err);
       showToast('Görsel oluşturulamadı', 'err');
     });
-  });
+  }));
 }
 
 function fallbackDownload(blob, fileName) {
