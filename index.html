@@ -25,7 +25,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="RTA Ligi">
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Mulish:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Mulish:wght@300;400;500;600;700&family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg: #0b0e0b;
@@ -2149,6 +2149,7 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
     </div>
     <div class="hero-sub" style="margin-bottom:14px">2. Sezon — 5 Lig</div>
     <div id="completion-inner"></div>
+    <button class="btn btn-sm admin-only" onclick="downloadWeeklySummaryImage()" style="margin-top:14px;background:rgba(40,120,255,0.15);color:#5a96ff;border:1px solid rgba(40,120,255,0.35)">📸 Haftalık Özet Görseli</button>
   </div>
 
   <!-- Platform geneli öne çıkanlar (tüm liglerden, lig sekmesinden bağımsız) -->
@@ -3063,6 +3064,9 @@ Tayfun Selek vs Derya Özdemir
 
 <div class="toast" id="toast"></div>
 
+<!-- Haftalık özet görseli — ekran dışında konumlanmış, html2canvas ile yakalanacak şablon -->
+<div id="weekly-summary-capture" style="position:fixed;left:-9999px;top:0;width:1080px;"></div>
+
 <script>
 // ═══════════════════════════════════════════════════
 // STATE
@@ -3697,7 +3701,7 @@ function renderAll(fromSupabase = false) {
   renderStandingContent();
   updateKPIs();
   renderLastMatchTicker();
-  if (fromSupabase) renderHomeSections();
+  renderHomeSections();
   const ap = document.querySelector('.page.active');
   if (ap) {
     if (ap.id === 'page-sonuclar')   renderResults();
@@ -7055,6 +7059,124 @@ function downloadStandingImage(code) {
     showToast('Görsel oluşturulamadı', 'err');
   });
   }); // requestAnimationFrame
+}
+
+// ═══════════════════════════════════════════════════
+// HAFTALIK ÖZET GÖRSELİ
+// ═══════════════════════════════════════════════════
+function getWeekBoundaries() {
+  // Pazartesi 00:00 — Pazar 23:59 (bu haftanın sınırları)
+  const now = new Date();
+  const day = now.getDay(); // 0=Pazar, 1=Pazartesi ... 6=Cumartesi
+  const diffToMonday = day === 0 ? 6 : day - 1;
+  const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday, 0, 0, 0);
+  const sunday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6, 23, 59, 59);
+  return { monday, sunday };
+}
+
+function getWeekMatches() {
+  const { monday, sunday } = getWeekBoundaries();
+  return state.matches
+    .filter(m => {
+      const d = new Date(m.date);
+      return d >= monday && d <= sunday;
+    })
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
+}
+
+function buildWeeklySummaryHtml(matches) {
+  const { monday, sunday } = getWeekBoundaries();
+  const fmt = d => d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' });
+  const dateRangeStr = `${fmt(monday)} – ${fmt(sunday)}`;
+
+  const BAR = '#3268f0', SCORE_ON_BAR = '#ffd650', GOLD = '#ffc85a';
+  const LINE = '#222c44', MUTED = '#6e7da0', DIM = '#a0afcd', WHITE = '#ffffff';
+
+  const rows = matches.map(m => {
+    const winnerName = playerName(m.winner);
+    const loserName = playerName(m.loser);
+    const lgName = leagueName(m.league);
+    const winnerSetScores = m.sets.map(([a, b]) => (a > b ? a : b));
+    const loserSetScores  = m.sets.map(([a, b]) => (a > b ? b : a));
+    const colW = 90;
+
+    const winnerCols = winnerSetScores.map(s =>
+      `<div style="width:${colW}px;text-align:center;font-size:28px;font-weight:800;color:${SCORE_ON_BAR}">${s}</div>`
+    ).join('');
+    const loserCols = loserSetScores.map(s =>
+      `<div style="width:${colW}px;text-align:center;font-size:26px;font-weight:400;color:${MUTED}">${s}</div>`
+    ).join('');
+
+    return `
+      <div style="border-top:2px solid ${LINE};padding-top:16px;margin-top:16px">
+        <div style="text-align:right;font-size:15px;font-weight:700;color:${BAR};margin-bottom:10px">${lgName}</div>
+        <div style="background:${BAR};border-radius:10px;padding:9px 14px;display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:30px;font-weight:800;color:${WHITE}">${winnerName}</div>
+          <div style="display:flex">${winnerCols}</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px">
+          <div style="font-size:28px;font-weight:400;color:${DIM}">${loserName}</div>
+          <div style="display:flex">${loserCols}</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  return `
+    <div style="background:#0c1020;padding:56px 70px;font-family:'Public Sans',sans-serif;color:#fff;width:1080px;box-sizing:border-box">
+      <div style="display:flex;justify-content:space-between;align-items:baseline">
+        <div style="font-size:32px;font-weight:800;color:${BAR}">RTA LİGİ</div>
+        <div style="font-size:18px;font-weight:700;color:${GOLD}">HAFTALIK ÖZET</div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:10px">
+        <div style="font-size:17px;color:${MUTED}">Rize Tenis Akademisi</div>
+        <div style="font-size:17px;color:${MUTED}">${dateRangeStr}</div>
+      </div>
+      <div style="font-size:20px;font-weight:600;color:#fff;margin-top:24px">${matches.length} maç oynandı</div>
+      ${rows}
+      <div style="border-top:2px solid ${LINE};margin-top:24px;padding-top:24px">
+        <div style="font-size:20px;font-weight:700;color:${BAR}">rtaligleri.com</div>
+      </div>
+    </div>`;
+}
+
+function downloadWeeklySummaryImage() {
+  const matches = getWeekMatches();
+  if (!matches.length) { showToast('Bu hafta henüz maç girilmemiş', 'err'); return; }
+  if (typeof html2canvas === 'undefined') {
+    showToast('Görsel oluşturma aracı yüklenemedi', 'err');
+    return;
+  }
+  showToast('Görsel hazırlanıyor... ⏳', 'ok');
+
+  const container = document.getElementById('weekly-summary-capture');
+  container.innerHTML = buildWeeklySummaryHtml(matches);
+
+  requestAnimationFrame(() => {
+    html2canvas(container, {
+      backgroundColor: '#0c1020',
+      scale: 2,
+      useCORS: true,
+    }).then(canvas => {
+      canvas.toBlob(blob => {
+        if (!blob) { showToast('Görsel oluşturulamadı', 'err'); return; }
+        const fileName = `RTA-Haftalik-Ozet.png`;
+
+        if (navigator.share && navigator.canShare) {
+          const file = new File([blob], fileName, { type: 'image/png' });
+          if (navigator.canShare({ files: [file] })) {
+            navigator.share({ files: [file], title: 'RTA Ligi Haftalık Özet' })
+              .then(() => showToast('Paylaşım açıldı! 📤', 'ok'))
+              .catch(() => fallbackDownload(blob, fileName));
+            return;
+          }
+        }
+        fallbackDownload(blob, fileName);
+      }, 'image/png');
+    }).catch(err => {
+      console.error(err);
+      showToast('Görsel oluşturulamadı', 'err');
+    });
+  });
 }
 
 function fallbackDownload(blob, fileName) {
