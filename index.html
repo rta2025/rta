@@ -7129,20 +7129,20 @@ function buildWeeklySummaryHtml(matches, weekOffset = 0) {
     const winnerSetScores = m.sets.map(([a, b]) => (winnerIsSlot0 ? a : b));
     const loserSetScores  = m.sets.map(([a, b]) => (winnerIsSlot0 ? b : a));
 
-    const buildCols = (scores, otherScores, winColor, weight, size) => {
+    const buildCols = (scores, otherScores, weight, size) => {
       let html = '';
       for (let i = 0; i < maxSets; i++) {
         if (i >= scores.length) { html += `<div style="width:${colW}px"></div>`; continue; }
         const val = scores[i];
         const wonThisSet = val > otherScores[i];
-        const color = wonThisSet ? winColor : MUTED;
+        const color = wonThisSet ? GOLD : MUTED;
         html += `<div style="width:${colW}px;text-align:center;font-size:${size}px;font-weight:${weight};color:${color}">${val}</div>`;
       }
       return html;
     };
 
-    const winnerCols = buildCols(winnerSetScores, loserSetScores, GOLD, 800, 28);
-    const loserCols  = buildCols(loserSetScores, winnerSetScores, WHITE, 700, 26);
+    const winnerCols = buildCols(winnerSetScores, loserSetScores, 800, 28);
+    const loserCols  = buildCols(loserSetScores, winnerSetScores, 700, 26);
 
     return `
       <div style="border-top:2px solid ${LINE};padding-top:16px;margin-top:16px">
