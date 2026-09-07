@@ -7092,8 +7092,14 @@ function buildWeeklySummaryHtml(matches, weekOffset = 0) {
   const fmt = d => d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' });
   const dateRangeStr = `${fmt(monday)} – ${fmt(sunday)}`;
 
-  const BAR = '#3268f0', SCORE_ON_BAR = '#ffd650', GOLD = '#ffc85a';
+  const BAR = '#3268f0', GOLD = '#ffc85a';
   const LINE = '#222c44', MUTED = '#6e7da0', DIM = '#a0afcd', WHITE = '#ffffff';
+  const colW = 90;
+
+  // Tüm maçlarda AYNI sütun hizasını korumak için, en çok set oynanan maça
+  // göre sabit sütun sayısı kullanıyoruz — yoksa 3 set oynanan maçlar
+  // 2 set oynananlara göre sola kayıyordu.
+  const maxSets = Math.max(1, ...matches.map(m => m.sets.length));
 
   const rows = matches.map(m => {
     const winnerName = playerName(m.winner);
@@ -7101,25 +7107,29 @@ function buildWeeklySummaryHtml(matches, weekOffset = 0) {
     const lgName = leagueName(m.league);
     const winnerSetScores = m.sets.map(([a, b]) => (a > b ? a : b));
     const loserSetScores  = m.sets.map(([a, b]) => (a > b ? b : a));
-    const colW = 90;
 
-    const winnerCols = winnerSetScores.map(s =>
-      `<div style="width:${colW}px;text-align:center;font-size:28px;font-weight:800;color:${SCORE_ON_BAR}">${s}</div>`
-    ).join('');
-    const loserCols = loserSetScores.map(s =>
-      `<div style="width:${colW}px;text-align:center;font-size:26px;font-weight:400;color:${MUTED}">${s}</div>`
-    ).join('');
+    const buildCols = (scores, color, weight, size) => {
+      let html = '';
+      for (let i = 0; i < maxSets; i++) {
+        const val = i < scores.length ? scores[i] : '';
+        html += `<div style="width:${colW}px;text-align:center;font-size:${size}px;font-weight:${weight};color:${color}">${val}</div>`;
+      }
+      return html;
+    };
+
+    const winnerCols = buildCols(winnerSetScores, GOLD, 800, 28);
+    const loserCols  = buildCols(loserSetScores, MUTED, 400, 26);
 
     return `
       <div style="border-top:2px solid ${LINE};padding-top:16px;margin-top:16px">
         <div style="text-align:right;font-size:15px;font-weight:700;color:${BAR};margin-bottom:10px">${lgName}</div>
-        <div style="background:${BAR};border-radius:10px;padding:9px 14px;display:flex;justify-content:space-between;align-items:center">
+        <div style="display:flex;justify-content:space-between;align-items:center">
           <div style="font-size:30px;font-weight:800;color:${WHITE}">${winnerName}</div>
-          <div style="display:flex">${winnerCols}</div>
+          <div style="display:flex;flex-shrink:0">${winnerCols}</div>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
           <div style="font-size:28px;font-weight:400;color:${DIM}">${loserName}</div>
-          <div style="display:flex">${loserCols}</div>
+          <div style="display:flex;flex-shrink:0">${loserCols}</div>
         </div>
       </div>`;
   }).join('');
