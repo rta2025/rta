@@ -3714,12 +3714,7 @@ function renderAll(fromSupabase = false) {
   }
 }
 
-function updateCompletionBar() {
-  const el = document.getElementById('completion-inner');
-  if (!el) return;
-
-  const lg = _standingLeague;
-  const lgNames = {super:'Süper Lig', l2:'2. Lig', l3:'3. Lig', l4:'4. Lig', l5:'5. Lig'};
+function computeLeagueCompletion(lg) {
   const lgPlayers = state.players.filter(p => p.league === lg);
   const played = new Set();
   state.matches.filter(m => m.league === lg).forEach(m => {
@@ -3733,17 +3728,46 @@ function updateCompletionBar() {
       if (played.has(`${Math.min(p.id,q.id)}-${Math.max(p.id,q.id)}`)) donePairs++;
     });
   });
-  const pct = totalPairs ? Math.round(donePairs / totalPairs * 100) : 0;
+  return { donePairs, totalPairs, pct: totalPairs ? Math.round(donePairs / totalPairs * 100) : 0 };
+}
+
+function updateCompletionBar() {
+  const el = document.getElementById('completion-inner');
+  if (!el) return;
+
+  const lg = _standingLeague;
+  const lgNames = {super:'Süper Lig', l2:'2. Lig', l3:'3. Lig', l4:'4. Lig', l5:'5. Lig'};
+  const ALL_LEAGUES = ['super','l2','l3','l4','l5'];
+
+  // Genel (tüm liglerin toplamı)
+  let genelDone = 0, genelTotal = 0;
+  ALL_LEAGUES.forEach(code => {
+    const c = computeLeagueCompletion(code);
+    genelDone += c.donePairs;
+    genelTotal += c.totalPairs;
+  });
+  const genelPct = genelTotal ? Math.round(genelDone / genelTotal * 100) : 0;
+
+  // O an açık olan lig
+  const cur = computeLeagueCompletion(lg);
 
   el.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-      <span style="font-size:0.85rem;font-weight:600">${lgNames[lg] || ''} — Sezon İlerlemesi</span>
-      <span style="font-family:'Oswald',sans-serif;font-size:1.1rem;color:var(--accent)">${donePairs} / ${totalPairs} maç</span>
+      <span style="font-size:0.85rem;font-weight:600">Genel Sezon İlerlemesi</span>
+      <span style="font-family:'Oswald',sans-serif;font-size:1.1rem;color:var(--accent)">${genelDone} / ${genelTotal} maç</span>
     </div>
     <div style="background:var(--surface3);border-radius:20px;height:8px;overflow:hidden">
-      <div style="background:var(--accent);height:100%;width:${pct}%;transition:width 0.5s;border-radius:20px"></div>
+      <div style="background:var(--accent);height:100%;width:${genelPct}%;transition:width 0.5s;border-radius:20px"></div>
     </div>
-    <div style="font-size:0.75rem;color:var(--text-dim);margin-top:6px">%${pct} tamamlandı</div>
+    <div style="font-size:0.75rem;color:var(--text-dim);margin-top:6px;margin-bottom:16px">%${genelPct} tamamlandı</div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <span style="font-size:0.72rem;color:var(--text-dim);font-weight:600">${lgNames[lg] || ''}</span>
+      <span style="font-family:'Oswald',sans-serif;font-size:0.85rem;color:var(--text-dim)">${cur.donePairs} / ${cur.totalPairs} maç · %${cur.pct}</span>
+    </div>
+    <div style="background:var(--surface3);border-radius:20px;height:5px;overflow:hidden">
+      <div style="background:var(--text-dim);height:100%;width:${cur.pct}%;transition:width 0.5s;border-radius:20px"></div>
+    </div>
   `;
 }
 
