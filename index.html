@@ -2149,7 +2149,10 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
     </div>
     <div class="hero-sub" style="margin-bottom:14px">2. Sezon — 5 Lig</div>
     <div id="completion-inner"></div>
-    <button class="btn btn-sm admin-only" onclick="downloadWeeklySummaryImage()" style="margin-top:14px;background:rgba(40,120,255,0.15);color:#5a96ff;border:1px solid rgba(40,120,255,0.35)">📸 Haftalık Özet Görseli</button>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+      <button class="btn btn-sm admin-only" onclick="downloadWeeklySummaryImage(0)" style="background:rgba(40,120,255,0.15);color:#5a96ff;border:1px solid rgba(40,120,255,0.35)">📸 Bu Haftanın Özeti</button>
+      <button class="btn btn-sm admin-only" onclick="downloadWeeklySummaryImage(-1)" style="background:rgba(40,120,255,0.15);color:#5a96ff;border:1px solid rgba(40,120,255,0.35)">📸 Geçen Haftanın Özeti</button>
+    </div>
   </div>
 
   <!-- Platform geneli öne çıkanlar (tüm liglerden, lig sekmesinden bağımsız) -->
@@ -7064,18 +7067,18 @@ function downloadStandingImage(code) {
 // ═══════════════════════════════════════════════════
 // HAFTALIK ÖZET GÖRSELİ
 // ═══════════════════════════════════════════════════
-function getWeekBoundaries() {
-  // Pazartesi 00:00 — Pazar 23:59 (bu haftanın sınırları)
+function getWeekBoundaries(weekOffset = 0) {
+  // Pazartesi 00:00 — Pazar 23:59 (weekOffset=0: bu hafta, -1: geçen hafta, vs.)
   const now = new Date();
   const day = now.getDay(); // 0=Pazar, 1=Pazartesi ... 6=Cumartesi
   const diffToMonday = day === 0 ? 6 : day - 1;
-  const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday, 0, 0, 0);
+  const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday + weekOffset*7, 0, 0, 0);
   const sunday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6, 23, 59, 59);
   return { monday, sunday };
 }
 
-function getWeekMatches() {
-  const { monday, sunday } = getWeekBoundaries();
+function getWeekMatches(weekOffset = 0) {
+  const { monday, sunday } = getWeekBoundaries(weekOffset);
   return state.matches
     .filter(m => {
       const d = new Date(m.date);
@@ -7084,8 +7087,8 @@ function getWeekMatches() {
     .sort((a, b) => new Date(a.date) - new Date(b.date));
 }
 
-function buildWeeklySummaryHtml(matches) {
-  const { monday, sunday } = getWeekBoundaries();
+function buildWeeklySummaryHtml(matches, weekOffset = 0) {
+  const { monday, sunday } = getWeekBoundaries(weekOffset);
   const fmt = d => d.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' });
   const dateRangeStr = `${fmt(monday)} – ${fmt(sunday)}`;
 
@@ -7139,9 +7142,10 @@ function buildWeeklySummaryHtml(matches) {
     </div>`;
 }
 
-function downloadWeeklySummaryImage() {
-  const matches = getWeekMatches();
-  if (!matches.length) { showToast('Bu hafta henüz maç girilmemiş', 'err'); return; }
+function downloadWeeklySummaryImage(weekOffset = 0) {
+  const matches = getWeekMatches(weekOffset);
+  const errMsg = weekOffset === 0 ? 'Bu hafta henüz maç girilmemiş' : 'Geçen hafta hiç maç girilmemiş';
+  if (!matches.length) { showToast(errMsg, 'err'); return; }
   if (typeof html2canvas === 'undefined') {
     showToast('Görsel oluşturma aracı yüklenemedi', 'err');
     return;
@@ -7149,7 +7153,7 @@ function downloadWeeklySummaryImage() {
   showToast('Görsel hazırlanıyor... ⏳', 'ok');
 
   const container = document.getElementById('weekly-summary-capture');
-  container.innerHTML = buildWeeklySummaryHtml(matches);
+  container.innerHTML = buildWeeklySummaryHtml(matches, weekOffset);
 
   requestAnimationFrame(() => {
     html2canvas(container, {
