@@ -4622,24 +4622,68 @@ function renderH2H() {
   }
   const p1 = state.players.find(p => p.id === p1id);
   const p2 = state.players.find(p => p.id === p2id);
-  const matches = state.matches.filter(m =>
+  if (!p1 || !p2) { box.innerHTML = '<div class="h2h-empty">İki farklı oyuncu seçin</div>'; return; }
+
+  // ── Mevcut sezon maçları (gerçek tarih/skor ile) ──
+  const liveMatches = state.matches.filter(m =>
     (m.winner === p1id && m.loser === p2id) ||
     (m.winner === p2id && m.loser === p1id)
-  ).sort((a,b) => new Date(b.date) - new Date(a.date));
+  ).map(m => ({
+    winnerName: playerName(m.winner), loserName: playerName(m.loser),
+    score: m.score || '', date: m.date || ''
+  }));
+
+  // ── Arşivlenmiş LİG sezonlarından H2H — her oyuncunun kendi "matches"
+  // (rakip bazlı) listesi bu bilgiyi taşıyorsa oradan çekiyoruz. ──
+  const norm = s => (s || '').trim().toLocaleLowerCase('tr-TR');
+  const archiveMatches = [];
+  loadArchive().forEach(season => {
+    Object.values(season.leagues || {}).forEach(players => {
+      (players || []).forEach(ap => {
+        if (norm(ap.name) !== norm(p1.name)) return;
+        (ap.matches || []).forEach(m => {
+          if (!m.played || norm(m.rival) !== norm(p2.name)) return;
+          archiveMatches.push({
+            winnerName: m.won ? p1.name : p2.name,
+            loserName: m.won ? p2.name : p1.name,
+            score: m.score || '', date: season.date || ''
+          });
+        });
+      });
+    });
+  });
+
+  // ── Arşivlenmiş TURNUVALARDAN H2H (bracket'te bu ikisi karşılaşmışsa) ──
+  const tournamentMatches = [];
+  loadTournamentArchiveList().forEach(entry => {
+    const bm = (entry.bracket && entry.bracket.matches) || {};
+    Object.values(bm).forEach(m => {
+      if (!m.winner || !m.p1 || !m.p2) return;
+      const names = [norm(m.p1), norm(m.p2)];
+      if (!names.includes(norm(p1.name)) || !names.includes(norm(p2.name))) return;
+      const loserName = m.winner === m.p1 ? m.p2 : m.p1;
+      tournamentMatches.push({
+        winnerName: m.winner, loserName,
+        score: m.winnerScore || m.score || '', date: `🏆 ${entry.info?.name || 'Turnuva'}`
+      });
+    });
+  });
+
+  const matches = [...liveMatches, ...archiveMatches, ...tournamentMatches]
+    .sort((a,b) => new Date(b.date) - new Date(a.date));
 
   if (matches.length === 0) {
     box.innerHTML = '<div class="h2h-empty">Bu iki oyuncu henüz karşılaşmamış</div>'; return;
   }
 
-  const p1wins = matches.filter(m => m.winner === p1id).length;
-  const p2wins = matches.filter(m => m.winner === p2id).length;
+  const p1wins = matches.filter(m => norm(m.winnerName) === norm(p1.name)).length;
+  const p2wins = matches.filter(m => norm(m.winnerName) === norm(p2.name)).length;
   const p1leader = p1wins > p2wins;
   const p2leader = p2wins > p1wins;
 
   const matchRows = matches.map(m => {
-    const winner = state.players.find(p => p.id === m.winner);
     return `<div class="h2h-match">
-      <span class="h2h-match-winner">${winner?.name || '?'} kazandı</span>
+      <span class="h2h-match-winner">${m.winnerName} kazandı</span>
       <span style="color:var(--text-dim);font-size:11px">${m.score || ''}</span>
       <span class="h2h-match-date">${m.date || ''}</span>
     </div>`;
@@ -5387,15 +5431,47 @@ function archiveCurrentSeason() {
     leagues: {}
   };
 
+  // Bir oyuncunun kendi liginde OYNADIĞI/OYNAMADIĞI tüm rakiplere karşı
+  // sonucunu (kazandı mı, skor ne) üretir — kendi skoru her zaman önce
+  // gösterilir (kaybettiği set dahil doğru gösterim için slot tespiti).
+  function buildRivalMatches(playerId, leaguePlayers, leagueCode) {
+    return leaguePlayers.filter(q => q.id !== playerId).map(q => {
+      const m = state.matches.find(mm => mm.league === leagueCode &&
+        ((mm.winner === playerId && mm.loser === q.id) || (mm.winner === q.id && mm.loser === playerId)));
+      if (!m) return { rival: q.name, played: false };
+      const won = m.winner === playerId;
+      let scoreStr = m.score || '';
+      if (m.sets && m.sets.length) {
+        let slot0Wins = 0;
+        m.sets.forEach(([a, b]) => { if (a > b) slot0Wins++; });
+        const winnerIsSlot0 = slot0Wins === m.winningSets;
+        const playerIsSlot0 = won ? winnerIsSlot0 : !winnerIsSlot0;
+        scoreStr = m.sets.map(([a, b]) => playerIsSlot0 ? `${a}-${b}` : `${b}-${a}`).join(' / ');
+      }
+      return { rival: q.name, played: true, won, score: scoreStr };
+    });
+  }
+
   ['super','l2','l3','l4','l5'].forEach(lg => {
-    snapshot.leagues[lg] = getStandings(lg).map((p, i) => ({
-      rank: i + 1,
-      name: p.name,
-      mp: p.mp,
-      mw: p.mw,
-      ml: p.ml,
-      pts: p.pts
-    }));
+    const standing = getStandings(lg);
+    const leaguePlayers = state.players.filter(p => p.league === lg);
+    snapshot.leagues[lg] = standing.map((p, i) => {
+      const winPct = p.mp > 0 ? Math.round(p.mw / p.mp * 100) : 0;
+      return {
+        rank: i + 1,
+        name: p.name,
+        photo_url: p.photo_url || null,
+        mp: p.mp,
+        mw: p.mw,
+        ml: p.ml,
+        pts: p.pts,
+        win_pct: winPct,
+        won_games: p.gw,
+        lost_games: p.gl,
+        set_avg: (p.sw || 0) - (p.sl || 0),
+        matches: buildRivalMatches(p.id, leaguePlayers, lg)
+      };
+    });
   });
 
   snapshot.totalMatches = state.matches.length;
