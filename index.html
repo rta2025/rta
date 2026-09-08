@@ -3962,6 +3962,14 @@ function renderResults() {
     const ln2 = leagueName(m.league);
     const woTag = m.walkover ? ' <span class="chip chip-r">HÜKMEN</span>' : '';
     const ptsInfo = `${m.wpts}p / ${m.lpts}p`;
+    // Skoru kazananın kendi bakış açısından göster
+    let scoreDisplay = m.score;
+    if (m.sets && m.sets.length) {
+      let slot0Wins = 0;
+      m.sets.forEach(([a, b]) => { if (a > b) slot0Wins++; });
+      const winnerIsSlot0 = slot0Wins === m.winningSets;
+      scoreDisplay = m.sets.map(([a, b]) => winnerIsSlot0 ? `${a}-${b}` : `${b}-${a}`).join(' / ');
+    }
     return `<div class="match-row">
       <span class="match-lig ${lc}">${ln2}</span>
       <div class="match-players">
@@ -3969,7 +3977,7 @@ function renderResults() {
         <div class="mloser">⬡ ${ln}</div>
       </div>
       <div>
-        <div class="match-score-txt">${m.score}</div>
+        <div class="match-score-txt">${scoreDisplay}</div>
         <div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px">${ptsInfo}</div>
       </div>
       <div class="match-meta">
@@ -4107,11 +4115,21 @@ function renderPlayerDetail() {
     const won = m.winner === pid;
     const opp = playerName(won ? m.loser : m.winner);
     const lc = leagueClass(m.league);
+    // Skoru bu oyuncunun (pid) kendi bakış açısından göster — kaybettiği
+    // maçlarda da kendi skoru önce gelsin diye slot tespiti yapıyoruz.
+    let scoreDisplay = m.score;
+    if (m.sets && m.sets.length) {
+      let slot0Wins = 0;
+      m.sets.forEach(([a, b]) => { if (a > b) slot0Wins++; });
+      const winnerIsSlot0 = slot0Wins === m.winningSets;
+      const playerIsSlot0 = won ? winnerIsSlot0 : !winnerIsSlot0;
+      scoreDisplay = m.sets.map(([a, b]) => playerIsSlot0 ? `${a}-${b}` : `${b}-${a}`).join(' / ');
+    }
     return `<tr>
       <td>${m.date}</td>
       <td>${opp}</td>
       <td><span class="${won?'tag tag-win':'tag tag-loss'}">${won?'GALİP':'MAĞLUP'}</span></td>
-      <td>${m.score}</td>
+      <td>${scoreDisplay}</td>
       <td class="right" style="color:var(--accent)">${won?m.wpts:m.lpts} puan</td>
     </tr>`;
   }).join('');
@@ -4179,10 +4197,19 @@ function renderLastMatches() {
     const wName = playerName(m.winner);
     const lName = playerName(m.loser);
     const lgTag = leagueName(m.league);
+    // Skoru kazananın kendi bakış açısından göster — m.score her zaman
+    // "1. oyuncu-2. oyuncu" sırasıyla saklanır, kazanan kim olursa olsun.
+    let scoreDisplay = m.score || `${m.winningSets}-${m.losingSets}`;
+    if (m.sets && m.sets.length) {
+      let slot0Wins = 0;
+      m.sets.forEach(([a, b]) => { if (a > b) slot0Wins++; });
+      const winnerIsSlot0 = slot0Wins === m.winningSets;
+      scoreDisplay = m.sets.map(([a, b]) => winnerIsSlot0 ? `${a}-${b}` : `${b}-${a}`).join(' / ');
+    }
     return `<div class="last-match-row">
       <div class="lm-player winner lm-left"><span class="lm-win-badge"></span>${wName}</div>
       <div>
-        <div class="lm-score">${m.score || `${m.winningSets}-${m.losingSets}`}</div>
+        <div class="lm-score">${scoreDisplay}</div>
         <div class="lm-date">${lgTag}${m.date ? ' • ' + m.date : ''}</div>
       </div>
       <div class="lm-player loser lm-right">${lName}</div>
@@ -4217,6 +4244,15 @@ function renderFeaturedMatch() {
 
   const sets3 = featured.sets?.length === 3 ? '• 3 Set' : '';
 
+  // Skoru kazananın kendi bakış açısından göster (aynı düzeltme)
+  let scoreDisplay = featured.score || '';
+  if (featured.sets && featured.sets.length) {
+    let slot0Wins = 0;
+    featured.sets.forEach(([a, b]) => { if (a > b) slot0Wins++; });
+    const winnerIsSlot0 = slot0Wins === featured.winningSets;
+    scoreDisplay = featured.sets.map(([a, b]) => winnerIsSlot0 ? `${a}-${b}` : `${b}-${a}`).join(' / ');
+  }
+
   el.innerHTML = `
     <div class="sec-title">🏆 Haftanın Maçı</div>
     <div class="featured-match">
@@ -4232,7 +4268,7 @@ function renderFeaturedMatch() {
           <div class="featured-name">${l.name}</div>
         </div>
       </div>
-      <div class="featured-score">${featured.score || ''}</div>
+      <div class="featured-score">${scoreDisplay}</div>
       <div class="featured-meta">${featured.date || ''} ${sets3}</div>
     </div>`;
 }
@@ -4624,18 +4660,31 @@ function renderH2H() {
   const p2 = state.players.find(p => p.id === p2id);
   if (!p1 || !p2) { box.innerHTML = '<div class="h2h-empty">İki farklı oyuncu seçin</div>'; return; }
 
+  // Skoru kazananın kendi bakış açısından göstermek için ortak yardımcı
+  function winnerFirstScore(m) {
+    if (!m.sets || !m.sets.length) return m.score || '';
+    let slot0Wins = 0;
+    m.sets.forEach(([a, b]) => { if (a > b) slot0Wins++; });
+    const winnerIsSlot0 = slot0Wins === m.winningSets;
+    return m.sets.map(([a, b]) => winnerIsSlot0 ? `${a}-${b}` : `${b}-${a}`).join(' / ');
+  }
+
   // ── Mevcut sezon maçları (gerçek tarih/skor ile) ──
   const liveMatches = state.matches.filter(m =>
     (m.winner === p1id && m.loser === p2id) ||
     (m.winner === p2id && m.loser === p1id)
   ).map(m => ({
     winnerName: playerName(m.winner), loserName: playerName(m.loser),
-    score: m.score || '', date: m.date || ''
+    score: winnerFirstScore(m), date: m.date || ''
   }));
 
   // ── Arşivlenmiş LİG sezonlarından H2H — her oyuncunun kendi "matches"
   // (rakip bazlı) listesi bu bilgiyi taşıyorsa oradan çekiyoruz. ──
   const norm = s => (s || '').trim().toLocaleLowerCase('tr-TR');
+  const flipScore = s => (s || '').split('/').map(set => {
+    const parts = set.trim().split('-');
+    return parts.length === 2 ? `${parts[1].trim()}-${parts[0].trim()}` : set.trim();
+  }).join(' / ');
   const archiveMatches = [];
   loadArchive().forEach(season => {
     Object.values(season.leagues || {}).forEach(players => {
@@ -4643,10 +4692,13 @@ function renderH2H() {
         if (norm(ap.name) !== norm(p1.name)) return;
         (ap.matches || []).forEach(m => {
           if (!m.played || norm(m.rival) !== norm(p2.name)) return;
+          // ap.matches'teki skor her zaman p1'in KENDİ bakış açısından
+          // saklanır (buildRivalMatches ile) — p1 kaybettiyse (m.won===false)
+          // kazananın (p2'nin) bakış açısına çevirmemiz gerekir.
           archiveMatches.push({
             winnerName: m.won ? p1.name : p2.name,
             loserName: m.won ? p2.name : p1.name,
-            score: m.score || '', date: season.date || ''
+            score: m.won ? (m.score || '') : flipScore(m.score), date: season.date || ''
           });
         });
       });
@@ -8073,11 +8125,18 @@ function renderLastMatchTicker() {
   if (!wp || !lp) { ticker.style.display = 'none'; return; }
   const wName = wp.name.split(' ')[0];
   const lName = lp.name.split(' ')[0];
+  let scoreDisplay = m.score;
+  if (m.sets && m.sets.length) {
+    let slot0Wins = 0;
+    m.sets.forEach(([a, b]) => { if (a > b) slot0Wins++; });
+    const winnerIsSlot0 = slot0Wins === m.winningSets;
+    scoreDisplay = m.sets.map(([a, b]) => winnerIsSlot0 ? `${a}-${b}` : `${b}-${a}`).join(' / ');
+  }
   ticker.style.display = 'flex';
   ticker.innerHTML = `
     <span class="ticker-label">SON MAÇ</span>
     <span class="ticker-text">${wName} - ${lName}</span>
-    <span class="ticker-score">${m.score}</span>
+    <span class="ticker-score">${scoreDisplay}</span>
   `;
 }
 
