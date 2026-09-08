@@ -3995,21 +3995,70 @@ function deleteMatch(id) {
 // STATS
 // ═══════════════════════════════════════════════════
 function renderStats() {
+  const norm = s => (s || '').trim().toLocaleLowerCase('tr-TR');
+
   const allStats = [];
+  const byName = {};
   ['super','l2','l3','l4','l5'].forEach(lg => {
     getStandings(lg).forEach(p => {
-      allStats.push({...p, league: lg});
+      const entry = {...p, league: lg};
+      allStats.push(entry);
+      byName[norm(p.name)] = entry;
     });
   });
+
+  // ── Arşivlenmiş LİG sezonlarını ekle (O.Maç/Galibiyet/Mağlubiyet/Puan) ──
+  // Not: arşiv anlık görüntüsünde K.Oyun (set/oyun skorları) hiç saklanmıyor,
+  // o yüzden bu sütun sadece mevcut sezonu yansıtmaya devam eder.
+  loadArchive().forEach(season => {
+    Object.values(season.leagues || {}).forEach(players => {
+      (players || []).forEach(ap => {
+        const key = norm(ap.name);
+        let target = byName[key];
+        if (!target) {
+          target = { name: ap.name, league: null, mp:0, mw:0, ml:0, pts:0, gw:0, gl:0 };
+          byName[key] = target;
+          allStats.push(target);
+        }
+        target.mp  += ap.mp  || 0;
+        target.mw  += ap.mw  || 0;
+        target.ml  += ap.ml  || 0;
+        target.pts += ap.pts || 0;
+      });
+    });
+  });
+
+  // ── Arşivlenmiş TURNUVALARI ekle (sadece O.Maç/Galibiyet/Mağlubiyet) ──
+  // Not: turnuva skorları serbest metin olarak tutuluyor (ör. "2 (21-16, 21-11)"),
+  // sayısal set/oyun verisi yok — bu yüzden Puan ve K.Oyun'a katkısı yok.
+  loadTournamentArchiveList().forEach(entry => {
+    const matches = (entry.bracket && entry.bracket.matches) || {};
+    Object.values(matches).forEach(m => {
+      if (!m.winner || !m.p1 || !m.p2) return; // bay / boş maçları sayma
+      const loserName = m.winner === m.p1 ? m.p2 : m.p1;
+      [m.winner, loserName].forEach(name => {
+        const key = norm(name);
+        if (!byName[key]) {
+          const t = { name, league: null, mp:0, mw:0, ml:0, pts:0, gw:0, gl:0 };
+          byName[key] = t;
+          allStats.push(t);
+        }
+        byName[key].mp += 1;
+      });
+      byName[norm(m.winner)].mw += 1;
+      byName[norm(loserName)].ml += 1;
+    });
+  });
+
   allStats.sort((a,b) => b.pts - a.pts || b.mw - a.mw);
 
   document.getElementById('stat-all-body').innerHTML = allStats.map((p, i) => {
     const gal = p.mp > 0 ? Math.round(p.mw/p.mp*100) : 0;
-    const ln = leagueName(p.league);
-    const lc = leagueClass(p.league);
+    const ln = p.league ? leagueName(p.league) : '—';
+    const lc = p.league ? leagueClass(p.league) : '';
     return `<tr>
       <td><span class="rank-num ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</span></td>
-      <td><span class="pname">${avatarHtml(p, 'av')}${p.name}</span></td>
+      <td><span class="pname">${p.league ? avatarHtml(p, 'av') : ''}${p.name}</span></td>
       <td><span class="match-lig ${lc}" style="font-size:0.78rem">${ln}</span></td>
       <td class="right">${p.mp}</td>
       <td class="right"><span class="tag tag-win">${p.mw}G</span> <span class="tag tag-loss">${p.ml}M</span></td>
