@@ -3082,7 +3082,7 @@ function loadState() {
 
 async function saveState() {
   localStorage.setItem(SK, JSON.stringify(state));
-  if (!window._sbReady) return;
+  if (!window._sbReady) return true; // Supabase henüz hazır değilse yerel kayıt yeterli sayılır
   const sb = window._sbAdmin;
   try {
     await sb.from('meta').upsert({
@@ -3119,7 +3119,11 @@ async function saveState() {
       // maçları da gerçekten sil — yoksa sayfa yenilenince geri gelirler.
       await sb.from('matches').delete().gte('id', 0);
     }
-  } catch(e) { console.warn('Supabase write error:', e); }
+    return true;
+  } catch(e) {
+    console.warn('Supabase write error:', e);
+    return false;
+  }
 }
 
 async function sbDeleteMatch(id) {
@@ -3848,7 +3852,7 @@ function calcPoints() {
   document.getElementById('pp-lpts').textContent = lpts ? lpts + ' puan' : '—';
 }
 
-function submitMatch() {
+async function submitMatch() {
   // Play-off modu aktifse ayrı fonksiyona yönlendir
   if (document.getElementById('po-checkbox').checked) { submitPlayoff(); return; }
 
@@ -3899,10 +3903,15 @@ function submitMatch() {
     walkover: false
   });
 
-  saveState();
+  saveState().then(ok => {
+    if (!ok) {
+      showToast('⚠️ Kaydedilemedi! İnternet bağlantını kontrol edip tekrar dene.', 'err');
+    } else {
+      showToast(`✅ ${playerName(winner)} kazandı! (${wpts} puan)` + (ignoredThirdSet ? ' — ⚠️ maç 2-0 bittiği için 3. set yok sayıldı' : ''));
+    }
+  });
   savePrevRanks();
   renderAll();
-  showToast(`✅ ${playerName(winner)} kazandı! (${wpts} puan)` + (ignoredThirdSet ? ' — ⚠️ maç 2-0 bittiği için 3. set yok sayıldı' : ''));
   ['s1a','s1b','s2a','s2b','s3a','s3b'].forEach(id => document.getElementById(id).value='');
   document.getElementById('pp-result').textContent='—';
   document.getElementById('pp-wpts').textContent='—';
@@ -3931,9 +3940,14 @@ function submitWalkover() {
     walkover: true
   });
 
-  saveState();
+  saveState().then(ok => {
+    if (!ok) {
+      showToast('⚠️ Kaydedilemedi! İnternet bağlantını kontrol edip tekrar dene.', 'err');
+    } else {
+      showToast(`🚫 Hükmen: ${playerName(wPlayer.id)} kazandı (4 puan)`);
+    }
+  });
   renderAll();
-  showToast(`🚫 Hükmen: ${playerName(wPlayer.id)} kazandı (4 puan)`);
 }
 
 // ═══════════════════════════════════════════════════
@@ -6076,7 +6090,6 @@ function submitPlayoff() {
   const all = loadPlayoffs();
   all.push(entry);
   savePlayoffs(all);
-  sbUpsertPlayoff(entry);
 
   // Formu sıfırla
   document.getElementById('po-checkbox').checked = false;
@@ -6085,7 +6098,14 @@ function submitPlayoff() {
     const el = document.getElementById(id); if(el) el.value='';
   });
   renderArchive();
-  showToast(`✅ Play-off sonucu kaydedildi! ${winner} kazandı.`);
+
+  sbUpsertPlayoff(entry).then(ok => {
+    if (!ok) {
+      showToast('⚠️ Kaydedilemedi! İnternet bağlantını kontrol edip tekrar dene.', 'err');
+    } else {
+      showToast(`✅ Play-off sonucu kaydedildi! ${winner} kazandı.`);
+    }
+  });
 }
 
 async function deletePlayoff(id) {
@@ -6099,7 +6119,7 @@ async function deletePlayoff(id) {
 }
 
 async function sbUpsertPlayoff(entry) {
-  if (!window._sbReady) return;
+  if (!window._sbReady) return true;
   try {
     await window._sbAdmin.from('playoff_matches').upsert({
       id: entry.id, season_id: entry.seasonId, match_type: entry.matchType,
@@ -6108,7 +6128,11 @@ async function sbUpsertPlayoff(entry) {
       sets_json: JSON.stringify(entry.sets),
       score_str: entry.scoreStr, note: entry.note, match_date: entry.date
     });
-  } catch(e) { console.warn('Playoff upsert error:', e); }
+    return true;
+  } catch(e) {
+    console.warn('Playoff upsert error:', e);
+    return false;
+  }
 }
 
 // ═══════════════════════════════════════════════════
