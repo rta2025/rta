@@ -7390,7 +7390,7 @@ function buildWeeklySummaryHtml(matches, weekOffset = 0) {
       </div>
       <div style="display:flex;justify-content:space-between;align-items:baseline">
         <div style="font-size:32px;font-weight:800;color:${BAR}">RTA LİGİ</div>
-        <div style="font-size:18px;font-weight:700;color:${GOLD}">HAFTALIK ÖZET</div>
+        <div style="font-size:18px;font-weight:700;color:${GOLD}">HAFTANIN SONUÇLARI</div>
       </div>
       <div style="display:flex;justify-content:space-between;margin-top:10px">
         <div style="font-size:17px;color:${MUTED}">Rize Tenis Akademisi</div>
@@ -7442,7 +7442,7 @@ function downloadWeeklySummaryImage(weekOffset = 0) {
         if (navigator.share && navigator.canShare) {
           const file = new File([blob], fileName, { type: 'image/png' });
           if (navigator.canShare({ files: [file] })) {
-            navigator.share({ files: [file], title: 'RTA Ligi Haftalık Özet' })
+            navigator.share({ files: [file], title: 'RTA Ligi Haftanın Sonuçları' })
               .then(() => showToast('Paylaşım açıldı! 📤', 'ok'))
               .catch(() => fallbackDownload(blob, fileName));
             return;
