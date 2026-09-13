@@ -7369,14 +7369,24 @@ function buildWeeklySummaryHtml(matches, weekOffset = 0) {
 
   const BAR = '#3268f0', GOLD = '#ffc85a';
   const LINE = '#222c44', MUTED = '#6e7da0', DIM = '#a0afcd', WHITE = '#ffffff';
-  const colW = 90;
+
+  // 8 maça kadar tek sütun (mevcut, geniş format); 9 ve üzeri maçta
+  // görsel çok uzamasın diye otomatik iki sütuna bölünür.
+  const TWO_COL_THRESHOLD = 9;
+  const twoColumn = matches.length >= TWO_COL_THRESHOLD;
 
   // Tüm maçlarda AYNI sütun hizasını korumak için, en çok set oynanan maça
   // göre sabit sütun sayısı kullanıyoruz — yoksa 3 set oynanan maçlar
   // 2 set oynananlara göre sola kayıyordu.
   const maxSets = Math.max(1, ...matches.map(m => m.sets.length));
+  const colW = twoColumn ? 48 : 90;
+  const nameFontW = twoColumn ? 17 : 30;
+  const nameFontL = twoColumn ? 15 : 28;
+  const scoreFontW = twoColumn ? 16 : 28;
+  const scoreFontL = twoColumn ? 14 : 26;
+  const lgFontSize = twoColumn ? 12 : 15;
 
-  const rows = matches.map(m => {
+  const buildMatchBlock = (m) => {
     const winnerName = playerName(m.winner);
     const loserName = playerName(m.loser);
     const lgName = leagueName(m.league);
@@ -7405,25 +7415,44 @@ function buildWeeklySummaryHtml(matches, weekOffset = 0) {
       return html;
     };
 
-    const winnerCols = buildCols(winnerSetScores, loserSetScores, 800, 28);
-    const loserCols  = buildCols(loserSetScores, winnerSetScores, 700, 26);
+    const winnerCols = buildCols(winnerSetScores, loserSetScores, 800, scoreFontW);
+    const loserCols  = buildCols(loserSetScores, winnerSetScores, 700, scoreFontL);
 
     return `
-      <div style="border-top:2px solid ${LINE};padding-top:16px;margin-top:16px">
-        <div style="text-align:right;font-size:15px;font-weight:700;color:${BAR};margin-bottom:10px">${lgName}</div>
+      <div style="border-top:2px solid ${LINE};padding-top:${twoColumn?10:16}px;margin-top:${twoColumn?10:16}px">
+        <div style="text-align:right;font-size:${lgFontSize}px;font-weight:700;color:${BAR};margin-bottom:${twoColumn?6:10}px">${lgName}</div>
         <div style="display:flex;justify-content:space-between;align-items:center">
-          <div style="font-size:30px;font-weight:800;color:${WHITE}">${winnerName}</div>
+          <div style="font-size:${nameFontW}px;font-weight:800;color:${WHITE};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${winnerName}</div>
           <div style="display:flex;flex-shrink:0">${winnerCols}</div>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
-          <div style="font-size:28px;font-weight:400;color:${DIM}">${loserName}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:${twoColumn?4:10}px">
+          <div style="font-size:${nameFontL}px;font-weight:400;color:${DIM};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${loserName}</div>
           <div style="display:flex;flex-shrink:0">${loserCols}</div>
         </div>
       </div>`;
-  }).join('');
+  };
+
+  let bodyHtml;
+  if (!twoColumn) {
+    bodyHtml = matches.map(buildMatchBlock).join('');
+  } else {
+    // Maçları iki sütuna say olarak yarı yarıya bölüyoruz (ilk yarı sol,
+    // ikinci yarı sağ) — her sütun kendi genişliğinde bağımsız akıyor.
+    const half = Math.ceil(matches.length / 2);
+    const leftMatches = matches.slice(0, half);
+    const rightMatches = matches.slice(half);
+    bodyHtml = `
+      <div style="display:flex;gap:32px;margin-top:8px">
+        <div style="flex:1;min-width:0">${leftMatches.map(buildMatchBlock).join('')}</div>
+        <div style="width:1px;background:${LINE};flex-shrink:0"></div>
+        <div style="flex:1;min-width:0">${rightMatches.map(buildMatchBlock).join('')}</div>
+      </div>`;
+  }
+
+  const containerWidth = twoColumn ? 1080 : 1080;
 
   return `
-    <div style="background:#0c1020;padding:56px 70px;font-family:'Public Sans',sans-serif;color:#fff;width:1080px;box-sizing:border-box">
+    <div style="background:#0c1020;padding:56px 70px;font-family:'Public Sans',sans-serif;color:#fff;width:${containerWidth}px;box-sizing:border-box">
       <div style="text-align:center;margin-bottom:28px">
         <img src="logo_rta.png" style="width:100px;height:100px;object-fit:contain" alt="RTA Logo">
       </div>
@@ -7436,7 +7465,7 @@ function buildWeeklySummaryHtml(matches, weekOffset = 0) {
         <div style="font-size:17px;color:${MUTED}">${dateRangeStr}</div>
       </div>
       <div style="font-size:20px;font-weight:600;color:#fff;margin-top:24px">${matches.length} maç oynandı</div>
-      ${rows}
+      ${bodyHtml}
       <div style="border-top:2px solid ${LINE};margin-top:24px;padding-top:24px">
         <div style="font-size:20px;font-weight:700;color:${BAR}">rtaligleri.com</div>
       </div>
