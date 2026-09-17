@@ -3864,6 +3864,17 @@ async function submitMatch() {
 
   if (p1 === p2) { showToast('Farklı iki oyuncu seçin!', 'err'); return; }
 
+  // Bu iki oyuncu bu ligde bu sezon zaten karşılaşmış mı kontrol et —
+  // aynı maçın yanlışlıkla iki kez girilmesini önlemek için.
+  const alreadyPlayed = state.matches.find(m =>
+    m.league === league &&
+    ((m.winner === p1 && m.loser === p2) || (m.winner === p2 && m.loser === p1))
+  );
+  if (alreadyPlayed) {
+    showToast(`⚠️ ${playerName(p1)} - ${playerName(p2)} bu ligde zaten karşılaşmış (${alreadyPlayed.date})! Düzeltme gerekiyorsa Sonuçlar sayfasından "Düzenle" kullanın.`, 'err');
+    return;
+  }
+
   const sVals = [
     [document.getElementById('s1a').value, document.getElementById('s1b').value],
     [document.getElementById('s2a').value, document.getElementById('s2b').value],
