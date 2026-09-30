@@ -87,7 +87,9 @@ body {
     gap: 8px;
   }
   .brand { padding-bottom: 4px; }
-  .header-right { margin-left: 0; }
+  .header-right { margin-left: 0; flex-wrap: wrap; justify-content: flex-end; row-gap: 6px; }
+  .season-countdown { font-size: 10.5px; padding: 5px 10px; gap: 6px; }
+  .season-countdown .cd-num { font-size: 14px; }
   .nav {
     order: 3;
     width: 100%;
@@ -649,24 +651,6 @@ body {
 .stat-table td { padding: 10px 12px; border-bottom: 1px solid rgba(36,48,36,0.4); }
 .stat-table tr:last-child td { border-bottom: none; }
 .stat-table tbody tr:hover td { background: rgba(26,122,26,0.06); }
-
-// ── YENİ SEZON GERİ SAYIMI ──
-function initNewSeasonCountdown() {
-  const TARGET = new Date(2026, 8, 4, 0, 0, 0);
-  function update() {
-    const el = document.getElementById('new-season-countdown');
-    if (!el) return;
-    const diff = TARGET - new Date();
-    if (diff <= 0) { el.textContent = '🎾 Yeni Sezon Başladı!'; return; }
-    const d = Math.floor(diff / 86400000);
-    const h = Math.floor((diff % 86400000) / 3600000);
-    const m = Math.floor((diff % 3600000) / 60000);
-    el.textContent = `${d} GÜN ${String(h).padStart(2,'0')} SAAT ${String(m).padStart(2,'0')} DAK`;
-  }
-  update();
-  setInterval(update, 60000);
-}
-initNewSeasonCountdown();
 
 /* ── SON MAÇ TICKER ── */
 .last-match-ticker {
@@ -1434,8 +1418,9 @@ body.light-mode .rk-lg-none{background:#e8efe8;}
   background: var(--surface2); border: 1px solid var(--border);
   border-radius: 8px; padding: 6px 14px; font-size: 12px;
   color: var(--text-dim); cursor: default;
-  margin-left: 0;
+  margin-left: 0; flex-shrink: 0; white-space: nowrap;
 }
+.season-countdown:empty { display: none; }
 .season-countdown .cd-num {
   font-family: 'Oswald', sans-serif; font-size: 16px;
   font-weight: 600; color: var(--accent);
@@ -2035,6 +2020,7 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
     </div>
   </a>
   <div class="header-right">
+    <span id="season-countdown" class="season-countdown"></span>
     <span id="weather-badge"></span>
     <a class="wa-btn" href="https://chat.whatsapp.com/CT43VJYVV42CiemKe1qOJc?s=sw&p=a&ilr=0" target="_blank" title="WhatsApp Grubu">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
@@ -4450,8 +4436,9 @@ function clearSpecialPlayer() {
 
 // SEZON SAYACI
 function initCountdown() {
-  const SEASON_END = new Date(2026, 6, 31, 23, 59, 59);
-  const NEXT_SEASON = new Date(2026, 8, 4, 0, 0, 0); // 4 Eylül 2026
+  const SEASON_START = new Date(2026, 8, 4, 0, 0, 0);  // 4 Eylül 2026 — Güz Sezonu başlangıcı
+  const SEASON_DAYS  = 90;                             // Sezon süresi
+  const SEASON_END   = new Date(SEASON_START.getTime() + SEASON_DAYS * 86400000);
 
   function update() {
     const el = document.getElementById('season-countdown');
@@ -4460,42 +4447,22 @@ function initCountdown() {
     const diff = SEASON_END - now;
 
     if (diff > 0) {
-      // Mevcut sezon devam ediyor
+      // Güz Sezonu devam ediyor — bitimine kalan süre
       const days  = Math.floor(diff / 86400000);
       const hours = Math.floor((diff % 86400000) / 3600000);
       const mins  = Math.floor((diff % 3600000)  / 60000);
       el.innerHTML = `
-        <span>🏁</span>
+        <span>🍂</span>
         <div class="cd-unit"><span class="cd-num">${days}</span><span class="cd-label">GÜN</span></div>
         <span style="color:var(--border)">:</span>
         <div class="cd-unit"><span class="cd-num">${String(hours).padStart(2,'0')}</span><span class="cd-label">SAAT</span></div>
         <span style="color:var(--border)">:</span>
         <div class="cd-unit"><span class="cd-num">${String(mins).padStart(2,'0')}</span><span class="cd-label">DAK</span></div>
       `;
+      el.title = 'Güz Sezonu bitimine kalan süre';
     } else {
-      // Yeni sezon geri sayımı
-      const diff2 = NEXT_SEASON - now;
-      if (diff2 <= 0) {
-        el.innerHTML = '<span style="color:var(--accent)">🎾 Yeni Sezon Başladı!</span>';
-        return;
-      }
-      const days  = Math.floor(diff2 / 86400000);
-      const hours = Math.floor((diff2 % 86400000) / 3600000);
-      const mins  = Math.floor((diff2 % 3600000)  / 60000);
-      el.innerHTML = `
-        <div style="display:flex;flex-direction:column;align-items:flex-start;gap:2px">
-          <span style="font-size:0.6rem;color:var(--accent);font-weight:700;letter-spacing:1px">YENİ SEZON</span>
-          <div style="display:flex;align-items:center;gap:6px">
-            <span>🎾</span>
-            <div class="cd-unit"><span class="cd-num" style="color:var(--accent)">${days}</span><span class="cd-label">GÜN</span></div>
-            <span style="color:var(--border)">:</span>
-            <div class="cd-unit"><span class="cd-num" style="color:var(--accent)">${String(hours).padStart(2,'0')}</span><span class="cd-label">SAAT</span></div>
-            <span style="color:var(--border)">:</span>
-            <div class="cd-unit"><span class="cd-num" style="color:var(--accent)">${String(mins).padStart(2,'0')}</span><span class="cd-label">DAK</span></div>
-          </div>
-        </div>
-      `;
-      el.title = 'Yeni sezon başlangıcına kalan süre (4 Eylül 2026)';
+      el.innerHTML = '<span style="color:var(--accent)">🏁 Güz Sezonu Sona Erdi</span>';
+      el.title = '';
     }
   }
   update();
