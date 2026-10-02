@@ -2114,6 +2114,13 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
         <option value="l5">5. Lig</option>
       </select>
     </div>
+    <div class="fgroup">
+      <label>Cinsiyet</label>
+      <select id="edit-player-gender" class="finput">
+        <option value="M">Erkek</option>
+        <option value="K">Kadın</option>
+      </select>
+    </div>
     <button class="btn btn-green" onclick="saveEditPlayer()" style="width:100%;margin-top:8px">💾 Kaydet</button>
   </div>
 </div>
@@ -2539,6 +2546,13 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
           <option value="l5">5. Lig</option>
         </select>
       </div>
+      <div class="fgroup" style="margin-bottom:16px">
+        <label>Cinsiyet</label>
+        <select id="np-gender">
+          <option value="M">Erkek</option>
+          <option value="K">Kadın</option>
+        </select>
+      </div>
       <button class="btn btn-green" onclick="addPlayer()">Oyuncu Ekle</button>
     </div>
 
@@ -2566,7 +2580,7 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
   <div class="score-card" style="padding:0;overflow:hidden">
     <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
     <table class="stat-table">
-      <thead><tr><th>#</th><th>Ad Soyad</th><th>Lig</th><th>O.Maç</th><th>Puan</th><th></th></tr></thead>
+      <thead><tr><th>#</th><th>Ad Soyad</th><th>Lig</th><th>O.Maç</th><th>Puan</th><th>Cinsiyet</th><th></th></tr></thead>
       <tbody id="admin-player-body"></tbody>
     </table>
     </div>
@@ -3090,7 +3104,7 @@ async function saveState() {
     if (state.players.length) {
       await sb.from('players').upsert(
         state.players.map(p => ({
-          id: p.id, name: p.name, league: p.league, photo_url: p.photo_url || null
+          id: p.id, name: p.name, league: p.league, photo_url: p.photo_url || null, gender: p.gender || 'M'
         }))
       );
     }
@@ -4806,14 +4820,25 @@ function renderH2H() {
 function addPlayer() {
   const name = document.getElementById('np-name').value.trim();
   const league = document.getElementById('np-league').value;
+  const genderSel = document.getElementById('np-gender');
+  const gender = genderSel ? genderSel.value : 'M';
   if (!name) { showToast('İsim girin!', 'err'); return; }
   if (state.players.filter(p=>p.league===league).length >= (LEAGUE_CAP[league] || 12)) {
     showToast(`Bu ligde zaten ${LEAGUE_CAP[league] || 12} oyuncu var!`, 'err'); return;
   }
-  state.players.push({id: state.nextPlayerId++, name, league});
+  state.players.push({id: state.nextPlayerId++, name, league, gender});
   document.getElementById('np-name').value = '';
   saveState(); renderAll(true); renderAdminTable();
   showToast(`✅ ${name} eklendi (${leagueName(league)})`);
+}
+
+function setGender(id, gender) {
+  const p = state.players.find(x => x.id === id);
+  if (!p) return;
+  p.gender = gender;
+  saveState();
+  renderAdminTable();
+  renderRanking();
 }
 
 function movePlayer() {
@@ -5032,12 +5057,17 @@ function renderAdminTable() {
   const rows = state.players.map((p, i) => {
     const st = getStandings(p.league).find(x=>x.id===p.id) || {};
     const lc = leagueClass(p.league);
+    const isK = p.gender === 'K';
     return `<tr>
       <td style="color:var(--text-muted)">${i+1}</td>
       <td style="font-weight:600">${p.name}</td>
       <td><span class="match-lig ${lc}" style="font-size:0.78rem">${leagueName(p.league)}</span></td>
       <td>${st.mp||0}</td>
       <td style="color:var(--accent);font-weight:700">${st.pts||0}</td>
+      <td style="display:flex;gap:4px">
+          <button class="btn btn-sm" onclick="setGender(${p.id},'M')" style="${!isK ? 'background:rgba(40,120,255,0.2);color:#5a96ff;border-color:rgba(40,120,255,0.4)' : ''}">Erkek</button>
+          <button class="btn btn-sm" onclick="setGender(${p.id},'K')" style="${isK ? 'background:rgba(225,48,108,0.2);color:#e1306c;border-color:rgba(225,48,108,0.4)' : ''}">Kadın</button>
+        </td>
       <td style="display:flex;gap:4px">
           <button class="btn btn-sm" onclick="openEditPlayer(${p.id})" style="background:rgba(26,122,26,0.2);color:var(--accent)">✏️</button>
           <button class="btn btn-sm" onclick="deletePlayer(${p.id})">Sil</button>
@@ -5046,7 +5076,7 @@ function renderAdminTable() {
   }).join('');
 
   document.getElementById('admin-player-body').innerHTML = rows ||
-    '<tr><td colspan="6" class="empty">Oyuncu yok.</td></tr>';
+    '<tr><td colspan="7" class="empty">Oyuncu yok.</td></tr>';
 }
 
 // ═══════════════════════════════════════════════════
@@ -5907,6 +5937,14 @@ function _renderRankingList() {
   const ranked = Object.values(byPlayer).sort((a,b) => b.total - a.total);
   window._lastRankedList = ranked; // Görsel indirme için sakla
 
+  // Kadınlar arası sıralama (genel sıralama içindeki sırayı koruyarak)
+  const womenRank = {};
+  let _wCount = 0;
+  ranked.forEach(r => {
+    const pl = state.players.find(x => x.name === r.player);
+    if (pl && pl.gender === 'K') womenRank[r.player] = ++_wCount;
+  });
+
   // Turnuva listesi (admin)
   const trList = document.getElementById('rk-tournament-list');
   if (trList) {
@@ -5958,7 +5996,7 @@ function _renderRankingList() {
         </div>`).join('');
       return `<tr class="rk-main" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">
           <td><span class="rk-rank ${rankCls}">${i+1}</span></td>
-          <td style="font-weight:600">${r.player}<span class="rk-expand-ico">▼</span></td>
+          <td style="font-weight:600">${r.player}${womenRank[r.player] ? ` <span style="color:var(--text-dim);font-weight:500">(${womenRank[r.player]})</span>` : ''}<span class="rk-expand-ico">▼</span></td>
           <td class="center"><span class="rk-lg-badge ${lgCls}">${lgTxt}</span></td>
           <td class="center" style="color:var(--text-dim)">${r.entries.length}</td>
           <td class="right"><span class="rk-pts">${r.total}</span></td>
@@ -6493,6 +6531,7 @@ function openEditPlayer(id) {
   document.getElementById('edit-player-name').value = p.name;
   document.getElementById('edit-player-photo').value = p.photo_url || '';
   document.getElementById('edit-player-league').value = p.league;
+  document.getElementById('edit-player-gender').value = p.gender === 'K' ? 'K' : 'M';
   document.getElementById('edit-player-modal').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -6507,6 +6546,7 @@ async function saveEditPlayer() {
   const name = document.getElementById('edit-player-name').value.trim();
   const photoUrl = document.getElementById('edit-player-photo').value.trim();
   const league = document.getElementById('edit-player-league').value;
+  const gender = document.getElementById('edit-player-gender').value;
   if (!name) { showToast('Ad boş olamaz', 'err'); return; }
 
   const p = state.players.find(x => x.id === id);
@@ -6514,10 +6554,11 @@ async function saveEditPlayer() {
   p.name   = name;
   p.league = league;
   p.photo_url = photoUrl || null;
+  p.gender = gender;
 
   // Supabase güncelle
   try {
-    await window._sbAdmin.from('players').update({ name, league, photo_url: p.photo_url }).eq('id', id);
+    await window._sbAdmin.from('players').update({ name, league, photo_url: p.photo_url, gender }).eq('id', id);
   } catch(e) { console.warn('Supabase güncelleme hatası:', e); }
 
   saveState();
