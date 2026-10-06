@@ -1934,6 +1934,9 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
 }
 .bracket-champion-label { font-size: 10px; color: var(--gold); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
 .bracket-champion-name { font-family: 'Oswald', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--gold); }
+.report-note{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:14px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:12.5px;color:var(--text-dim);text-align:center}
+.report-note-btn{background:rgba(93,201,93,0.12);color:var(--accent);border:1px solid rgba(93,201,93,0.35);border-radius:8px;padding:6px 14px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit}
+.report-note-btn:hover{background:rgba(93,201,93,0.2)}
 </style>
 
 <!-- Supabase SDK -->
@@ -2173,6 +2176,10 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
   </div>
 
   <div id="standings-content"></div>
+  <div class="report-note">
+    <span class="report-note-text">ℹ️ Puanlar elle girilmektedir. Puan durumunda bir hata olduğunu düşünüyorsanız lütfen bildirin.</span>
+    <button type="button" class="report-note-btn" onclick="reportStandingsError()">💬 Hata Bildir</button>
+  </div>
   <div id="playoff-section" style="margin-top:20px"></div>
 
 </div>
@@ -5246,6 +5253,11 @@ function setStandingLeague(lg) {
   updateCompletionBar();
   renderStandingContent();
   renderHomeSections();
+}
+
+function reportStandingsError() {
+  const msg = 'Merhaba, ' + leagueName(_standingLeague) + ' puan durumunda bir hata olduğunu düşünüyorum: ';
+  window.open('https://wa.me/905533693866?text=' + encodeURIComponent(msg), '_blank');
 }
 
 function renderStandingContent() {
