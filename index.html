@@ -7594,7 +7594,7 @@ function buildLeadersHtml() {
           <div style="font-size:19px;color:${SUB};margin-top:6px">${leader.mp} maç · ${leader.mw} galibiyet · %${rate} oran</div>
         </div>
         <div style="text-align:right;min-width:110px">
-          <div style="font-size:72px;font-weight:900;color:${ACC};line-height:0.9">${leader.pts}</div>
+          <div style="display:flex;justify-content:flex-end;font-size:72px;font-weight:900;color:${ACC};line-height:0.9">${String(leader.pts).split('').map(ch => `<span style="display:inline-block;width:46px;text-align:center">${ch}</span>`).join('')}</div>
           <div style="font-size:14px;font-weight:700;letter-spacing:0.16em;color:${SUB};margin-top:6px">PUAN</div>
         </div>
       </div>`;
@@ -7605,7 +7605,7 @@ function buildLeadersHtml() {
       <div style="position:absolute;left:0;right:0;top:78px;text-align:center">
         <div style="font-size:20px;font-weight:700;letter-spacing:0.3em;color:${NAVY};opacity:0.75">RTA LİGİ · GÜZ SEZONU</div>
         <div style="font-size:104px;font-weight:900;letter-spacing:-0.02em;color:${NAVY};margin-top:10px;line-height:1">Zirvedekiler</div>
-        <div style="font-size:22px;color:${NAVY};opacity:0.75;margin-top:12px">Her ligin lideri · ${dateStr}</div>
+        <div style="font-size:22px;color:${NAVY};opacity:0.75;margin-top:12px">${dateStr}</div>
       </div>
       <div style="position:absolute;left:60px;right:60px;top:400px;background:rgba(7,20,42,0.88);border-radius:30px;padding:6px 48px 26px;box-shadow:0 30px 60px -20px rgba(0,0,0,0.5)">
         ${rows}
