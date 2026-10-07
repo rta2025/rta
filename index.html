@@ -2159,6 +2159,7 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
       <button class="btn btn-sm admin-only" onclick="downloadWeeklySummaryImage(0)" style="background:rgba(40,120,255,0.15);color:#5a96ff;border:1px solid rgba(40,120,255,0.35)">📸 Bu Haftanın Özeti</button>
       <button class="btn btn-sm admin-only" onclick="downloadWeeklySummaryImage(-1)" style="background:rgba(40,120,255,0.15);color:#5a96ff;border:1px solid rgba(40,120,255,0.35)">📸 Geçen Haftanın Özeti</button>
+      <button class="btn btn-sm admin-only" onclick="downloadLeadersImage()" style="background:rgba(93,201,93,0.15);color:var(--accent);border:1px solid rgba(93,201,93,0.35)">📸 Zirvedekiler Görseli</button>
     </div>
   </div>
 
@@ -3087,6 +3088,7 @@ Tayfun Selek vs Derya Özdemir
 
 <!-- Haftalık özet görseli — ekran dışında konumlanmış, html2canvas ile yakalanacak şablon -->
 <div id="weekly-summary-capture" style="position:fixed;left:-9999px;top:0;width:1080px;"></div>
+<div id="leaders-capture" style="position:fixed;left:-9999px;top:0;width:1080px;"></div>
 
 <script>
 // ═══════════════════════════════════════════════════
@@ -7563,6 +7565,93 @@ function downloadWeeklySummaryImage(weekOffset = 0) {
       console.error(err);
       showToast('Görsel oluşturulamadı', 'err');
     });
+  }));
+}
+
+// ── Zirvedekiler görseli: her ligin 1 numarası (tribün arka planlı) ──
+const LEADERS_BG = 'zirve_arkaplan.jpg';
+
+function buildLeadersHtml() {
+  const TX = '#fff', SUB = '#9fb8d4', ACC = '#8fd0ff', LINE = 'rgba(255,255,255,0.14)', CHIP = 'rgba(143,208,255,0.16)', NAVY = '#0b2545';
+  const defs = [
+    { code: 'super', label: 'Süper Lig' },
+    { code: 'l2', label: '2. Lig' },
+    { code: 'l3', label: '3. Lig' },
+    { code: 'l4', label: '4. Lig' },
+    { code: 'l5', label: '5. Lig' }
+  ];
+  const dateStr = new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  const rows = defs.map(d => {
+    const leader = getStandings(d.code).find(r => r.mp > 0);
+    if (!leader) return '';
+    const rate = Math.round((leader.mw / leader.mp) * 100);
+    return `
+      <div data-leader="1" style="display:flex;align-items:center;gap:26px;padding:26px 0;border-bottom:1px solid ${LINE}">
+        <div style="width:150px"><div style="display:inline-block;background:${CHIP};color:${ACC};font-size:20px;font-weight:800;letter-spacing:0.06em;padding:8px 16px;border-radius:30px;white-space:nowrap">${d.label}</div></div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:40px;font-weight:800;color:${TX};line-height:1.1">${leader.name}</div>
+          <div style="font-size:19px;color:${SUB};margin-top:6px">${leader.mp} maç · ${leader.mw} galibiyet · %${rate} oran</div>
+        </div>
+        <div style="text-align:right;min-width:110px">
+          <div style="font-size:72px;font-weight:900;color:${ACC};line-height:0.9">${leader.pts}</div>
+          <div style="font-size:14px;font-weight:700;letter-spacing:0.16em;color:${SUB};margin-top:6px">PUAN</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  return `
+    <div style="position:relative;width:1080px;height:1620px;overflow:hidden;background:#9fc0d8 url(${LEADERS_BG}) center/cover no-repeat;font-family:'Public Sans','Segoe UI',sans-serif">
+      <div style="position:absolute;left:0;right:0;top:78px;text-align:center">
+        <div style="font-size:20px;font-weight:700;letter-spacing:0.3em;color:${NAVY};opacity:0.75">RTA LİGİ · GÜZ SEZONU</div>
+        <div style="font-size:104px;font-weight:900;letter-spacing:-0.02em;color:${NAVY};margin-top:10px;line-height:1">Zirvedekiler</div>
+        <div style="font-size:22px;color:${NAVY};opacity:0.75;margin-top:12px">Her ligin lideri · ${dateStr}</div>
+      </div>
+      <div style="position:absolute;left:60px;right:60px;top:400px;background:rgba(7,20,42,0.88);border-radius:30px;padding:6px 48px 26px;box-shadow:0 30px 60px -20px rgba(0,0,0,0.5)">
+        ${rows}
+        <div style="padding-top:22px;display:flex;justify-content:space-between;font-size:17px;letter-spacing:0.08em;color:${SUB}"><span>Rize Tenis Akademisi</span><span>rtaligleri.com</span></div>
+      </div>
+    </div>`;
+}
+
+function downloadLeadersImage() {
+  if (typeof html2canvas === 'undefined') {
+    showToast('Görsel oluşturma aracı yüklenemedi', 'err');
+    return;
+  }
+  const html = buildLeadersHtml();
+  if (!html.includes('data-leader="1"')) { showToast('Henüz maç girilmemiş', 'err'); return; }
+  showToast('Görsel hazırlanıyor... ⏳', 'ok');
+  const container = document.getElementById('leaders-capture');
+  container.innerHTML = html;
+
+  // Arka plan fotoğrafı yüklenmeden yakalamayalım (yüklenemezse düz renkle devam eder)
+  const bgReady = new Promise(res => {
+    const im = new Image();
+    im.onload = im.onerror = res;
+    im.src = LEADERS_BG;
+    setTimeout(res, 2500);
+  });
+
+  bgReady.then(() => requestAnimationFrame(() => {
+    html2canvas(container, { backgroundColor: '#9fc0d8', scale: 2, useCORS: true })
+      .then(canvas => {
+        canvas.toBlob(blob => {
+          if (!blob) { showToast('Görsel oluşturulamadı', 'err'); return; }
+          const fileName = 'RTA-Zirvedekiler.png';
+          if (navigator.share && navigator.canShare) {
+            const file = new File([blob], fileName, { type: 'image/png' });
+            if (navigator.canShare({ files: [file] })) {
+              navigator.share({ files: [file], title: 'RTA Ligi Zirvedekiler' })
+                .then(() => showToast('Paylaşım açıldı! 📤', 'ok'))
+                .catch(() => fallbackDownload(blob, fileName));
+              return;
+            }
+          }
+          fallbackDownload(blob, fileName);
+        }, 'image/png');
+      })
+      .catch(err => { console.error(err); showToast('Görsel oluşturulamadı', 'err'); });
   }));
 }
 
