@@ -4280,7 +4280,7 @@ function renderLastMatches() {
   if (!el) return;
   // Artık lig sekmesinden bağımsız — TÜM liglerden son maçlar (Haftanın Maçı gibi hep aynı yerde görünsün)
   const recent = [...state.matches]
-    .sort((a,b) => new Date(b.date) - new Date(a.date))
+    .sort((a,b) => new Date(b.date) - new Date(a.date) || (b.id||0) - (a.id||0))
     .slice(0, 5);
   if (!recent.length) { el.innerHTML = ''; return; }
 
@@ -4524,7 +4524,7 @@ function openProfile(playerId) {
   const pts     = matches.reduce((s, m) => s + (m.winner === playerId ? (m.wpts||0) : (m.lpts||0)), 0);
 
   const form = matches
-    .sort((a,b) => new Date(b.date) - new Date(a.date))
+    .sort((a,b) => new Date(b.date) - new Date(a.date) || (b.id||0) - (a.id||0))
     .slice(0, 5)
     .map(m => m.winner === playerId ? 'w' : 'l');
 
@@ -4650,7 +4650,7 @@ function getPlayerBadge(playerId) {
   const now = new Date();
   const matches = state.matches
     .filter(m => m.winner === playerId || m.loser === playerId)
-    .sort((a,b) => new Date(b.date) - new Date(a.date));
+    .sort((a,b) => new Date(b.date) - new Date(a.date) || (b.id||0) - (a.id||0));
 
   if (matches.length === 0) return '';
 
@@ -4674,7 +4674,7 @@ function getPlayerBadge(playerId) {
 function getFormSeries(playerId) {
   const matches = state.matches
     .filter(m => m.winner === playerId || m.loser === playerId)
-    .sort((a,b) => new Date(b.date) - new Date(a.date))
+    .sort((a,b) => new Date(b.date) - new Date(a.date) || (b.id||0) - (a.id||0))
     .slice(0, 5);
   return matches.map(m => m.winner === playerId ? 'w' : 'l');
 }
@@ -8347,7 +8347,7 @@ function renderLastMatchTicker() {
   if (!ticker) return;
   const matches = [...state.matches]
     .filter(m => m.score && m.date)
-    .sort((a, b) => new Date(b.date) - new Date(a.date));
+    .sort((a, b) => new Date(b.date) - new Date(a.date) || (b.id||0) - (a.id||0));
   if (!matches.length) { ticker.style.display = 'none'; return; }
   const m = matches[0];
   const wp = state.players.find(p => p.id === m.winner);
