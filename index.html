@@ -7479,27 +7479,23 @@ function buildWeeklySummaryHtml(matches, weekOffset = 0) {
     const loserCols  = buildCols(loserSetScores, winnerSetScores, 700, scoreFontL);
 
     if (isMilestone) {
-      // Spot ışığı: 100. maç üstten ışık alır, haftanın diğer maçları soluklaşır
-      const sidePad = twoColumn ? 12 : 20;
+      // Sadece altın dikdörtgen çerçeve
       return `
-      <div style="margin:${twoColumn?12:18}px ${twoColumn?0:-20}px 0;padding:${twoColumn?10:18}px ${sidePad}px ${twoColumn?10:20}px;position:relative;background:radial-gradient(ellipse ${twoColumn?300:520}px ${twoColumn?90:140}px at 50% 0%,rgba(255,200,90,0.35),rgba(255,200,90,0) 70%);border-radius:20px;border-top:3px solid ${GOLD}">
-        <div style="position:absolute;left:50%;top:-3px;transform:translateX(-50%);background:${GOLD};color:#1a1200;font-size:${twoColumn?11:15}px;font-weight:900;letter-spacing:0.16em;padding:${twoColumn?2:3}px ${twoColumn?14:22}px;border-radius:0 0 14px 14px;white-space:nowrap">★ ${matchNo}. MAÇ ★</div>
-        <div style="padding:${twoColumn?14:16}px ${twoColumn?4:20}px 0">
-          <div style="text-align:right;font-size:${lgFontSize}px;font-weight:700;color:${GOLD};margin-bottom:${twoColumn?6:8}px">${lgName}</div>
-          <div style="display:flex;justify-content:space-between;align-items:center">
-            <div style="font-size:${nameFontW}px;font-weight:800;color:${WHITE};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${winnerName}</div>
-            <div style="display:flex;flex-shrink:0">${winnerCols}</div>
-          </div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:${twoColumn?4:10}px">
-            <div style="font-size:${nameFontL}px;font-weight:400;color:${DIM};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${loserName}</div>
-            <div style="display:flex;flex-shrink:0">${loserCols}</div>
-          </div>
+      <div style="border:3px solid ${GOLD};padding:${twoColumn?6:12}px ${twoColumn?10:16}px;margin-top:${twoColumn?10:16}px">
+        <div style="position:relative;display:flex;justify-content:flex-end;font-size:${lgFontSize}px;font-weight:800"><span style="position:absolute;left:0;right:0;text-align:center;color:${GOLD}">${matchNo}. MAÇ</span><span style="position:relative;color:${BAR};font-weight:700">${lgName}</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:${nameFontW}px;font-weight:800;color:${WHITE};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${winnerName}</div>
+          <div style="display:flex;flex-shrink:0">${winnerCols}</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:${twoColumn?4:10}px">
+          <div style="font-size:${nameFontL}px;font-weight:400;color:${DIM};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${loserName}</div>
+          <div style="display:flex;flex-shrink:0">${loserCols}</div>
         </div>
       </div>`;
     }
 
     return `
-      <div style="border-top:2px solid ${LINE};padding-top:${twoColumn?10:16}px;margin-top:${twoColumn?10:16}px;opacity:${_hasMilestone ? 0.38 : 1}">
+      <div style="border-top:2px solid ${LINE};padding-top:${twoColumn?10:16}px;margin-top:${twoColumn?10:16}px">
         <div style="text-align:right;font-size:${lgFontSize}px;font-weight:700;color:${BAR};margin-bottom:${twoColumn?6:10}px">${lgName}</div>
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div style="font-size:${nameFontW}px;font-weight:800;color:${WHITE};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${winnerName}</div>
