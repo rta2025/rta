@@ -4069,8 +4069,8 @@ function renderStats() {
   });
 
   // ── Arşivlenmiş LİG sezonlarını ekle (O.Maç/Galibiyet/Mağlubiyet/Puan) ──
-  // Not: arşiv anlık görüntüsünde K.Oyun (set/oyun skorları) hiç saklanmıyor,
-  // o yüzden bu sütun sadece mevcut sezonu yansıtmaya devam eder.
+  // K.Oyun: arşivde won_games/lost_games saklanıyorsa onlar da toplama eklenir
+  // (eski arşivlerde bu alanlar yoksa o sezon 0 sayılır).
   loadArchive().forEach(season => {
     Object.values(season.leagues || {}).forEach(players => {
       (players || []).forEach(ap => {
@@ -4085,6 +4085,8 @@ function renderStats() {
         target.mw  += ap.mw  || 0;
         target.ml  += ap.ml  || 0;
         target.pts += ap.pts || 0;
+        target.gw  += ap.won_games  || 0;
+        target.gl  += ap.lost_games || 0;
       });
     });
   });
