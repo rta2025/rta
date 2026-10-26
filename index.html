@@ -2323,6 +2323,7 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
       <div class="pp-item"><div class="pp-label">Mağlup Puan</div><div class="pp-val" id="pp-lpts" style="color:var(--text-dim)">—</div></div>
     </div>
 
+    <label style="display:flex;align-items:center;gap:8px;margin:10px 0 14px;font-size:0.85rem;color:var(--text-dim);cursor:pointer"><input type="checkbox" id="retired-checkbox"> Ligden çekilen oyuncunun maçı <span style="opacity:.7">(0-6, 0-6 gir; puan durumuna işler, Son Maçlar ve haftalık görselde görünmez)</span></label>
     <button class="btn btn-green" id="submit-btn" onclick="submitMatch()">✓ MAÇ SONUCUNU KAYDET</button>
   </div>
 
@@ -3555,6 +3556,11 @@ function getStandings(league) {
   return result;
 }
 
+// Ligden çekilen oyuncunun oynanamayan maçı (0-6, 0-6, 4/1 puan). Skor metninde işaret taşır,
+// Son Maçlar / haftalık görsel / form serisinde gösterilmez; puan durumuna normal maç gibi yansır.
+const RETIRED_TAG = 'ÇEKİLDİ';
+function isRetiredMatch(m) { return !!m && typeof m.score === 'string' && m.score.includes(RETIRED_TAG); }
+
 function pointsForResult(winningSets, losingSets) {
   if (winningSets === 2 && losingSets === 0) return {wpts: 4, lpts: 1};
   if (winningSets === 2 && losingSets === 1) return {wpts: 3, lpts: 2};
@@ -3826,10 +3832,10 @@ function updateKPIs() {
   const elMatches = document.getElementById('kpi-matches');
   const elWeek = document.getElementById('kpi-week');
   if (elPlayers) elPlayers.textContent = state.players.length;
-  if (elMatches) elMatches.textContent = state.matches.length;
+  if (elMatches) elMatches.textContent = state.matches.filter(m => !isRetiredMatch(m)).length;
   if (elWeek) {
     const wk = Date.now() - 7*24*60*60*1000;
-    elWeek.textContent = state.matches.filter(m => new Date(m.date).getTime() > wk).length;
+    elWeek.textContent = state.matches.filter(m => new Date(m.date).getTime() > wk && !isRetiredMatch(m)).length;
   }
 
   // Tamamlanma durumu — ayrı fonksiyon çağırıyoruz
@@ -3950,7 +3956,9 @@ async function submitMatch() {
   const winner = ws >= ls ? p1 : p2;
   const loser = winner === p1 ? p2 : p1;
   const {wpts, lpts} = pointsForResult(winningSets, losingSets);
-  const scoreStr = sets.map(([a,b])=>`${a}-${b}`).join(' / ');
+  const _retiredChk = document.getElementById('retired-checkbox');
+  const isRetiredEntry = !!(_retiredChk && _retiredChk.checked);
+  const scoreStr = sets.map(([a,b])=>`${a}-${b}`).join(' / ') + (isRetiredEntry ? ' · ' + RETIRED_TAG : '');
 
   state.matches.push({
     id: state.nextMatchId++,
@@ -3970,6 +3978,7 @@ async function submitMatch() {
   savePrevRanks();
   renderAll();
   ['s1a','s1b','s2a','s2b','s3a','s3b'].forEach(id => document.getElementById(id).value='');
+  if (_retiredChk) _retiredChk.checked = false;
   document.getElementById('pp-result').textContent='—';
   document.getElementById('pp-wpts').textContent='—';
   document.getElementById('pp-lpts').textContent='—';
@@ -4031,7 +4040,7 @@ function renderResults() {
     const wn = playerName(m.winner), ln = playerName(m.loser);
     const lc = leagueClass(m.league);
     const ln2 = leagueName(m.league);
-    const woTag = m.walkover ? ' <span class="chip chip-r">HÜKMEN</span>' : '';
+    const woTag = isRetiredMatch(m) ? ' <span class="chip chip-r">ÇEKİLDİ</span>' : (m.walkover ? ' <span class="chip chip-r">HÜKMEN</span>' : '');
     const ptsInfo = `${m.wpts}p / ${m.lpts}p`;
     // Skoru kazananın kendi bakış açısından göster
     let scoreDisplay = m.score;
@@ -4303,7 +4312,7 @@ function renderLastMatches() {
   const el = document.getElementById('last-matches-section');
   if (!el) return;
   // Artık lig sekmesinden bağımsız — TÜM liglerden son maçlar (Haftanın Maçı gibi hep aynı yerde görünsün)
-  const recent = [...state.matches]
+  const recent = state.matches.filter(m => !isRetiredMatch(m))
     .sort((a,b) => new Date(b.date) - new Date(a.date) || (b.id||0) - (a.id||0))
     .slice(0, 5);
   if (!recent.length) { el.innerHTML = ''; return; }
@@ -4342,7 +4351,7 @@ function renderFeaturedMatch() {
 
   const now = new Date();
   const weekAgo = new Date(now - 7 * 86400000);
-  const recent = state.matches.filter(m => new Date(m.date) >= weekAgo);
+  const recent = state.matches.filter(m => new Date(m.date) >= weekAgo && !isRetiredMatch(m));
   if (!recent.length) { el.innerHTML = ''; return; }
 
   const threeSet = recent.filter(m => m.sets && m.sets.length === 3);
@@ -4410,7 +4419,7 @@ function renderPlayerOfWeek() {
   // Normal haftanın oyuncusu hesabı
   const now = new Date();
   const weekAgo = new Date(now - 7 * 86400000);
-  const recent = state.matches.filter(m => new Date(m.date) >= weekAgo);
+  const recent = state.matches.filter(m => new Date(m.date) >= weekAgo && !isRetiredMatch(m));
   if (recent.length < 2) { el.innerHTML = ''; return; }
 
   const stats = {};
@@ -4547,7 +4556,7 @@ function openProfile(playerId) {
   const winPct  = matches.length > 0 ? Math.round(wins / matches.length * 100) : 0;
   const pts     = matches.reduce((s, m) => s + (m.winner === playerId ? (m.wpts||0) : (m.lpts||0)), 0);
 
-  const form = matches
+  const form = matches.filter(m => !isRetiredMatch(m))
     .sort((a,b) => new Date(b.date) - new Date(a.date) || (b.id||0) - (a.id||0))
     .slice(0, 5)
     .map(m => m.winner === playerId ? 'w' : 'l');
@@ -4673,7 +4682,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeProfile
 function getPlayerBadge(playerId) {
   const now = new Date();
   const matches = state.matches
-    .filter(m => m.winner === playerId || m.loser === playerId)
+    .filter(m => (m.winner === playerId || m.loser === playerId) && !isRetiredMatch(m))
     .sort((a,b) => new Date(b.date) - new Date(a.date) || (b.id||0) - (a.id||0));
 
   if (matches.length === 0) return '';
@@ -4697,7 +4706,7 @@ function getPlayerBadge(playerId) {
 // FORM SERİSİ & SIRA DEĞİŞİMİ & HEAD-TO-HEAD
 function getFormSeries(playerId) {
   const matches = state.matches
-    .filter(m => m.winner === playerId || m.loser === playerId)
+    .filter(m => (m.winner === playerId || m.loser === playerId) && !isRetiredMatch(m))
     .sort((a,b) => new Date(b.date) - new Date(a.date) || (b.id||0) - (a.id||0))
     .slice(0, 5);
   return matches.map(m => m.winner === playerId ? 'w' : 'l');
@@ -6536,7 +6545,7 @@ async function saveEditMatch() {
   const { wpts, lpts } = pointsForResult(ws, ls);
 
   // Skor metni
-  const scoreStr = newSets.map(([a,b]) => `${a}-${b}`).join(' / ');
+  const scoreStr = newSets.map(([a,b]) => `${a}-${b}`).join(' / ') + (isRetiredMatch(m) ? ' · ' + RETIRED_TAG : '');
 
   m.sets         = newSets;
   m.winningSets  = ws;
@@ -7451,7 +7460,7 @@ function getWeekMatches(weekOffset = 0) {
   return state.matches
     .filter(m => {
       const d = new Date(m.date);
-      return d >= monday && d <= sunday;
+      return d >= monday && d <= sunday && !isRetiredMatch(m);
     })
     .sort((a, b) => new Date(a.date) - new Date(b.date));
 }
@@ -7482,7 +7491,7 @@ function buildWeeklySummaryHtml(matches, weekOffset = 0) {
 
   // Sezonun kaçıncı maçı olduğunu bul (tarih, aynı gündeyse giriş sırası) —
   // 100, 200... gibi yuvarlak maçlar görselde altın renkle öne çıkarılır.
-  const _orderedAll = [...state.matches].sort((a, b) => new Date(a.date) - new Date(b.date) || (a.id || 0) - (b.id || 0));
+  const _orderedAll = state.matches.filter(x => !isRetiredMatch(x)).sort((a, b) => new Date(a.date) - new Date(b.date) || (a.id || 0) - (b.id || 0));
   const _matchNo = new Map(_orderedAll.map((x, i) => [x.id, i + 1]));
   const MILESTONE_EVERY = 100;
   const _hasMilestone = matches.some(x => { const n = _matchNo.get(x.id) || 0; return n > 0 && n % MILESTONE_EVERY === 0; });
@@ -8414,7 +8423,7 @@ function renderLastMatchTicker() {
   const ticker = document.getElementById('last-match-ticker');
   if (!ticker) return;
   const matches = [...state.matches]
-    .filter(m => m.score && m.date)
+    .filter(m => m.score && m.date && !isRetiredMatch(m))
     .sort((a, b) => new Date(b.date) - new Date(a.date) || (b.id||0) - (a.id||0));
   if (!matches.length) { ticker.style.display = 'none'; return; }
   const m = matches[0];
