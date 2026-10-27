@@ -2239,11 +2239,11 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
       <div class="form-grid3">
         <div class="fgroup">
           <label>Oyuncu 1 (Ev Sahibi)</label>
-          <select id="mp1" onchange="calcPoints()"></select>
+          <select id="mp1" onchange="refreshOpponentDropdown();calcPoints()"></select>
         </div>
         <div class="vs-txt">VS</div>
         <div class="fgroup">
-          <label>Oyuncu 2 (Misafir)</label>
+          <label id="mp2-label">Oyuncu 2 (Misafir)</label>
           <select id="mp2" onchange="calcPoints()"></select>
         </div>
       </div>
@@ -3850,13 +3850,36 @@ function updatePlayerDropdowns() {
   const players = state.players.filter(p => p.league === lg);
   const opts = players.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
   document.getElementById('mp1').innerHTML = opts;
-  document.getElementById('mp2').innerHTML = opts;
-  if (players.length >= 2) document.getElementById('mp2').selectedIndex = 1;
+  refreshOpponentDropdown();
   calcPoints();
 
   const lg2 = document.getElementById('hl').value;
   const pl2 = state.players.filter(p => p.league === lg2);
   document.getElementById('hp').innerHTML = pl2.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+}
+
+// Oyuncu 2 listesi: seçilen Oyuncu 1'in bu ligde henüz oynamadığı (kalan) rakipler.
+// Play-off modunda tüm oyuncular listelenir (önceki karşılaşma engel değil).
+function refreshOpponentDropdown() {
+  const sel2 = document.getElementById('mp2');
+  const label = document.getElementById('mp2-label');
+  if (!sel2) return;
+  const lg = document.getElementById('ml').value;
+  const p1 = parseInt(document.getElementById('mp1').value);
+  const po = document.getElementById('po-checkbox') && document.getElementById('po-checkbox').checked;
+  const prev = sel2.value;
+  let cands = state.players.filter(p => p.league === lg && p.id !== p1);
+  if (!po) {
+    cands = cands.filter(p => !state.matches.some(m => m.league === lg &&
+      ((m.winner === p1 && m.loser === p.id) || (m.winner === p.id && m.loser === p1))));
+  }
+  if (cands.length) {
+    sel2.innerHTML = cands.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    if (cands.some(p => String(p.id) === prev)) sel2.value = prev;
+  } else {
+    sel2.innerHTML = '<option value="">— Kalan maç yok —</option>';
+  }
+  if (label) label.textContent = po ? 'Oyuncu 2 (Misafir)' : `Oyuncu 2 (Misafir) · ${cands.length} kalan maç`;
 }
 
 function calcPoints() {
@@ -3913,6 +3936,7 @@ async function submitMatch() {
   const p2 = parseInt(document.getElementById('mp2').value);
   const date = document.getElementById('mdate').value || new Date().toISOString().split('T')[0];
 
+  if (isNaN(p2)) { showToast('Bu oyuncunun bu ligde kalan maçı yok.', 'err'); return; }
   if (p1 === p2) { showToast('Farklı iki oyuncu seçin!', 'err'); return; }
 
   // Bu iki oyuncu bu ligde bu sezon zaten karşılaşmış mı kontrol et —
@@ -3977,6 +4001,7 @@ async function submitMatch() {
   });
   savePrevRanks();
   renderAll();
+  refreshOpponentDropdown();
   ['s1a','s1b','s2a','s2b','s3a','s3b'].forEach(id => document.getElementById(id).value='');
   if (_retiredChk) _retiredChk.checked = false;
   document.getElementById('pp-result').textContent='—';
