@@ -2178,6 +2178,12 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
       <button class="btn btn-sm admin-only" onclick="downloadWeeklySummaryImage(0)" style="background:rgba(40,120,255,0.15);color:#5a96ff;border:1px solid rgba(40,120,255,0.35)">📸 Bu Haftanın Özeti</button>
       <button class="btn btn-sm admin-only" onclick="downloadWeeklySummaryImage(-1)" style="background:rgba(40,120,255,0.15);color:#5a96ff;border:1px solid rgba(40,120,255,0.35)">📸 Geçen Haftanın Özeti</button>
       <button class="btn btn-sm admin-only" onclick="downloadLeadersImage()" style="background:rgba(93,201,93,0.15);color:var(--accent);border:1px solid rgba(93,201,93,0.35)">📸 Zirvedekiler Görseli</button>
+      <span class="admin-only" style="display:inline-flex;gap:6px;align-items:center">
+        <select id="bests-scope" class="finput" style="width:auto;padding:6px 10px;font-size:0.8rem">
+          <option value="">Tüm Sezon</option><option value="super">Süper Lig</option><option value="l2">2. Lig</option><option value="l3">3. Lig</option><option value="l4">4. Lig</option><option value="l5">5. Lig</option>
+        </select>
+        <button class="btn btn-sm" onclick="downloadSeasonBestsImage()" style="background:rgba(240,192,64,0.15);color:var(--gold);border:1px solid rgba(240,192,64,0.35)">🏅 Sezonun Enleri</button>
+      </span>
     </div>
   </div>
 
@@ -7781,6 +7787,174 @@ function fallbackDownload(blob, fileName) {
   }, 300);
 
   showToast('Görsel indirildi! Görünmezse resme uzun basıp kaydedin 📸', 'ok');
+}
+
+// ── Sezonun Enleri: tüm sezon veya tek lig için "en"ler görseli ──
+function _gameCountsWinner(m) {
+  // Kazananın bakış açısıyla oyun sayısı (3. set 10 puanlık tie-break ise 1-0 sayılır)
+  let gw = 0, gl = 0;
+  if (m.sets && m.sets.length) {
+    let s0 = 0;
+    m.sets.forEach(([a, b]) => { if (a > b) s0++; });
+    const w0 = s0 === m.winningSets;
+    m.sets.forEach(([a, b], idx) => {
+      const w = w0 ? a : b, l = w0 ? b : a;
+      if (idx === 2 && (a >= 10 || b >= 10)) { if (w > l) gw += 1; else gl += 1; }
+      else { gw += w; gl += l; }
+    });
+  }
+  return { gw, gl };
+}
+function _scoreWinnerView(m) {
+  let s0 = 0;
+  (m.sets || []).forEach(([a, b]) => { if (a > b) s0++; });
+  const w0 = s0 === m.winningSets;
+  return (m.sets || []).map(([a, b]) => w0 ? `${a}-${b}` : `${b}-${a}`).join('  ');
+}
+
+function computeSeasonBests(code) {
+  const codes = code ? [code] : ['super', 'l2', 'l3', 'l4', 'l5'];
+  const lgLabel = c => leagueName(c);
+  // Resmî puan durumu (çekilme maçları dahil) ve çekilme dışı maçlar
+  const stats = [];
+  codes.forEach(c => getStandings(c).forEach(p => stats.push({ ...p, lg: c })));
+  const real = state.matches.filter(m => codes.includes(m.league) && !isRetiredMatch(m) && m.sets && m.sets.length);
+  const nameOf = id => playerName(id);
+  const lgOf = id => { const p = state.players.find(x => x.id === id); return p ? p.league : null; };
+
+  const played = {};  // çekilme dışı oynanan maç sayısı
+  real.forEach(m => { played[m.winner] = (played[m.winner] || 0) + 1; played[m.loser] = (played[m.loser] || 0) + 1; });
+
+  // Galibiyet serisi
+  const streak = {};
+  [...real].sort((a, b) => new Date(a.date) - new Date(b.date) || (a.id || 0) - (b.id || 0)).forEach(m => {
+    const cur = streak.__cur || (streak.__cur = {});
+    cur[m.winner] = (cur[m.winner] || 0) + 1;
+    cur[m.loser] = 0;
+    streak[m.winner] = Math.max(streak[m.winner] || 0, cur[m.winner]);
+  });
+  delete streak.__cur;
+
+  const top = (items, valFn, opts = {}) => {
+    const arr = items.map(it => ({ it, v: valFn(it) })).filter(x => x.v !== null && x.v !== undefined && !isNaN(x.v));
+    if (!arr.length) return null;
+    const best = Math.max(...arr.map(x => x.v));
+    if (opts.min !== undefined && best < opts.min) return null;
+    return { v: best, items: arr.filter(x => x.v === best).map(x => x.it) };
+  };
+  const toNames = list => list.map(p => ({ name: p.name, lg: p.lg }));
+
+  const out = [];
+  const add = (label, r, big, sub) => { if (r) out.push({ label, names: toNames(r.items), big: big(r), sub: sub ? sub(r) : '' }); };
+
+  add('EN ÇOK GALİBİYET', top(stats, p => p.mw, { min: 1 }), r => `${r.v}`, () => 'galibiyet');
+  add('EN ÇOK PUAN', top(stats, p => p.pts, { min: 1 }), r => `${r.v}`, () => 'puan');
+  const minMp = 5;
+  let ratePool = stats.filter(p => p.mp >= minMp);
+  const rateLabel = ratePool.length ? `EN YÜKSEK GALİBİYET % (en az ${minMp} maç)` : null;
+  if (!ratePool.length) ratePool = stats.filter(p => p.mp >= 3);
+  add(rateLabel || 'EN YÜKSEK GALİBİYET % (en az 3 maç)', top(ratePool, p => Math.round(p.mw / p.mp * 100)), r => `%${r.v}`, r => `${r.items[0].mw}/${r.items[0].mp} maç`);
+  add('EN İYİ OYUN AVERAJI', top(stats.filter(p => p.mp > 0), p => p.gw - p.gl, { min: 1 }), r => `+${r.v}`, r => `${r.items[0].gw}-${r.items[0].gl}`);
+  add('EN İYİ SET AVERAJI', top(stats.filter(p => p.mp > 0), p => p.sw - p.sl, { min: 1 }), r => `+${r.v}`, r => `${r.items[0].sw}-${r.items[0].sl}`);
+  const strItems = stats.map(p => ({ ...p, streak: streak[p.id] || 0 }));
+  add('EN UZUN GALİBİYET SERİSİ', top(strItems, p => p.streak, { min: 2 }), r => `${r.v}`, () => 'maç üst üste');
+  const actItems = stats.map(p => ({ ...p, pl: played[p.id] || 0 }));
+  add('EN ÇOK MAÇ OYNAYAN', top(actItems, p => p.pl, { min: 1 }), r => `${r.v}`, () => 'maç');
+
+  // En sert skor
+  const hard = real.map(m => ({ m, ...(_gameCountsWinner(m)) })).filter(x => x.gw - x.gl > 0)
+    .sort((a, b) => (b.gw - b.gl) - (a.gw - a.gl) || a.gl - b.gl || (b.m.id || 0) - (a.m.id || 0))[0];
+  if (hard) out.push({ label: 'EN SERT SKOR', names: [{ name: nameOf(hard.m.winner), lg: lgOf(hard.m.winner) }], big: _scoreWinnerView(hard.m), sub: `${nameOf(hard.m.loser)} karşısında` });
+
+  // En çekişmeli maç (3 sete giden, set farkları toplamı en küçük)
+  const close = real.filter(m => m.sets.length === 3)
+    .map(m => ({ m, d: m.sets.reduce((s, [a, b]) => s + Math.abs(a - b), 0) }))
+    .sort((a, b) => a.d - b.d || (b.m.id || 0) - (a.m.id || 0))[0];
+  if (close) out.push({ label: 'EN ÇEKİŞMELİ MAÇ', names: [{ name: nameOf(close.m.winner), lg: lgOf(close.m.winner) }], big: _scoreWinnerView(close.m), sub: `${nameOf(close.m.loser)} karşısında` });
+
+  return out;
+}
+
+const BESTS_SCOPES = [
+  { code: '', label: 'Tüm Sezon' },
+  { code: 'super', label: 'Süper Lig' },
+  { code: 'l2', label: '2. Lig' },
+  { code: 'l3', label: '3. Lig' },
+  { code: 'l4', label: '4. Lig' },
+  { code: 'l5', label: '5. Lig' }
+];
+
+function buildSeasonBestsHtml(code) {
+  const TX = '#fff', SUB = '#9fb8d4', ACC = '#8fd0ff', LINE = 'rgba(255,255,255,0.14)', CHIP = 'rgba(143,208,255,0.16)', NAVY = '#0b2545';
+  const bests = computeSeasonBests(code);
+  if (!bests.length) return '';
+  const scopeLabel = (BESTS_SCOPES.find(s => s.code === code) || BESTS_SCOPES[0]).label;
+  const dateStr = new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+  const esc = t => String(t).replace(/[<>&"]/g, '');
+
+  const rows = bests.map(b => {
+    const shown = b.names.length <= 3 ? b.names : b.names.slice(0, 2);
+    const extra = b.names.length - shown.length;
+    const nameLine = shown.map(n => esc(n.name)).join(' · ') + (extra > 0 ? ` +${extra} oyuncu` : '');
+    const lgTag = (!code && b.names.length === 1 && b.names[0].lg) ? `<span style="font-size:17px;font-weight:700;color:${ACC};margin-left:12px;letter-spacing:0.04em">${leagueName(b.names[0].lg)}</span>` : '';
+    const bigIsText = /\s|-/.test(String(b.big)) && String(b.big).length > 8;
+    return `
+      <div data-best="1" style="padding:20px 0;border-bottom:1px solid ${LINE};display:flex;align-items:center;gap:20px">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:15px;font-weight:800;letter-spacing:0.12em;color:${ACC}">${b.label}</div>
+          <div style="font-size:${shown.length > 1 ? 28 : 36}px;font-weight:800;color:${TX};line-height:1.15;margin-top:6px">${nameLine}${lgTag}</div>
+          <div style="font-size:17px;color:${SUB};margin-top:4px">${esc(b.sub)}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;font-size:${bigIsText ? 34 : 60}px;font-weight:900;color:${ACC};line-height:1;white-space:nowrap">${esc(b.big)}</div>
+      </div>`;
+  }).join('');
+
+  const panelH = 120 + bests.length * 124 + 90;
+  const totalH = 400 + panelH + 80;
+  return `
+    <div style="position:relative;width:1080px;height:${totalH}px;overflow:hidden;background:#9fc0d8 url(${LEADERS_BG}) center/cover no-repeat;font-family:'Public Sans','Segoe UI',sans-serif">
+      <div style="position:absolute;left:0;right:0;top:78px;text-align:center">
+        <div style="font-size:20px;font-weight:700;letter-spacing:0.3em;color:${NAVY};opacity:0.75">RTA LİGİ · GÜZ SEZONU</div>
+        <div style="font-size:96px;font-weight:900;letter-spacing:-0.02em;color:${NAVY};margin-top:10px;line-height:1">Sezonun Enleri</div>
+        <div style="font-size:24px;font-weight:700;color:${NAVY};opacity:0.85;margin-top:12px">${scopeLabel} · ${dateStr}</div>
+      </div>
+      <div style="position:absolute;left:60px;right:60px;top:380px;background:rgba(7,20,42,0.88);border-radius:30px;padding:6px 48px 26px;box-shadow:0 30px 60px -20px rgba(0,0,0,0.5)">
+        ${rows}
+        <div style="padding-top:22px;display:flex;justify-content:space-between;font-size:17px;letter-spacing:0.08em;color:${SUB}"><span>Rize Tenis Akademisi</span><span>rtaligleri.com</span></div>
+      </div>
+    </div>`;
+}
+
+function downloadSeasonBestsImage() {
+  if (typeof html2canvas === 'undefined') { showToast('Görsel oluşturma aracı yüklenemedi', 'err'); return; }
+  const sel = document.getElementById('bests-scope');
+  const code = sel ? sel.value : '';
+  const html = buildSeasonBestsHtml(code);
+  if (!html.includes('data-best="1"')) { showToast('Henüz yeterli maç yok', 'err'); return; }
+  showToast('Görsel hazırlanıyor... ⏳', 'ok');
+  const container = document.getElementById('leaders-capture');
+  container.innerHTML = html;
+  const bgReady = new Promise(res => { const im = new Image(); im.onload = im.onerror = res; im.src = LEADERS_BG; setTimeout(res, 2500); });
+  bgReady.then(() => requestAnimationFrame(() => {
+    html2canvas(container, { backgroundColor: '#9fc0d8', scale: 2, useCORS: true })
+      .then(canvas => {
+        canvas.toBlob(blob => {
+          if (!blob) { showToast('Görsel oluşturulamadı', 'err'); return; }
+          const fileName = 'RTA-Sezonun-Enleri' + (code ? '-' + code : '') + '.png';
+          if (navigator.share && navigator.canShare) {
+            const file = new File([blob], fileName, { type: 'image/png' });
+            if (navigator.canShare({ files: [file] })) {
+              navigator.share({ files: [file], title: 'RTA Ligi Sezonun Enleri' })
+                .then(() => showToast('Paylaşım açıldı! 📤', 'ok'))
+                .catch(() => fallbackDownload(blob, fileName));
+              return;
+            }
+          }
+          fallbackDownload(blob, fileName);
+        }, 'image/png');
+      })
+      .catch(err => { console.error(err); showToast('Görsel oluşturulamadı', 'err'); });
+  }));
 }
 
 function renderBracket() {
