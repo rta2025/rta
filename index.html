@@ -1104,6 +1104,40 @@ body.light-mode .po-type-btn { background:var(--surface2); }
 .logout-btn:hover { background: rgba(224,85,85,0.1); }
 
 
+
+/* Takım turnuvası (Rize Cup 3) */
+.tt-wrap { margin-bottom:18px; }
+.tt-wrap input[type=text], .tt-wrap select { background:var(--surface2); color:var(--text); border:1px solid var(--border); border-radius:6px; font-family:inherit; box-sizing:border-box; max-width:100%; }
+.tt-team input[type=text] { width:100%; min-width:0; }
+.tt-pl .tt-pl-in { flex:1; min-width:0; }
+.tt-hero { display:flex; justify-content:space-between; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:12px; }
+.tt-group { background:var(--surface); border:1px solid var(--border); border-radius:12px; margin-bottom:12px; overflow:hidden; }
+.tt-gh { background:rgba(93,201,93,0.12); padding:9px 14px; font-weight:800; color:var(--accent); letter-spacing:.06em; font-size:13px; display:flex; justify-content:space-between; align-items:center; }
+.tt-teams { display:grid; grid-template-columns:repeat(auto-fit,minmax(118px,1fr)); }
+.tt-teams-admin { grid-template-columns:1fr; }
+.tt-team { padding:10px; border-right:1px solid var(--border); border-bottom:1px solid var(--border); min-width:0; }
+.tt-tn { font-weight:800; font-size:12px; color:var(--gold); margin-bottom:6px; }
+.tt-pl { display:flex; gap:6px; align-items:flex-start; font-size:11.5px; padding:3px 0; line-height:1.25; }
+.tt-no { flex-shrink:0; width:15px; height:15px; border-radius:50%; background:var(--surface2); color:var(--accent); font-size:9px; font-weight:800; display:flex; align-items:center; justify-content:center; margin-top:1px; }
+.tt-empty { color:var(--text-dim); }
+.tt-name-in { padding:4px 6px !important; font-size:12px !important; font-weight:800; color:var(--gold); margin-bottom:4px; }
+.tt-pl-in { padding:3px 5px !important; font-size:11px !important; }
+.tt-table { width:100%; border-collapse:collapse; font-size:11.5px; }
+.tt-table th { color:var(--text-dim); font-weight:700; padding:6px 6px; text-align:center; border-bottom:1px solid var(--border); font-size:10.5px; }
+.tt-table td { padding:6px; text-align:center; border-bottom:1px solid rgba(36,48,36,.5); }
+.tt-table tr.tt-q td { background:rgba(93,201,93,0.08); }
+.tt-group details { border-top:1px solid var(--border); padding:0 14px 10px; }
+.tt-group summary { cursor:pointer; padding:10px 0; font-size:12px; font-weight:800; color:var(--accent); }
+.tt-tie { margin-bottom:10px; }
+.tt-tt { font-size:12px; font-weight:800; margin:6px 0; }
+.tt-m { display:grid; grid-template-columns:54px 1fr auto; gap:8px; align-items:center; font-size:11.5px; padding:6px 0; border-bottom:1px dashed var(--border); }
+.tt-ty { color:var(--accent); font-weight:800; }
+.tt-sc { background:var(--surface2); border-radius:6px; padding:2px 7px; font-weight:800; font-size:11px; white-space:nowrap; }
+.tt-btn { background:rgba(93,201,93,.15); color:var(--accent); border:1px solid rgba(93,201,93,.35); border-radius:6px; padding:3px 9px; font-size:11px; cursor:pointer; font-family:inherit; }
+.tt-in { width:44px; padding:5px 4px; text-align:center; background:var(--surface); color:var(--text); border:1px solid var(--border); border-radius:6px; font-size:13px; }
+.tt-sel { width:auto !important; padding:4px 6px !important; font-size:11.5px !important; display:inline-block; }
+.tt-ko-h { font-size:13px; font-weight:900; color:var(--gold); margin:14px 0 6px; letter-spacing:.04em; }
+
 /* Admin-only nav items hidden by default */
 .admin-only { display: none !important; }
 .admin-only.visible { display: block !important; }
@@ -2686,6 +2720,9 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
   <!-- AKTİF TURNUVA KARTI (dinamik) -->
   <div id="active-tournament-card"></div>
 
+  <!-- Takım turnuvası (Rize Cup 3) -->
+  <div id="team-tournament-section"></div>
+
   <!-- Admin: Turnuva Yönet Butonları -->
   <div class="admin-only" style="display:none;margin-bottom:16px">
     <div id="tm-action-buttons" style="display:flex;gap:8px">
@@ -3228,6 +3265,8 @@ async function loadFromSupabase() {
       }
       // Turnuva bilgisi ve turnuva arşivini de burada al (sadece Turnuvalar sekmesine
       // uğranmasına bağlı kalmadan, hangi sekmeden girilirse girilsin hazır olsun)
+      if (meta.team_tournament) localStorage.setItem('rta_team_tournament', JSON.stringify(meta.team_tournament));
+      else if ('team_tournament' in meta) localStorage.removeItem('rta_team_tournament');
       if (meta.tournament_info) localStorage.setItem('rta_tournament_info', JSON.stringify(meta.tournament_info));
       else localStorage.removeItem('rta_tournament_info');
       if (meta.tournament_archive) localStorage.setItem('rta_tournament_archive', JSON.stringify(meta.tournament_archive));
@@ -5294,6 +5333,7 @@ function setAdminUI(isAdmin) {
     el.classList.toggle('visible', isAdmin);
   });
   document.getElementById('admin-badge').classList.toggle('visible', isAdmin);
+  if (typeof renderTeamTournament === 'function') renderTeamTournament();
   document.getElementById('logout-btn').classList.toggle('visible', isAdmin);
   // login-trigger-btn kaldırıldı (tenis topu çift tık ile giriş aktif)
 }
@@ -6509,7 +6549,7 @@ function showPage(name) {
   if (name === 'skor')       { updatePlayerDropdowns(); document.getElementById('mdate').value = new Date().toISOString().split('T')[0]; }
   if (name === 'sonuclar')   { renderResults(); }
   if (name === 'arsiv')      { renderArchive(); renderTournamentArchive(); }
-  if (name === 'galeri')     { renderGaleri(); renderTournamentMatchups(); renderBracket(); renderActiveTournamentCard(); }
+  if (name === 'galeri')     { renderGaleri(); renderTournamentMatchups(); renderBracket(); renderActiveTournamentCard(); renderTeamTournament(); }
   if (name === 'blog')       { renderBlogPosts(); }
   if (name === 'ranking')    { renderRanking(); }
   if (name === 'istatistik') { renderStats(); }
@@ -7955,6 +7995,336 @@ function downloadSeasonBestsImage() {
       })
       .catch(err => { console.error(err); showToast('Görsel oluşturulamadı', 'err'); });
   }));
+}
+
+// ═══════════════════════════════════════════════════
+// TAKIM TURNUVASI (Rize Cup 3): 18 takım, 6 grup, 2 tekler + 1 çiftler eşleşmeleri
+// ═══════════════════════════════════════════════════
+const TT_KEY = 'rta_team_tournament';
+const TT_LETTERS = 'ABCDEFGHIJKLMNOPQR'.split('');
+let _ttOpen = {};   // açık/kapalı <details> durumları (yeniden çizimde korunur)
+
+function ttLoad() { try { return JSON.parse(localStorage.getItem(TT_KEY) || 'null'); } catch { return null; } }
+function ttSave(d) {
+  localStorage.setItem(TT_KEY, JSON.stringify(d));
+  if (window._sbAdmin) {
+    window._sbAdmin.from('meta').update({ team_tournament: d }).eq('id', 1)
+      .then(({ error }) => { if (error) showToast('Kaydedilemedi: ' + error.message + ' (Supabase sütunu eksik olabilir)', 'err'); });
+  }
+}
+function ttDefault() {
+  return {
+    name: 'Rize Cup 3',
+    teams: TT_LETTERS.map(l => ({ id: l, name: l + ' Takımı', p: ['', '', ''] })),
+    t3: {},   // grup 3. eşleşme oyuncu dağılımı (komite belirler)
+    res: {},  // maç sonuçları
+    qf: [{}, {}, {}, {}]
+  };
+}
+function ttStart() {
+  if (!isLoggedIn()) return;
+  if (ttLoad() && !confirm('Mevcut takım turnuvası verisi silinip yeniden başlatılacak. Emin misiniz?')) return;
+  ttSave(ttDefault());
+  renderTeamTournament();
+}
+function ttReset() {
+  if (!isLoggedIn()) return;
+  if (!confirm('DİKKAT: Takım turnuvasındaki tüm takımlar ve sonuçlar silinecek. Emin misiniz?')) return;
+  if (!confirm('Gerçekten silinsin mi? Bu işlem geri alınamaz.')) return;
+  localStorage.removeItem(TT_KEY);
+  if (window._sbAdmin) window._sbAdmin.from('meta').update({ team_tournament: null }).eq('id', 1).then(() => {});
+  renderTeamTournament();
+}
+const _ttEsc = t => String(t == null ? '' : t).replace(/[<>&"]/g, '');
+const _ttId = k => String(k).replace(/[^A-Za-z0-9]/g, '_');
+const ttTeam = (tt, id) => tt.teams.find(t => t.id === id);
+const ttTeamName = (tt, id) => { const t = ttTeam(tt, id); return t ? t.name : '—'; };
+const ttPl = (tt, id, no) => { const t = ttTeam(tt, id); const n = t && t.p[no - 1]; return n ? n : `${id} ${no}`; };
+
+// Grupların takımları: grup g (0-5) → 3 takım
+const ttGroupTeams = (tt, g) => tt.teams.slice(g * 3, g * 3 + 3).map(t => t.id);
+
+// Bir eşleşmenin (tie) maç tanımları: {k, type:'single'|'double', a:[no..], b:[no..]}
+const TT_SPECS = {
+  g1: [{ k: 's1', type: 'single', a: [1], b: [1] }, { k: 's2', type: 'single', a: [3], b: [3] }, { k: 'd', type: 'double', a: [1, 2], b: [1, 2] }],
+  g2: [{ k: 's1', type: 'single', a: [1], b: [1] }, { k: 's2', type: 'single', a: [2], b: [2] }, { k: 'd', type: 'double', a: [2, 3], b: [2, 3] }],
+  qf: [{ k: 's1', type: 'single', a: [2], b: [2] }, { k: 's2', type: 'single', a: [3], b: [3] }, { k: 'd', type: 'double', a: [1, 3], b: [1, 3] }],
+  sf: [{ k: 's1', type: 'single', a: [1], b: [1] }, { k: 's2', type: 'single', a: [3], b: [3] }, { k: 'd', type: 'double', a: [1, 2], b: [1, 2] }],
+  fn: [{ k: 's1', type: 'single', a: [1], b: [1] }, { k: 's2', type: 'single', a: [2], b: [2] }, { k: 'd', type: 'double', a: [1, 3], b: [1, 3] }]
+};
+
+// Gruptaki 3 eşleşme: 1. A–B, 2. B–C, 3. A–C (komite)
+function ttGroupTies(tt, g) {
+  const [x, y, z] = ttGroupTeams(tt, g);
+  const k3 = `G${g}T3`;
+  const c = (tt.t3 && tt.t3[k3]) || {};
+  const specs3 = [
+    { k: 's1', type: 'single', a: c.s1a ? [c.s1a] : null, b: c.s1b ? [c.s1b] : null },
+    { k: 's2', type: 'single', a: c.s2a ? [c.s2a] : null, b: c.s2b ? [c.s2b] : null },
+    { k: 'd', type: 'double', a: c.da ? c.da.split('').map(Number) : null, b: c.db ? c.db.split('').map(Number) : null }
+  ];
+  return [
+    { key: `G${g}T1`, label: '1. Eşleşme', a: x, b: y, specs: TT_SPECS.g1, stage: 'group', group: g },
+    { key: `G${g}T2`, label: '2. Eşleşme', a: y, b: z, specs: TT_SPECS.g2, stage: 'group', group: g },
+    { key: k3, label: '3. Eşleşme', a: x, b: z, specs: specs3, stage: 'group', group: g, custom: true }
+  ];
+}
+
+// Tek maç sonucunun hesabı (a = eşleşmenin 1. takımı)
+function ttOutcome(r) {
+  if (!r) return null;
+  if (r.wo === 'a' || r.wo === 'b') {
+    const w = r.wo === 'a' ? 'b' : 'a';
+    return { w, pa: w === 'a' ? 4 : 0, pb: w === 'b' ? 4 : 0, sa: w === 'a' ? 2 : 0, sb: w === 'b' ? 2 : 0, ga: w === 'a' ? 12 : 0, gb: w === 'b' ? 12 : 0, wo: true };
+  }
+  const s = r.s || [];
+  let sa = 0, sb = 0, ga = 0, gb = 0;
+  s.forEach(([a, b], i) => {
+    if (a > b) sa++; else if (b > a) sb++;
+    if (i === 2 && (a >= 10 || b >= 10)) { if (a > b) ga++; else gb++; }
+    else { ga += a; gb += b; }
+  });
+  if (sa < 2 && sb < 2) return null;
+  const w = sa > sb ? 'a' : 'b';
+  const straight = Math.min(sa, sb) === 0;
+  const pw = straight ? 4 : 3, pl = straight ? 1 : 2;
+  return { w, pa: w === 'a' ? pw : pl, pb: w === 'b' ? pw : pl, sa, sb, ga, gb, wo: false };
+}
+const ttScoreText = r => !r ? '' : (r.wo ? 'Hükmen' : (r.s || []).map(x => x[0] + '-' + x[1]).join(' '));
+
+function ttTieMatches(tie) {
+  return (tie.specs || []).map(sp => ({ ...sp, key: `${tie.key}:${sp.k}` }));
+}
+// Grup sıralaması
+function ttGroupTable(tt, g) {
+  const ids = ttGroupTeams(tt, g);
+  const rows = Object.fromEntries(ids.map(id => [id, { id, pts: 0, mw: 0, sd: 0, gd: 0, mp: 0 }]));
+  let done = 0, total = 0;
+  ttGroupTies(tt, g).forEach(tie => {
+    ttTieMatches(tie).forEach(m => {
+      total++;
+      const o = ttOutcome(tt.res[m.key]);
+      if (!o) return;
+      done++;
+      const A = rows[tie.a], B = rows[tie.b];
+      A.pts += o.pa; B.pts += o.pb; A.mp++; B.mp++;
+      if (o.w === 'a') A.mw++; else B.mw++;
+      A.sd += o.sa - o.sb; B.sd += o.sb - o.sa;
+      A.gd += o.ga - o.gb; B.gd += o.gb - o.ga;
+    });
+  });
+  const list = Object.values(rows).sort((x, y) => y.pts - x.pts || y.mw - x.mw || y.sd - x.sd || y.gd - x.gd);
+  return { list, complete: total > 0 && done === total, done, total };
+}
+// Eleme eşleşmesi sonucu (her galibiyet 1 puan, 2 galibiyet alan kazanır)
+function ttKoResult(tt, tie) {
+  let wa = 0, wb = 0, played = 0;
+  ttTieMatches(tie).forEach(m => { const o = ttOutcome(tt.res[m.key]); if (!o) return; played++; if (o.w === 'a') wa++; else wb++; });
+  const winner = wa >= 2 ? tie.a : (wb >= 2 ? tie.b : null);
+  return { wa, wb, played, winner };
+}
+// Çeyrek finale çıkanlar: 6 grup birincisi + en iyi 2 grup ikincisi
+function ttQualifiers(tt) {
+  const tables = [0, 1, 2, 3, 4, 5].map(g => ttGroupTable(tt, g));
+  const winners = [], seconds = [];
+  tables.forEach((t, g) => {
+    if (!t.complete) return;
+    winners.push(t.list[0].id);
+    seconds.push(t.list[1]);
+  });
+  const allDone = tables.every(t => t.complete);
+  let best2 = [];
+  if (allDone) best2 = seconds.sort((x, y) => y.pts - x.pts || y.mw - x.mw || y.sd - x.sd || y.gd - x.gd).slice(0, 2).map(r => r.id);
+  return { winners, best2, ready: allDone, all: [...winners, ...best2] };
+}
+function ttKoTies(tt) {
+  const qf = (tt.qf || []).map((p, i) => ({ key: `QF${i + 1}`, label: `Çeyrek Final ${i + 1}`, a: p.a || null, b: p.b || null, specs: TT_SPECS.qf, stage: 'qf' }));
+  const w = i => (qf[i].a && qf[i].b) ? ttKoResult(tt, qf[i]).winner : null;
+  const sf = [
+    { key: 'SF1', label: 'Yarı Final 1', a: w(0), b: w(1), specs: TT_SPECS.sf, stage: 'sf' },
+    { key: 'SF2', label: 'Yarı Final 2', a: w(2), b: w(3), specs: TT_SPECS.sf, stage: 'sf' }
+  ];
+  const sw = i => (sf[i].a && sf[i].b) ? ttKoResult(tt, sf[i]).winner : null;
+  const fn = [{ key: 'FN', label: 'FİNAL', a: sw(0), b: sw(1), specs: TT_SPECS.fn, stage: 'fn' }];
+  return { qf, sf, fn };
+}
+
+// ── Yönetici işlemleri ──
+function ttSetTeam(id, field, val) {
+  const tt = ttLoad(); if (!tt || !isLoggedIn()) return;
+  const t = ttTeam(tt, id); if (!t) return;
+  val = String(val).trim();
+  if (field === 'name') t.name = val || (id + ' Takımı');
+  else t.p[parseInt(field) - 1] = val;
+  ttSave(tt); renderTeamTournament();
+}
+function ttSetT3(k3, field, val) {
+  const tt = ttLoad(); if (!tt || !isLoggedIn()) return;
+  tt.t3 = tt.t3 || {}; tt.t3[k3] = tt.t3[k3] || {};
+  tt.t3[k3][field] = val;
+  ttSave(tt); renderTeamTournament();
+}
+function ttSetQf(i, side, val) {
+  const tt = ttLoad(); if (!tt || !isLoggedIn()) return;
+  tt.qf[i] = tt.qf[i] || {}; tt.qf[i][side] = val || null;
+  ttSave(tt); renderTeamTournament();
+}
+function ttToggleForm(key) {
+  const el = document.getElementById('ttf-' + _ttId(key));
+  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+function ttSaveResult(key) {
+  const tt = ttLoad(); if (!tt || !isLoggedIn()) return;
+  const id = _ttId(key);
+  const wo = document.getElementById('ttwo-' + id).value;
+  if (wo === 'a' || wo === 'b') {
+    tt.res[key] = { wo };
+  } else {
+    const sets = [];
+    for (let i = 1; i <= 3; i++) {
+      const a = document.getElementById(`tts-${id}-${i}a`).value, b = document.getElementById(`tts-${id}-${i}b`).value;
+      if (a === '' && b === '') continue;
+      if (a === '' || b === '') { showToast('Set skorlarını eksiksiz girin', 'err'); return; }
+      sets.push([parseInt(a), parseInt(b)]);
+    }
+    if (sets.length < 2) { showToast('En az 2 set girin', 'err'); return; }
+    let sa = 0, sb = 0, used = [];
+    for (const s of sets) { if (sa === 2 || sb === 2) break; used.push(s); if (s[0] > s[1]) sa++; else if (s[1] > s[0]) sb++; }
+    if (sa < 2 && sb < 2) { showToast('Geçersiz skor: birinin 2 set kazanması gerek', 'err'); return; }
+    tt.res[key] = { s: used };
+  }
+  ttSave(tt); renderTeamTournament(); showToast('Sonuç kaydedildi ✅', 'ok');
+}
+function ttClearResult(key) {
+  const tt = ttLoad(); if (!tt || !isLoggedIn()) return;
+  delete tt.res[key]; ttSave(tt); renderTeamTournament();
+}
+
+// ── Çizim ──
+function ttMatchRowHtml(tt, tie, m, admin) {
+  const key = m.key, r = tt.res[key], o = ttOutcome(r), id = _ttId(key);
+  let who;
+  if (!tie.a || !tie.b) who = '<span style="color:var(--text-dim)">Takımlar belli değil</span>';
+  else if (!m.a || !m.b) who = '<span style="color:var(--text-dim)">Oyuncu dağılımı bekleniyor</span>';
+  else {
+    const side = (team, nos) => nos.map(n => _ttEsc(ttPl(tt, team, n))).join(' + ');
+    const wa = o && o.w === 'a', wb = o && o.w === 'b';
+    who = `<span style="${wa ? 'color:var(--accent);font-weight:800' : ''}">${side(tie.a, m.a)}</span> <span style="color:var(--text-dim)">–</span> <span style="${wb ? 'color:var(--accent);font-weight:800' : ''}">${side(tie.b, m.b)}</span>`;
+  }
+  const typ = m.type === 'double' ? 'Çift' : 'Tek ' + (m.a ? m.a[0] : '?') + '-' + (m.b ? m.b[0] : '?');
+  const score = o ? `<span class="tt-sc">${_ttEsc(ttScoreText(r))}${tie.stage === 'group' ? ` <span style="opacity:.7">(${o.pa}-${o.pb})</span>` : ''}</span>` : '';
+  const canEnter = admin && tie.a && tie.b && m.a && m.b;
+  const btn = canEnter ? `<button class="tt-btn" onclick="ttToggleForm('${key}')">${o ? '✏️' : 'Skor gir'}</button>` : '';
+  let form = '';
+  if (canEnter) {
+    const sv = (i, j) => (r && r.s && r.s[i - 1]) ? r.s[i - 1][j] : '';
+    const inp = (i, ab, j) => `<input type="number" min="0" max="99" id="tts-${id}-${i}${ab}" value="${sv(i, j)}" class="tt-in">`;
+    form = `<div id="ttf-${id}" style="display:none;grid-column:1/-1;background:var(--surface2);border-radius:8px;padding:10px;margin-top:4px">
+      <div style="font-size:11px;color:var(--text-dim);margin-bottom:6px">${_ttEsc(ttTeamName(tt, tie.a))} – ${_ttEsc(ttTeamName(tt, tie.b))} (soldaki: ${_ttEsc(ttTeamName(tt, tie.a))})</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        ${[1, 2, 3].map(i => `<span>${inp(i, 'a', 0)} - ${inp(i, 'b', 1)}</span>`).join('<span style="color:var(--text-dim)">/</span>')}
+      </div>
+      <div style="font-size:10.5px;color:var(--text-dim);margin-top:4px">3. set: 10 puanlık tie-break ise 10-7 gibi girin. 2-0 biterse 3. seti boş bırakın.</div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap">
+        <select id="ttwo-${id}" class="finput" style="width:auto;padding:5px 8px;font-size:12px">
+          <option value="">Normal sonuç</option>
+          <option value="a" ${r && r.wo === 'a' ? 'selected' : ''}>Hükmen: ${_ttEsc(ttTeamName(tt, tie.a))} oyuncusu çıkmadı</option>
+          <option value="b" ${r && r.wo === 'b' ? 'selected' : ''}>Hükmen: ${_ttEsc(ttTeamName(tt, tie.b))} oyuncusu çıkmadı</option>
+        </select>
+        <button class="tt-btn" onclick="ttSaveResult('${key}')">💾 Kaydet</button>
+        ${o ? `<button class="tt-btn" style="color:#ff8888;border-color:rgba(224,85,85,.4)" onclick="ttClearResult('${key}')">Sil</button>` : ''}
+      </div></div>`;
+  }
+  return `<div class="tt-m"><span class="tt-ty">${typ}</span><span class="tt-who">${who}</span><span style="display:flex;gap:6px;align-items:center">${score}${btn}</span>${form}</div>`;
+}
+
+function ttT3SetupHtml(tt, tie) {
+  const c = (tt.t3 && tt.t3[tie.key]) || {};
+  const selNo = (f, label) => `<select class="finput tt-sel" onchange="ttSetT3('${tie.key}','${f}',this.value)"><option value="">${label}</option>${[1, 2, 3].map(n => `<option value="${n}" ${String(c[f] || '') === String(n) ? 'selected' : ''}>${n}</option>`).join('')}</select>`;
+  const selPair = f => `<select class="finput tt-sel" onchange="ttSetT3('${tie.key}','${f}',this.value)"><option value="">Çift</option>${['12', '13', '23'].map(p => `<option value="${p}" ${c[f] === p ? 'selected' : ''}>${p[0]}+${p[1]}</option>`).join('')}</select>`;
+  return `<div class="admin-only visible" style="background:rgba(240,192,64,.08);border:1px dashed rgba(240,192,64,.4);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:11px">
+    <div style="color:var(--gold);font-weight:800;margin-bottom:6px">Komite oyuncu dağılımı (${_ttEsc(ttTeamName(tt, tie.a))} – ${_ttEsc(ttTeamName(tt, tie.b))})</div>
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:4px">Tek 1: ${selNo('s1a', 'No')} – ${selNo('s1b', 'No')}</div>
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:4px">Tek 2: ${selNo('s2a', 'No')} – ${selNo('s2b', 'No')}</div>
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">Çift: ${selPair('da')} – ${selPair('db')}</div></div>`;
+}
+
+function ttTieHtml(tt, tie, admin) {
+  const ms = ttTieMatches(tie);
+  const ko = tie.stage !== 'group';
+  let head = `${_ttEsc(tie.label)} · ${tie.a ? _ttEsc(ttTeamName(tt, tie.a)) : '—'} – ${tie.b ? _ttEsc(ttTeamName(tt, tie.b)) : '—'}`;
+  if (ko && tie.a && tie.b) { const r = ttKoResult(tt, tie); if (r.played) head += ` <span class="tt-sc">${r.wa}–${r.wb}</span>`; }
+  const setup = (tie.custom && admin) ? ttT3SetupHtml(tt, tie) : '';
+  const note = (tie.custom && !admin && !ms.every(m => m.a && m.b)) ? '<div style="font-size:11px;color:var(--text-dim);margin-bottom:4px">Oyuncu dağılımı komite tarafından belirlenecek.</div>' : '';
+  return `<div class="tt-tie"><div class="tt-tt">${head}</div>${setup}${note}${ms.map(m => ttMatchRowHtml(tt, tie, m, admin)).join('')}</div>`;
+}
+
+function ttTeamCardHtml(tt, t, admin) {
+  if (admin) {
+    return `<div class="tt-team"><input type="text" class="finput tt-name-in" value="${_ttEsc(t.name)}" onchange="ttSetTeam('${t.id}','name',this.value)">
+      ${[1, 2, 3].map(n => `<div class="tt-pl"><span class="tt-no">${n}</span><input type="text" class="finput tt-pl-in" list="tt-players" placeholder="oyuncu seç / yaz" value="${_ttEsc(t.p[n - 1])}" onchange="ttSetTeam('${t.id}','${n}',this.value)"></div>`).join('')}</div>`;
+  }
+  return `<div class="tt-team"><div class="tt-tn">${_ttEsc(t.name)}</div>
+    ${[1, 2, 3].map(n => `<div class="tt-pl"><span class="tt-no">${n}</span><span class="${t.p[n - 1] ? '' : 'tt-empty'}">${t.p[n - 1] ? _ttEsc(t.p[n - 1]) : '—'}</span></div>`).join('')}</div>`;
+}
+
+function ttGroupHtml(tt, g, admin) {
+  const ids = ttGroupTeams(tt, g);
+  const tbl = ttGroupTable(tt, g);
+  const open = _ttOpen['g' + g] ? 'open' : '';
+  const rows = tbl.list.map((r, i) => `<tr class="${tbl.complete && i < 2 ? 'tt-q' : ''}"><td>${i + 1}</td><td style="text-align:left">${_ttEsc(ttTeamName(tt, r.id))}</td><td>${r.mp}</td><td>${r.mw}</td><td>${r.sd > 0 ? '+' : ''}${r.sd}</td><td>${r.gd > 0 ? '+' : ''}${r.gd}</td><td><b>${r.pts}</b></td></tr>`).join('');
+  return `<div class="tt-group"><div class="tt-gh"><span>GRUP ${TT_LETTERS[g]}</span><span style="font-weight:600;opacity:.8;font-size:11px">${tbl.done}/${tbl.total} maç oynandı</span></div>
+    <div class="tt-teams${admin ? ' tt-teams-admin' : ''}">${ids.map(id => ttTeamCardHtml(tt, ttTeam(tt, id), admin)).join('')}</div>
+    <table class="tt-table"><thead><tr><th>#</th><th style="text-align:left">Takım</th><th>M</th><th>G</th><th>Set</th><th>Oyun</th><th>Puan</th></tr></thead><tbody>${rows}</tbody></table>
+    <details ${open} ontoggle="_ttOpen['g${g}']=this.open"><summary>Fikstür ve sonuçlar</summary>
+      ${ttGroupTies(tt, g).map(tie => ttTieHtml(tt, tie, admin)).join('')}</details></div>`;
+}
+
+function ttKoHtml(tt, admin) {
+  const q = ttQualifiers(tt);
+  const ko = ttKoTies(tt);
+  const nm = id => id ? _ttEsc(ttTeamName(tt, id)) : '—';
+  const qfSel = (i, side) => {
+    const opts = (q.ready ? q.all : tt.teams.map(t => t.id));
+    const cur = (tt.qf[i] || {})[side] || '';
+    return `<select class="finput tt-sel" onchange="ttSetQf(${i},'${side}',this.value)"><option value="">Takım seç</option>${opts.map(id => `<option value="${id}" ${cur === id ? 'selected' : ''}>${_ttEsc(ttTeamName(tt, id))}</option>`).join('')}</select>`;
+  };
+  const qInfo = `<div style="font-size:12px;color:var(--text-dim);margin-bottom:10px;line-height:1.6">
+    <b style="color:var(--text)">Çeyrek finale çıkanlar:</b> 6 grup birincisi + en iyi 2 grup ikincisi.<br>
+    Grup birincileri: ${q.winners.length ? q.winners.map(nm).join(', ') : '—'}<br>
+    En iyi 2 ikinci: ${q.ready ? q.best2.map(nm).join(', ') : 'tüm gruplar bitince belli olur'}</div>`;
+  const setup = admin ? `<div class="admin-only visible" style="background:rgba(240,192,64,.08);border:1px dashed rgba(240,192,64,.4);border-radius:8px;padding:8px 10px;margin-bottom:10px;font-size:11px">
+    <div style="color:var(--gold);font-weight:800;margin-bottom:6px">Çeyrek final kurası (eşleşmeleri seçin)</div>
+    ${[0, 1, 2, 3].map(i => `<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:4px">QF${i + 1}: ${qfSel(i, 'a')} – ${qfSel(i, 'b')}</div>`).join('')}
+    <div style="color:var(--text-dim);margin-top:4px">Yarı final: QF1 ve QF2 galipleri, QF3 ve QF4 galipleri karşılaşır. Final: yarı final galipleri.</div></div>` : '';
+  const block = (title, ties) => `<div class="tt-ko-h">${title}</div>${ties.map(t => ttTieHtml(tt, t, admin)).join('')}`;
+  const champ = (ko.fn[0].a && ko.fn[0].b) ? ttKoResult(tt, ko.fn[0]).winner : null;
+  return `<div class="tt-group"><div class="tt-gh"><span>ELEME AŞAMASI</span></div><div style="padding:10px 14px">
+    ${qInfo}${setup}
+    ${block('Çeyrek Final', ko.qf)}${block('Yarı Final', ko.sf)}${block('Final', ko.fn)}
+    ${champ ? `<div style="text-align:center;font-size:18px;font-weight:900;color:var(--gold);margin-top:12px">🏆 Şampiyon: ${nm(champ)}</div>` : ''}
+    </div></div>`;
+}
+
+function renderTeamTournament() {
+  const el = document.getElementById('team-tournament-section');
+  if (!el) return;
+  // Turnuva henüz başlatılmamışsa da gruplar herkese gösterilir (isimler sonra girilir)
+  let tt = ttLoad();
+  const started = !!tt;
+  if (!tt) tt = ttDefault();
+  const admin = isLoggedIn() && started;
+  const startBtn = (!started && isLoggedIn()) ? `<div style="margin-bottom:12px"><button class="btn btn-sm" onclick="ttStart()" style="background:rgba(240,192,64,0.15);color:var(--gold);border:1px solid rgba(240,192,64,0.35)">🏆 Takım ve Sonuç Girişini Başlat (isimleri girmek için)</button></div>` : '';
+  const pendingNote = !started ? '<div style="font-size:12px;color:var(--text-dim);margin:-4px 0 12px">Takım ve oyuncu isimleri başvurular tamamlanınca açıklanacaktır.</div>' : '';
+  const names = state.players.map(p => `<option value="${_ttEsc(p.name)}">`).join('');
+  el.innerHTML = `<div class="tt-wrap">
+    <datalist id="tt-players">${names}</datalist>
+    <div class="tt-hero"><div><div style="font-size:1.15rem;font-weight:900">🏆 ${_ttEsc(tt.name)}</div><div style="font-size:12px;color:var(--text-dim);margin-top:3px">54 oyuncu · 18 takım · 6 grup · her eşleşme 2 tekler + 1 çiftler</div></div>
+      ${admin ? `<button class="tt-btn" style="color:#ff8888;border-color:rgba(224,85,85,.4)" onclick="ttReset()">Sıfırla</button>` : ''}</div>
+    ${startBtn}${pendingNote}
+    ${[0, 1, 2, 3, 4, 5].map(g => ttGroupHtml(tt, g, admin)).join('')}
+    ${ttKoHtml(tt, admin)}
+  </div>`;
 }
 
 function renderBracket() {
