@@ -1105,6 +1105,12 @@ body.light-mode .po-type-btn { background:var(--surface2); }
 
 
 
+.adm-fold > summary { cursor:pointer; list-style:none; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:11px 14px; font-weight:800; font-size:13px; color:var(--text); }
+.adm-fold > summary::-webkit-details-marker { display:none; }
+.adm-fold > summary::before { content:'▶ '; font-size:10px; color:var(--text-dim); }
+.adm-fold[open] > summary::before { content:'▼ '; }
+.adm-fold > summary span { font-weight:500; font-size:11px; color:var(--text-dim); margin-left:4px; }
+.adm-fold[open] > summary { margin-bottom:10px; }
 /* Takım turnuvası (Rize Cup 3) */
 .tt-wrap { margin-bottom:18px; }
 .tt-wrap input[type=text], .tt-wrap select { background:var(--surface2); color:var(--text); border:1px solid var(--border); border-radius:6px; font-family:inherit; box-sizing:border-box; max-width:100%; }
@@ -2788,6 +2794,9 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
     <div id="bracket-champion-box"></div>
   </div>
 
+  <!-- Admin: Tek eleme turnuva araçları (Rize Cup 3'te kullanılmaz, kapalı durur) -->
+  <div class="admin-only" style="display:none;margin-bottom:12px"><details class="adm-fold"><summary>🌳 Tek Eleme Turnuva Araçları <span>(3.lük maçı · 32'lik ağaç kurulumu)</span></summary>
+
   <!-- Admin: 3.lük Maçı Girişi -->
   <div class="admin-only" style="display:none;margin-bottom:16px;background:var(--surface);border-radius:10px;padding:14px 16px">
     <div class="tournament-rules-title" style="margin-bottom:8px">🥉 3.lük Maçı (Admin)</div>
@@ -2875,11 +2884,16 @@ Tayfun Selek vs Derya Özdemir
     </div>
   </div>
 
+  </details></div>
+
   <!-- Eşleşmeler (public görünüm) -->
   <div id="tournament-matchups-view" style="display:none;margin-bottom:16px">
     <div class="tournament-rules-title" style="margin-bottom:10px">🎾 Eşleşmeler</div>
     <div id="tournament-matchups-list" style="display:flex;flex-direction:column;gap:8px"></div>
   </div>
+
+  <!-- Admin: Maç programı girişi (kapalı durur) -->
+  <div class="admin-only" style="display:none;margin-bottom:12px"><details class="adm-fold"><summary>📅 Maç Programı Ekle <span>(tarih · saat · kort · oyuncular)</span></summary>
 
   <!-- Admin: Eşleşme girişi -->
   <div class="admin-only" style="display:none;margin-bottom:16px;background:var(--surface);border-radius:10px;padding:14px 16px">
@@ -2941,6 +2955,8 @@ Tayfun Selek vs Derya Özdemir
       <button class="btn" onclick="clearTournamentMatchups()" style="flex:1">✕ Hepsini Temizle</button>
     </div>
   </div>
+
+  </details></div>
 
   <!-- Kurallar (dinamik) -->
   <div id="tournament-rules-display"></div>
@@ -8319,7 +8335,7 @@ function renderTeamTournament() {
   const names = state.players.map(p => `<option value="${_ttEsc(p.name)}">`).join('');
   el.innerHTML = `<div class="tt-wrap">
     <datalist id="tt-players">${names}</datalist>
-    <div class="tt-hero"><div><div style="font-size:1.15rem;font-weight:900">🏆 ${_ttEsc(tt.name)}</div><div style="font-size:12px;color:var(--text-dim);margin-top:3px">54 oyuncu · 18 takım · 6 grup · her eşleşme 2 tekler + 1 çiftler</div></div>
+    <div class="tt-hero"><div><div style="font-size:1.1rem;font-weight:900">🏆 Gruplar ve Maç Sonuçları</div><div style="font-size:12px;color:var(--text-dim);margin-top:3px">54 oyuncu · 18 takım · 6 grup · her eşleşme 2 tekler + 1 çiftler</div></div>
       ${admin ? `<button class="tt-btn" style="color:#ff8888;border-color:rgba(224,85,85,.4)" onclick="ttReset()">Sıfırla</button>` : ''}</div>
     ${startBtn}${pendingNote}
     ${[0, 1, 2, 3, 4, 5].map(g => ttGroupHtml(tt, g, admin)).join('')}
