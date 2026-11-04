@@ -3621,6 +3621,14 @@ function getStandings(league) {
 // Ligden çekilen oyuncunun oynanamayan maçı (0-6, 0-6, 4/1 puan). Skor metninde işaret taşır,
 // Son Maçlar / haftalık görsel / form serisinde gösterilmez; puan durumuna normal maç gibi yansır.
 const RETIRED_TAG = 'ÇEKİLDİ';
+// W.O. etiketi: ÇEKİLDİ işaretli maçlar + ligden ayrılan oyuncunun eskiden girilmiş 0-6/0-6 mağlubiyetleri
+function isWoMatch(m) {
+  if (isRetiredMatch(m)) return true;
+  const lp = state.players.find(p => p.id === m.loser);
+  if (!lp || lp.left_note === null || lp.left_note === undefined) return false;
+  const sc = String(m.score || '').replace(/·.*$/, '').replace(/\s/g, '');
+  return sc === '0-6/0-6' || sc === '6-0/6-0';
+}
 function isRetiredMatch(m) { return !!m && typeof m.score === 'string' && m.score.includes(RETIRED_TAG); }
 
 function pointsForResult(winningSets, losingSets) {
@@ -4302,7 +4310,7 @@ function renderPlayerDetail() {
       <td>${m.date}</td>
       <td>${opp}</td>
       <td><span class="${won?'tag tag-win':'tag tag-loss'}">${won?'GALİP':'MAĞLUP'}</span></td>
-      <td>${scoreDisplay}${isRetiredMatch(m) ? ' <span style="font-size:0.62rem;font-weight:700;letter-spacing:.5px;color:var(--text-muted);border:1px solid var(--border);border-radius:4px;padding:1px 4px;margin-left:3px;vertical-align:middle">W.O.</span>' : ''}</td>
+      <td>${scoreDisplay}${isWoMatch(m) ? ' <span style="font-size:0.62rem;font-weight:700;letter-spacing:.5px;color:var(--text-muted);border:1px solid var(--border);border-radius:4px;padding:1px 4px;margin-left:3px;vertical-align:middle">WO</span>' : ''}</td>
       <td class="right" style="color:var(--accent)">${won?m.wpts:m.lpts} puan</td>
     </tr>`;
   }).join('');
@@ -4643,7 +4651,7 @@ function openProfile(playerId) {
   const winPct  = matches.length > 0 ? Math.round(wins / matches.length * 100) : 0;
   const pts     = matches.reduce((s, m) => s + (m.winner === playerId ? (m.wpts||0) : (m.lpts||0)), 0);
 
-  const form = matches.filter(m => !isRetiredMatch(m))
+  const form = matches.filter(m => !isWoMatch(m))
     .sort((a,b) => new Date(b.date) - new Date(a.date) || (b.id||0) - (a.id||0))
     .slice(0, 5)
     .map(m => m.winner === playerId ? 'w' : 'l');
@@ -4687,7 +4695,7 @@ function openProfile(playerId) {
       const ls = m.losingSets  || 0;
       setScore = won ? `${ws}-${ls}` : `${ls}-${ws}`;
     }
-    rivalMap[rivalId].matches.push({ won, setScore, date: m.date });
+    rivalMap[rivalId].matches.push({ won, setScore, date: m.date, wo: isWoMatch(m) });
   });
 
   const rivals = Object.entries(rivalMap)
@@ -4718,7 +4726,7 @@ function openProfile(playerId) {
         }
         const cls = r.w >= r.l ? 'win' : 'loss';
         const matchRows = r.matches
-          .map(m => `<span style="font-size:10px;color:${m.won ? 'var(--accent)' : 'var(--red)'};margin-left:6px">${m.won ? 'G' : 'M'} ${m.setScore}</span>`)
+          .map(m => `<span style="font-size:10px;color:${m.won ? 'var(--accent)' : 'var(--red)'};margin-left:6px">${m.won ? 'G' : 'M'} ${m.setScore}${m.wo ? ' <b style="font-size:8.5px;letter-spacing:.4px;color:var(--text-muted);border:1px solid var(--border);border-radius:3px;padding:0 3px;margin-left:2px">WO</b>' : ''}</span>`)
           .join('');
         return `<div class="profile-rival">
           <span class="pr-name">${name}</span>
