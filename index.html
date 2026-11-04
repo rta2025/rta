@@ -8203,6 +8203,53 @@ function ttKoTies(tt) {
   return { qf, sf, fn };
 }
 
+// ── Oyuncu önerisi (iPhone'da tarayıcının kendi listesi çıkmadığı için kendi açılır listemiz) ──
+function ttAllNames() {
+  const set = new Set(state.players.map(p => p.name));
+  try { (JSON.parse(localStorage.getItem('rta_ranking_entries') || '[]')).forEach(r => r && r.player && set.add(r.player)); } catch (e) {}
+  try { (JSON.parse(localStorage.getItem(RANKING_KEY) || '[]')).forEach(r => r && r.player && set.add(r.player)); } catch (e) {}
+  return [...set].filter(Boolean).sort((a, b) => a.localeCompare(b, 'tr'));
+}
+let _ttSugEl = null, _ttSugTimer = null;
+function ttSuggestHideSoon() { _ttSugTimer = setTimeout(ttSuggestHide, 350); }
+function ttSuggestHide() { if (_ttSugEl) { _ttSugEl.remove(); _ttSugEl = null; } }
+function ttSuggest(inp) {
+  clearTimeout(_ttSugTimer);
+  const tt = ttLoad();
+  const used = new Set();
+  if (tt) tt.teams.forEach(t => t.p.forEach((n, i) => { if (n && !(inp.id === `ttp-${t.id}-${i + 1}`)) used.add(n); }));
+  const q = inp.value.trim().toLocaleLowerCase('tr');
+  let list = ttAllNames().filter(n => !q || n.toLocaleLowerCase('tr').includes(q));
+  const free = list.filter(n => !used.has(n)), taken = list.filter(n => used.has(n));
+  list = [...free, ...taken].slice(0, 40);
+  ttSuggestHide();
+  if (!list.length) return;
+  const el = document.createElement('div');
+  el.style.cssText = 'position:fixed;z-index:99999;background:#162016;border:1px solid #3a4f3a;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.6);overflow-y:auto;-webkit-overflow-scrolling:touch;';
+  el.innerHTML = list.map(n => `<div data-n="${_ttEsc(n)}" style="padding:11px 14px;font-size:14px;border-bottom:1px solid rgba(255,255,255,.06);color:${used.has(n) ? '#7d8a7d' : '#e8efe8'}">${_ttEsc(n)}${used.has(n) ? ' <span style="font-size:11px">· başka takımda</span>' : ''}</div>`).join('');
+  const choose = e => {
+    const d = e.target.closest('[data-n]'); if (!d) return;
+    e.preventDefault();
+    inp.value = d.getAttribute('data-n');
+    inp.dispatchEvent(new Event('input', { bubbles: true }));
+    ttSuggestHide(); inp.blur();
+  };
+  el.addEventListener('pointerdown', e => { e.preventDefault(); clearTimeout(_ttSugTimer); });
+  el.addEventListener('click', choose);
+  document.body.appendChild(el);
+  _ttSugEl = el;
+  const r = inp.getBoundingClientRect();
+  const vh = (window.visualViewport ? window.visualViewport.height : window.innerHeight);
+  const below = vh - r.bottom - 8, above = r.top - 8;
+  const h = Math.min(260, Math.max(below, above));
+  el.style.left = Math.max(8, r.left) + 'px';
+  el.style.width = Math.min(r.width, window.innerWidth - 16) + 'px';
+  el.style.maxHeight = h + 'px';
+  if (below >= 160 || below >= above) el.style.top = (r.bottom + 4) + 'px';
+  else el.style.top = Math.max(8, r.top - 4 - Math.min(h, el.scrollHeight)) + 'px';
+}
+window.addEventListener('scroll', () => { if (_ttSugEl && document.activeElement && document.activeElement.classList.contains('tt-pl-in')) ttSuggest(document.activeElement); }, { passive: true });
+
 // ── Yönetici işlemleri ──
 // Takım kartındaki "Kaydet" butonuyla kaydedilir (yazarken otomatik kaydetmez)
 function ttMarkDirty(id) {
@@ -8324,7 +8371,7 @@ function ttTieHtml(tt, tie, admin) {
 function ttTeamCardHtml(tt, t, admin) {
   if (admin) {
     return `<div class="tt-team"><input type="text" class="finput tt-name-in" id="ttn-${t.id}" data-saved="${_ttEsc(t.name)}" value="${_ttEsc(t.name)}" oninput="ttMarkDirty('${t.id}')">
-      ${[1, 2, 3].map(n => `<div class="tt-pl"><span class="tt-no">${n}</span><input type="text" class="finput tt-pl-in" id="ttp-${t.id}-${n}" data-saved="${_ttEsc(t.p[n - 1])}" list="tt-players" placeholder="oyuncu seç / yaz" value="${_ttEsc(t.p[n - 1])}" oninput="ttMarkDirty('${t.id}')"></div>`).join('')}
+      ${[1, 2, 3].map(n => `<div class="tt-pl"><span class="tt-no">${n}</span><input type="text" class="finput tt-pl-in" id="ttp-${t.id}-${n}" data-saved="${_ttEsc(t.p[n - 1])}" autocomplete="off" placeholder="oyuncu seç / yaz" value="${_ttEsc(t.p[n - 1])}" onfocus="ttSuggest(this)" oninput="ttMarkDirty('${t.id}');ttSuggest(this)" onblur="ttSuggestHideSoon()"></div>`).join('')}
       <button class="tt-btn" id="ttsave-${t.id}" style="margin-top:6px;width:100%" onclick="ttSaveTeam('${t.id}')">💾 Kaydet</button></div>`;
   }
   return `<div class="tt-team"><div class="tt-tn">${_ttEsc(t.name)}</div>
