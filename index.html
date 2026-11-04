@@ -4302,7 +4302,7 @@ function renderPlayerDetail() {
       <td>${m.date}</td>
       <td>${opp}</td>
       <td><span class="${won?'tag tag-win':'tag tag-loss'}">${won?'GALİP':'MAĞLUP'}</span></td>
-      <td>${scoreDisplay}</td>
+      <td>${scoreDisplay}${isRetiredMatch(m) ? ' <span style="font-size:0.62rem;font-weight:700;letter-spacing:.5px;color:var(--text-muted);border:1px solid var(--border);border-radius:4px;padding:1px 4px;margin-left:3px;vertical-align:middle">W.O.</span>' : ''}</td>
       <td class="right" style="color:var(--accent)">${won?m.wpts:m.lpts} puan</td>
     </tr>`;
   }).join('');
