@@ -7597,7 +7597,9 @@ function buildWeeklySummaryHtml(matches, weekOffset = 0) {
     const isMilestone = matchNo > 0 && matchNo % MILESTONE_EVERY === 0;
     const winnerName = playerName(m.winner);
     const loserName = playerName(m.loser);
-    const lgName = leagueName(m.league);
+    const lgName0 = leagueName(m.league);
+    const woBadge = isWoMatch(m) ? `<span style="color:${MUTED};border:1.5px solid ${MUTED};border-radius:4px;padding:0 6px;margin-right:10px;font-size:${Math.round(lgFontSize*0.8)}px;font-weight:700;letter-spacing:1px">WO</span>` : '';
+    const lgName = woBadge + lgName0;
 
     // ÖNEMLİ: m.sets her zaman "1. oyuncu - 2. oyuncu" sırasıyla saklanır,
     // set bazında kim kazanmış olursa olsun. Kazananın kendi skorunu her
