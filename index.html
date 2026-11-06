@@ -3623,7 +3623,7 @@ function getStandings(league) {
 const RETIRED_TAG = 'ÇEKİLDİ';
 // W.O. etiketi: ÇEKİLDİ işaretli maçlar + ligden ayrılan oyuncunun eskiden girilmiş 0-6/0-6 mağlubiyetleri
 function isWoMatch(m) {
-  if (isRetiredMatch(m)) return true;
+  if (isRetiredMatch(m) || m.walkover) return true;
   const lp = state.players.find(p => p.id === m.loser);
   if (!lp || lp.left_note === null || lp.left_note === undefined) return false;
   const sc = String(m.score || '').replace(/·.*$/, '').replace(/\s/g, '');
@@ -4428,7 +4428,7 @@ function renderLastMatches() {
     return `<div class="last-match-row">
       <div class="lm-player winner lm-left"><span class="lm-win-badge"></span>${wName}</div>
       <div>
-        <div class="lm-score">${scoreDisplay}</div>
+        <div class="lm-score">${scoreDisplay}${isWoMatch(m) ? ' <span style="font-size:0.6rem;font-weight:700;letter-spacing:.5px;color:var(--text-muted);border:1px solid var(--border);border-radius:4px;padding:0 4px;margin-left:5px;vertical-align:middle">WO</span>' : ''}</div>
         <div class="lm-date">${lgTag}${m.date ? ' • ' + m.date : ''}</div>
       </div>
       <div class="lm-player loser lm-right">${lName}</div>
