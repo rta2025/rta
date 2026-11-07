@@ -4310,7 +4310,7 @@ function renderPlayerDetail() {
       <td>${m.date}</td>
       <td>${opp}</td>
       <td><span class="${won?'tag tag-win':'tag tag-loss'}">${won?'GALİP':'MAĞLUP'}</span></td>
-      <td>${scoreDisplay}${isWoMatch(m) ? ' <span style="font-size:0.62rem;font-weight:700;letter-spacing:.5px;color:var(--text-muted);border:1px solid var(--border);border-radius:4px;padding:1px 4px;margin-left:3px;vertical-align:middle">WO</span>' : ''}</td>
+      <td>${scoreDisplay}${isWoMatch(m) ? ' <span style="font-size:0.62rem;font-weight:700;letter-spacing:1px;color:var(--text-muted);margin-left:4px">WO</span>' : ''}</td>
       <td class="right" style="color:var(--accent)">${won?m.wpts:m.lpts} puan</td>
     </tr>`;
   }).join('');
@@ -4428,10 +4428,10 @@ function renderLastMatches() {
     return `<div class="last-match-row">
       <div class="lm-player winner lm-left"><span class="lm-win-badge"></span>${wName}</div>
       <div>
-        <div class="lm-score">${scoreDisplay}${isWoMatch(m) ? ' <span style="font-size:0.6rem;font-weight:700;letter-spacing:.5px;color:var(--text-muted);border:1px solid var(--border);border-radius:4px;padding:0 4px;margin-left:5px;vertical-align:middle">WO</span>' : ''}</div>
+        <div class="lm-score">${scoreDisplay}</div>
         <div class="lm-date">${lgTag}${m.date ? ' • ' + m.date : ''}</div>
       </div>
-      <div class="lm-player loser lm-right">${lName}</div>
+      <div class="lm-player loser lm-right">${lName}${isWoMatch(m) ? ' <span style="font-size:0.62rem;font-weight:700;letter-spacing:1px;color:var(--text-muted);margin-left:4px">WO</span>' : ''}</div>
     </div>`;
   }).join('');
 
@@ -4726,7 +4726,7 @@ function openProfile(playerId) {
         }
         const cls = r.w >= r.l ? 'win' : 'loss';
         const matchRows = r.matches
-          .map(m => `<span style="font-size:10px;color:${m.won ? 'var(--accent)' : 'var(--red)'};margin-left:6px">${m.won ? 'G' : 'M'} ${m.setScore}${m.wo ? ' <b style="font-size:8.5px;letter-spacing:.4px;color:var(--text-muted);border:1px solid var(--border);border-radius:3px;padding:0 3px;margin-left:2px">WO</b>' : ''}</span>`)
+          .map(m => `<span style="font-size:10px;color:${m.won ? 'var(--accent)' : 'var(--red)'};margin-left:6px">${m.won ? 'G' : 'M'} ${m.setScore}${m.wo ? ' <b style="font-size:8.5px;letter-spacing:1px;color:var(--text-muted);margin-left:3px">WO</b>' : ''}</span>`)
           .join('');
         return `<div class="profile-rival">
           <span class="pr-name">${name}</span>
@@ -7597,9 +7597,8 @@ function buildWeeklySummaryHtml(matches, weekOffset = 0) {
     const isMilestone = matchNo > 0 && matchNo % MILESTONE_EVERY === 0;
     const winnerName = playerName(m.winner);
     const loserName = playerName(m.loser);
-    const lgName0 = leagueName(m.league);
-    const woBadge = isWoMatch(m) ? `<span style="color:${MUTED};border:1.5px solid ${MUTED};border-radius:4px;padding:0 6px;margin-right:10px;font-size:${Math.round(lgFontSize*0.8)}px;font-weight:700;letter-spacing:1px">WO</span>` : '';
-    const lgName = woBadge + lgName0;
+    const lgName = leagueName(m.league);
+    const woBadge = isWoMatch(m) ? `<span style="color:${MUTED};font-size:${Math.round(nameFontL*0.7)}px;font-weight:700;letter-spacing:1px;margin-left:10px">WO</span>` : '';
 
     // ÖNEMLİ: m.sets her zaman "1. oyuncu - 2. oyuncu" sırasıyla saklanır,
     // set bazında kim kazanmış olursa olsun. Kazananın kendi skorunu her
@@ -7638,7 +7637,7 @@ function buildWeeklySummaryHtml(matches, weekOffset = 0) {
           <div style="display:flex;flex-shrink:0">${winnerCols}</div>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:${twoColumn?4:10}px">
-          <div style="font-size:${nameFontL}px;font-weight:400;color:${DIM};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${loserName}</div>
+          <div style="font-size:${nameFontL}px;font-weight:400;color:${DIM};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${loserName}${woBadge}</div>
           <div style="display:flex;flex-shrink:0">${loserCols}</div>
         </div>
       </div>`;
@@ -7652,7 +7651,7 @@ function buildWeeklySummaryHtml(matches, weekOffset = 0) {
           <div style="display:flex;flex-shrink:0">${winnerCols}</div>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:${twoColumn?4:10}px">
-          <div style="font-size:${nameFontL}px;font-weight:400;color:${DIM};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${loserName}</div>
+          <div style="font-size:${nameFontL}px;font-weight:400;color:${DIM};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${loserName}${woBadge}</div>
           <div style="display:flex;flex-shrink:0">${loserCols}</div>
         </div>
       </div>`;
