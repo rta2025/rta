@@ -7881,65 +7881,107 @@ function _scoreWinnerView(m) {
 
 function computeSeasonBests(code) {
   const codes = code ? [code] : ['super', 'l2', 'l3', 'l4', 'l5'];
-  const lgLabel = c => leagueName(c);
-  // Resmî puan durumu (çekilme maçları dahil) ve çekilme dışı maçlar
   const stats = [];
   codes.forEach(c => getStandings(c).forEach(p => stats.push({ ...p, lg: c })));
-  const real = state.matches.filter(m => codes.includes(m.league) && !isRetiredMatch(m) && m.sets && m.sets.length);
+  // Hükmen / çekilme maçları averaj ve skor enlerinde sayılmaz (puan ve galibiyette resmî sayılır)
+  const real = state.matches.filter(m => codes.includes(m.league) && !isWoMatch(m) && m.sets && m.sets.length);
   const nameOf = id => playerName(id);
   const lgOf = id => { const p = state.players.find(x => x.id === id); return p ? p.league : null; };
 
-  const played = {};  // çekilme dışı oynanan maç sayısı
-  real.forEach(m => { played[m.winner] = (played[m.winner] || 0) + 1; played[m.loser] = (played[m.loser] || 0) + 1; });
-
-  // Galibiyet serisi
-  const streak = {};
-  [...real].sort((a, b) => new Date(a.date) - new Date(b.date) || (a.id || 0) - (b.id || 0)).forEach(m => {
-    const cur = streak.__cur || (streak.__cur = {});
-    cur[m.winner] = (cur[m.winner] || 0) + 1;
-    cur[m.loser] = 0;
-    streak[m.winner] = Math.max(streak[m.winner] || 0, cur[m.winner]);
+  // Hükmensiz maçlardan oyuncu başına oyun / set farkı
+  const nw = {};
+  const nwGet = id => nw[id] || (nw[id] = { mp: 0, gd: 0, sd: 0 });
+  real.forEach(m => {
+    const { gw, gl } = _gameCountsWinner(m);
+    const w = nwGet(m.winner), l = nwGet(m.loser);
+    w.mp++; l.mp++; w.gd += gw - gl; l.gd -= gw - gl;
+    w.sd += m.winningSets - m.losingSets; l.sd -= m.winningSets - m.losingSets;
   });
-  delete streak.__cur;
+  stats.forEach(p => {
+    const x = nw[p.id] || { mp: 0, gd: 0, sd: 0 };
+    p.nmp = x.mp; p.gd = x.gd; p.sd = x.sd;
+    p.rate = p.mp ? p.mw / p.mp : 0;
+    p.gdpm = x.mp ? x.gd / x.mp : null;
+  });
 
-  const top = (items, valFn, opts = {}) => {
-    const arr = items.map(it => ({ it, v: valFn(it) })).filter(x => x.v !== null && x.v !== undefined && !isNaN(x.v));
+  // Eşitlikte: ana ölçü → galibiyet % → oyun averajı → set averajı. Hâlâ eşitse hepsi listelenir.
+  const cmpKeys = (a, b) => { for (let i = 0; i < a.length; i++) { if (a[i] !== b[i]) return b[i] - a[i]; } return 0; };
+  const leaders = (items, keyFn, min) => {
+    const arr = items.map(p => ({ p, k: keyFn(p) })).filter(x => x.k[0] !== null && !isNaN(x.k[0]) && (min === undefined || x.k[0] >= min));
     if (!arr.length) return null;
-    const best = Math.max(...arr.map(x => x.v));
-    if (opts.min !== undefined && best < opts.min) return null;
-    return { v: best, items: arr.filter(x => x.v === best).map(x => x.it) };
+    arr.sort((a, b) => cmpKeys(a.k, b.k));
+    const first = arr[0].k;
+    const group = arr.filter(x => cmpKeys(x.k, first) === 0);
+    return { v: first[0], names: group.map(x => ({ name: x.p.name, lg: x.p.lg })), p: group[0].p };
   };
-  const toNames = list => list.map(p => ({ name: p.name, lg: p.lg }));
+  const topN = (items, keyFn, n, min) => items.map(p => ({ p, k: keyFn(p) }))
+    .filter(x => x.k[0] !== null && !isNaN(x.k[0]) && (min === undefined || x.k[0] >= min))
+    .sort((a, b) => cmpKeys(a.k, b.k) || b.p.mp - a.p.mp || a.p.name.localeCompare(b.p.name, 'tr')).slice(0, n);
 
-  const out = [];
-  const add = (label, r, big, sub) => { if (r) out.push({ label, names: toNames(r.items), big: big(r), sub: sub ? sub(r) : '' }); };
+  const kWins = p => [p.mw, p.rate, p.gd, p.sd];
+  const kPts = p => [p.pts, p.rate, p.gd, p.sd];
+  const kGd = p => [p.nmp ? p.gd : null, p.rate, p.sd];
+  const kSd = p => [p.nmp ? p.sd : null, p.rate, p.gd];
 
-  add('EN ÇOK GALİBİYET', top(stats, p => p.mw, { min: 1 }), r => `${r.v}`, () => 'galibiyet');
-  add('EN ÇOK PUAN', top(stats, p => p.pts, { min: 1 }), r => `${r.v}`, () => 'puan');
-  const minMp = 5;
-  let ratePool = stats.filter(p => p.mp >= minMp);
-  const rateLabel = ratePool.length ? `EN YÜKSEK GALİBİYET % (en az ${minMp} maç)` : null;
-  if (!ratePool.length) ratePool = stats.filter(p => p.mp >= 3);
-  add(rateLabel || 'EN YÜKSEK GALİBİYET % (en az 3 maç)', top(ratePool, p => Math.round(p.mw / p.mp * 100)), r => `%${r.v}`, r => `${r.items[0].mw}/${r.items[0].mp} maç`);
-  add('EN İYİ OYUN AVERAJI', top(stats.filter(p => p.mp > 0), p => p.gw - p.gl, { min: 1 }), r => `+${r.v}`, r => `${r.items[0].gw}-${r.items[0].gl}`);
-  add('EN İYİ SET AVERAJI', top(stats.filter(p => p.mp > 0), p => p.sw - p.sl, { min: 1 }), r => `+${r.v}`, r => `${r.items[0].sw}-${r.items[0].sl}`);
-  const strItems = stats.map(p => ({ ...p, streak: streak[p.id] || 0 }));
-  add('EN UZUN GALİBİYET SERİSİ', top(strItems, p => p.streak, { min: 2 }), r => `${r.v}`, () => 'maç üst üste');
-  const actItems = stats.map(p => ({ ...p, pl: played[p.id] || 0 }));
-  add('EN ÇOK MAÇ OYNAYAN', top(actItems, p => p.pl, { min: 1 }), r => `${r.v}`, () => 'maç');
+  const res = { code: code || '', table: [], lists: [], extras: [] };
 
-  // En sert skor
-  const hard = real.map(m => ({ m, ...(_gameCountsWinner(m)) })).filter(x => x.gw - x.gl > 0)
-    .sort((a, b) => (b.gw - b.gl) - (a.gw - a.gl) || a.gl - b.gl || (b.m.id || 0) - (a.m.id || 0))[0];
-  if (hard) out.push({ label: 'EN SERT SKOR', names: [{ name: nameOf(hard.m.winner), lg: lgOf(hard.m.winner) }], big: _scoreWinnerView(hard.m), sub: `${nameOf(hard.m.loser)} karşısında` });
+  if (!code) {
+    ['super', 'l2', 'l3', 'l4', 'l5'].forEach(c => {
+      const pool = stats.filter(p => p.lg === c);
+      const row = { lg: c, wins: leaders(pool, kWins, 1), pts: leaders(pool, kPts, 1), gd: leaders(pool.filter(p => p.nmp > 0), kGd, 1) };
+      if (row.wins || row.pts || row.gd) res.table.push(row);
+    });
+    let pool = stats.filter(p => p.mp >= 5), minLbl = 5;
+    if (!pool.length) { pool = stats.filter(p => p.mp >= 3); minLbl = 3; }
+    res.lists.push({ label: `GALİBİYET % (en az ${minLbl} maç)`, rows: topN(pool, p => [Math.round(p.rate * 100), p.gd, p.sd], 3).map(x => ({ p: x.p, big: `%${x.k[0]}` })) });
+    res.lists.push({ label: 'MAÇ BAŞINA OYUN FARKI (en az 3 maç)', rows: topN(stats.filter(p => p.nmp >= 3), p => [p.gdpm, p.rate], 3, 0.0001).map(x => ({ p: x.p, big: `+${x.k[0].toFixed(1)}` })) });
+  } else {
+    res.lists.push({ label: 'EN ÇOK GALİBİYET', rows: topN(stats, kWins, 3, 1).map(x => ({ p: x.p, big: `${x.p.mw}` })) });
+    res.lists.push({ label: 'EN ÇOK PUAN', rows: topN(stats, kPts, 3, 1).map(x => ({ p: x.p, big: `${x.p.pts}` })) });
+    let pool = stats.filter(p => p.mp >= 5), minLbl = 5;
+    if (!pool.length) { pool = stats.filter(p => p.mp >= 3); minLbl = 3; }
+    res.lists.push({ label: `GALİBİYET % (en az ${minLbl} maç)`, rows: topN(pool, p => [Math.round(p.rate * 100), p.gd, p.sd], 3).map(x => ({ p: x.p, big: `%${x.k[0]}` })) });
+    res.lists.push({ label: 'EN İYİ OYUN AVERAJI', rows: topN(stats.filter(p => p.nmp > 0), kGd, 3, 1).map(x => ({ p: x.p, big: `+${x.p.gd}` })) });
+    res.lists.push({ label: 'EN İYİ SET AVERAJI', rows: topN(stats.filter(p => p.nmp > 0), kSd, 3, 1).map(x => ({ p: x.p, big: `+${x.p.sd}` })) });
+  }
+  res.lists = res.lists.filter(l => l.rows.length);
 
-  // En çekişmeli maç (3 sete giden, set farkları toplamı en küçük)
-  const close = real.filter(m => m.sets.length === 3)
-    .map(m => ({ m, d: m.sets.reduce((s, [a, b]) => s + Math.abs(a - b), 0) }))
-    .sort((a, b) => a.d - b.d || (b.m.id || 0) - (a.m.id || 0))[0];
-  if (close) out.push({ label: 'EN ÇEKİŞMELİ MAÇ', names: [{ name: nameOf(close.m.winner), lg: lgOf(close.m.winner) }], big: _scoreWinnerView(close.m), sub: `${nameOf(close.m.loser)} karşısında` });
+  // Öne çıkanlar
+  const pushExtra = (label, rows, big) => { if (rows.length) res.extras.push({ label, rows, big }); };
 
-  return out;
+  // En farklı skor (eşitlerin hepsi, en çok 3)
+  const diffs = real.map(m => { const g = _gameCountsWinner(m); return { m, d: g.gw - g.gl, gl: g.gl }; }).filter(x => x.d > 0)
+    .sort((a, b) => b.d - a.d || a.gl - b.gl);
+  if (diffs.length) {
+    const best = diffs.filter(x => x.d === diffs[0].d && x.gl === diffs[0].gl).slice(0, 3);
+    pushExtra('EN FARKLI SKOR', best.map(x => ({ name: nameOf(x.m.winner), sub: `– ${nameOf(x.m.loser)} · ${leagueName(x.m.league)}`, big: _scoreWinnerView(x.m).replace(/  /g, ' / ') })));
+  }
+  // En çekişmeli maç
+  const close = real.filter(m => m.sets.length === 3).map(m => ({ m, d: m.sets.reduce((s, [a, b]) => s + Math.abs(a - b), 0) })).sort((a, b) => a.d - b.d);
+  if (close.length) {
+    const best = close.filter(x => x.d === close[0].d).slice(0, 3);
+    pushExtra('EN ÇEKİŞMELİ MAÇ', best.map(x => ({ name: nameOf(x.m.winner), sub: `– ${nameOf(x.m.loser)} · ${leagueName(x.m.league)}`, big: _scoreWinnerView(x.m).replace(/  /g, ' / ') })));
+  }
+  // Galibiyet serisi
+  const cur = {}, mx = {};
+  [...real].sort((a, b) => new Date(a.date) - new Date(b.date) || (a.id || 0) - (b.id || 0)).forEach(m => {
+    cur[m.winner] = (cur[m.winner] || 0) + 1; cur[m.loser] = 0;
+    mx[m.winner] = Math.max(mx[m.winner] || 0, cur[m.winner]);
+  });
+  const strMax = Math.max(0, ...Object.values(mx));
+  if (strMax >= 2) {
+    const ids = Object.keys(mx).filter(id => mx[id] === strMax).map(Number);
+    pushExtra('EN UZUN GALİBİYET SERİSİ', [{ name: ids.map(nameOf).join(' · '), sub: ids.length > 1 ? '(eşit)' : leagueName(lgOf(ids[0])), big: `${strMax} maç` }]);
+  }
+  // En çok maç
+  const played = {};
+  real.forEach(m => { played[m.winner] = (played[m.winner] || 0) + 1; played[m.loser] = (played[m.loser] || 0) + 1; });
+  const plMax = Math.max(0, ...Object.values(played));
+  if (plMax >= 1) {
+    const ids = Object.keys(played).filter(id => played[id] === plMax).map(Number);
+    pushExtra('EN ÇOK MAÇ OYNAYAN', [{ name: ids.map(nameOf).join(' · '), sub: ids.length > 1 ? '(eşit)' : leagueName(lgOf(ids[0])), big: `${plMax} maç` }]);
+  }
+  return res;
 }
 
 const BESTS_SCOPES = [
@@ -7952,43 +7994,51 @@ const BESTS_SCOPES = [
 ];
 
 function buildSeasonBestsHtml(code) {
-  const TX = '#fff', SUB = '#9fb8d4', ACC = '#8fd0ff', LINE = 'rgba(255,255,255,0.14)', CHIP = 'rgba(143,208,255,0.16)', NAVY = '#0b2545';
-  const bests = computeSeasonBests(code);
-  if (!bests.length) return '';
+  const TX = '#fff', SUB = '#9fb8d4', ACC = '#8fd0ff', LINE = 'rgba(255,255,255,0.12)', NAVY = '#0b2545';
+  const b = computeSeasonBests(code);
+  if (!b.table.length && !b.lists.length && !b.extras.length) return '';
   const scopeLabel = (BESTS_SCOPES.find(s => s.code === code) || BESTS_SCOPES[0]).label;
   const dateStr = new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
-  const esc = t => String(t).replace(/[<>&"]/g, '');
+  const esc = t => String(t == null ? '' : t).replace(/[<>&"]/g, '');
+  const panel = inner => `<div data-best="1" style="background:rgba(7,20,42,0.88);border-radius:26px;padding:26px 40px;margin:0 50px 22px;box-shadow:0 30px 60px -20px rgba(0,0,0,0.5)">${inner}</div>`;
+  const head = t => `<div style="font-size:16px;font-weight:800;letter-spacing:0.16em;color:${TX};margin-bottom:8px">${t}</div>`;
 
-  const rows = bests.map(b => {
-    const shown = b.names.length <= 3 ? b.names : b.names.slice(0, 2);
-    const extra = b.names.length - shown.length;
-    const nameLine = shown.map(n => esc(n.name)).join(' · ') + (extra > 0 ? ` +${extra} oyuncu` : '');
-    const lgTag = (!code && b.names.length === 1 && b.names[0].lg) ? `<span style="font-size:17px;font-weight:700;color:${ACC};margin-left:12px;letter-spacing:0.04em">${leagueName(b.names[0].lg)}</span>` : '';
-    const bigIsText = /\s|-/.test(String(b.big)) && String(b.big).length > 8;
-    return `
-      <div data-best="1" style="padding:20px 0;border-bottom:1px solid ${LINE};display:flex;align-items:center;gap:20px">
-        <div style="flex:1;min-width:0">
-          <div style="font-size:15px;font-weight:800;letter-spacing:0.12em;color:${ACC}">${b.label}</div>
-          <div style="font-size:${shown.length > 1 ? 28 : 36}px;font-weight:800;color:${TX};line-height:1.15;margin-top:6px">${nameLine}${lgTag}</div>
-          <div style="font-size:17px;color:${SUB};margin-top:4px">${esc(b.sub)}</div>
-        </div>
-        <div style="text-align:right;flex-shrink:0;font-size:${bigIsText ? 34 : 60}px;font-weight:900;color:${ACC};line-height:1;white-space:nowrap">${esc(b.big)}</div>
-      </div>`;
-  }).join('');
+  const cell = (r) => {
+    if (!r) return `<td style="padding:11px 6px;border-bottom:1px solid ${LINE};color:${SUB};font-size:17px">–</td>`;
+    const many = r.names.length;
+    const nm = r.names.map(n => esc(n.name)).join(many > 2 ? '<br>' : ' · ');
+    return `<td style="padding:11px 6px;border-bottom:1px solid ${LINE};vertical-align:middle"><span style="font-size:${many > 1 ? 17 : 19}px;font-weight:800;color:${TX}">${nm}</span> <span style="font-size:14px;color:${SUB};font-weight:600;margin-left:4px">${esc(r.big)}</span></td>`;
+  };
 
-  const panelH = 120 + bests.length * 124 + 90;
-  const totalH = 400 + panelH + 80;
+  let html = '';
+  if (b.table.length) {
+    const th = t => `<th style="padding:6px;text-align:left;font-size:13px;letter-spacing:0.1em;color:${ACC};font-weight:800;border-bottom:1px solid ${LINE}">${t}</th>`;
+    const rows = b.table.map(r => `<tr><td style="padding:11px 6px;border-bottom:1px solid ${LINE};font-size:16px;font-weight:800;color:${ACC};white-space:nowrap;vertical-align:middle">${leagueName(r.lg).toUpperCase()}</td>${
+      cell(r.wins && { names: r.wins.names, big: r.wins.v })}${cell(r.pts && { names: r.pts.names, big: r.pts.v })}${cell(r.gd && { names: r.gd.names, big: '+' + r.gd.v })}</tr>`).join('');
+    html += panel(`${head('LİG LİG ENLER')}<table style="width:100%;border-collapse:collapse"><tr>${th('')}${th('EN ÇOK GALİBİYET')}${th('EN ÇOK PUAN')}${th('EN İYİ OYUN AVERAJI')}</tr>${rows}</table>
+      <div style="font-size:13px;color:${SUB};margin-top:8px">Eşitlikte sırayla: galibiyet % → oyun averajı → set averajı. Hâlâ eşitse isimler birlikte yazılır.</div>`);
+  }
+
+  if (b.lists.length) {
+    const listHtml = b.lists.map(l => `<div><div style="font-size:14px;font-weight:800;letter-spacing:0.12em;color:${ACC};margin:8px 0 2px">${l.label}</div>${
+      l.rows.map((r, i) => `<div style="display:flex;align-items:center;padding:9px 0;border-bottom:1px solid ${LINE}"><div style="width:34px;font-size:20px;font-weight:900;color:${ACC}">${i + 1}</div><div style="flex:1;min-width:0;font-size:22px;font-weight:700;color:${TX};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.p.name)}<span style="font-size:14px;color:${SUB};font-weight:600;margin-left:8px">${leagueName(r.p.lg)}</span></div><div style="font-size:24px;font-weight:900;color:${ACC};margin-left:10px">${esc(r.big)}</div></div>`).join('')}</div>`).join('');
+    html += panel(`${head(code ? `${scopeLabel.toUpperCase()} · İLK 3` : 'TÜM LİGLER · ORANA GÖRE İLK 3')}<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 34px">${listHtml}</div>`);
+  }
+
+  if (b.extras.length) {
+    const ex = b.extras.map(e => e.rows.map((r, i) => `<div style="display:flex;align-items:center;padding:10px 0;border-bottom:1px solid ${LINE}"><div style="width:290px;flex-shrink:0;font-size:14px;font-weight:800;letter-spacing:0.1em;color:${ACC}">${i === 0 ? e.label : ''}</div><div style="flex:1;min-width:0;font-size:21px;font-weight:700;color:${TX}">${esc(r.name)}<span style="font-size:14px;color:${SUB};font-weight:600;margin-left:8px">${esc(r.sub)}</span></div><div style="font-size:22px;font-weight:900;color:${ACC};margin-left:10px;white-space:nowrap">${esc(r.big)}</div></div>`).join('')).join('');
+    html += panel(`${head('ÖNE ÇIKANLAR')}${ex}`);
+  }
+
   return `
-    <div style="position:relative;width:1080px;height:${totalH}px;overflow:hidden;background:#9fc0d8 url(${LEADERS_BG}) center/cover no-repeat;font-family:'Public Sans','Segoe UI',sans-serif">
-      <div style="position:absolute;left:0;right:0;top:78px;text-align:center">
+    <div style="position:relative;width:1080px;overflow:hidden;background:#9fc0d8 url(${LEADERS_BG}) center/cover no-repeat;font-family:'Public Sans','Segoe UI',sans-serif;padding-bottom:30px">
+      <div style="text-align:center;padding-top:60px;height:300px;box-sizing:border-box">
         <div style="font-size:20px;font-weight:700;letter-spacing:0.3em;color:${NAVY};opacity:0.75">RTA LİGİ · GÜZ SEZONU</div>
-        <div style="font-size:96px;font-weight:900;letter-spacing:-0.02em;color:${NAVY};margin-top:10px;line-height:1">Sezonun Enleri</div>
+        <div style="font-size:92px;font-weight:900;letter-spacing:-0.02em;color:${NAVY};margin-top:10px;line-height:1">Sezonun Enleri</div>
         <div style="font-size:24px;font-weight:700;color:${NAVY};opacity:0.85;margin-top:12px">${scopeLabel} · ${dateStr}</div>
       </div>
-      <div style="position:absolute;left:60px;right:60px;top:380px;background:rgba(7,20,42,0.88);border-radius:30px;padding:6px 48px 26px;box-shadow:0 30px 60px -20px rgba(0,0,0,0.5)">
-        ${rows}
-        <div style="padding-top:22px;display:flex;justify-content:space-between;font-size:17px;letter-spacing:0.08em;color:${SUB}"><span>Rize Tenis Akademisi</span><span>rtaligleri.com</span></div>
-      </div>
+      ${html}
+      <div style="margin:0 50px;padding:14px 40px;border-radius:18px;background:rgba(7,20,42,0.88);display:flex;justify-content:space-between;font-size:16px;letter-spacing:0.08em;color:${SUB}"><span>Rize Tenis Akademisi</span><span>rtaligleri.com</span></div>
     </div>`;
 }
 
