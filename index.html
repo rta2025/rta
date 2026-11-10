@@ -7882,7 +7882,7 @@ function _scoreWinnerView(m) {
 function computeSeasonBests(code) {
   const codes = code ? [code] : ['super', 'l2', 'l3', 'l4', 'l5'];
   const stats = [];
-  codes.forEach(c => getStandings(c).forEach(p => stats.push({ ...p, lg: c })));
+  codes.forEach(c => getStandings(c).forEach((p, i) => stats.push({ ...p, lg: c, rank: i })));
   // Hükmen / çekilme maçları averaj ve skor enlerinde sayılmaz (puan ve galibiyette resmî sayılır)
   const real = state.matches.filter(m => codes.includes(m.league) && !isWoMatch(m) && m.sets && m.sets.length);
   const nameOf = id => playerName(id);
@@ -7904,7 +7904,7 @@ function computeSeasonBests(code) {
     p.gdpm = x.mp ? x.gd / x.mp : null;
   });
 
-  // Eşitlikte: ana ölçü → galibiyet % → oyun averajı → set averajı. Hâlâ eşitse hepsi listelenir.
+  // Eşitlikte lig içi listelerde resmî puan durumu sırası, ligler arası listelerde oran/averaj kullanılır.
   const cmpKeys = (a, b) => { for (let i = 0; i < a.length; i++) { if (a[i] !== b[i]) return b[i] - a[i]; } return 0; };
   const leaders = (items, keyFn, min) => {
     const arr = items.map(p => ({ p, k: keyFn(p) })).filter(x => x.k[0] !== null && !isNaN(x.k[0]) && (min === undefined || x.k[0] >= min));
@@ -7918,10 +7918,11 @@ function computeSeasonBests(code) {
     .filter(x => x.k[0] !== null && !isNaN(x.k[0]) && (min === undefined || x.k[0] >= min))
     .sort((a, b) => cmpKeys(a.k, b.k) || b.p.mp - a.p.mp || a.p.name.localeCompare(b.p.name, 'tr')).slice(0, n);
 
-  const kWins = p => [p.mw, p.rate, p.gd, p.sd];
-  const kPts = p => [p.pts, p.rate, p.gd, p.sd];
-  const kGd = p => [p.nmp ? p.gd : null, p.rate, p.sd];
-  const kSd = p => [p.nmp ? p.sd : null, p.rate, p.gd];
+  // Eşitlikte resmî puan durumundaki sıra (ikili averaj dahil) esas alınır
+  const kWins = p => [p.mw, p.pts, -p.rank];
+  const kPts = p => [p.pts, -p.rank];
+  const kGd = p => [p.nmp ? p.gd : null, -p.rank];
+  const kSd = p => [p.nmp ? p.sd : null, -p.rank];
 
   const res = { code: code || '', table: [], lists: [], extras: [] };
 
@@ -8016,7 +8017,7 @@ function buildSeasonBestsHtml(code) {
     const rows = b.table.map(r => `<tr><td style="padding:11px 6px;border-bottom:1px solid ${LINE};font-size:16px;font-weight:800;color:${ACC};white-space:nowrap;vertical-align:middle">${leagueName(r.lg).toUpperCase()}</td>${
       cell(r.wins && { names: r.wins.names, big: r.wins.v })}${cell(r.pts && { names: r.pts.names, big: r.pts.v })}${cell(r.gd && { names: r.gd.names, big: '+' + r.gd.v })}</tr>`).join('');
     html += panel(`${head('LİG LİG ENLER')}<table style="width:100%;border-collapse:collapse"><tr>${th('')}${th('EN ÇOK GALİBİYET')}${th('EN ÇOK PUAN')}${th('EN İYİ OYUN AVERAJI')}</tr>${rows}</table>
-      <div style="font-size:13px;color:${SUB};margin-top:8px">Eşitlikte sırayla: galibiyet % → oyun averajı → set averajı. Hâlâ eşitse isimler birlikte yazılır.</div>`);
+      <div style="font-size:13px;color:${SUB};margin-top:8px">Eşitlikte puan durumundaki sıra esas alınır.</div>`);
   }
 
   if (b.lists.length) {
