@@ -7957,18 +7957,26 @@ function computeSeasonBests(code) {
     const best = diffs.filter(x => x.d === diffs[0].d && x.gl === diffs[0].gl).slice(0, 3);
     pushExtra(diffs[0].d >= 12 && diffs[0].gl === 0 ? 'DOUBLE BAGEL (6-0 / 6-0)' : 'EN FARKLI SKOR', best.map(x => ({ name: nameOf(x.m.winner), sub: `– ${nameOf(x.m.loser)} · ${leagueName(x.m.league)}`, big: _scoreWinnerView(x.m).replace(/  /g, ' / ') })));
   }
-  // Bagel kralı: en çok 6-0 set kazanan (hükmen maçları sayılmaz)
-  const bagel = {};
-  real.forEach(m => {
-    let s0 = 0; m.sets.forEach(([a, b]) => { if (a > b) s0++; });
-    const w0 = s0 === m.winningSets;
-    m.sets.forEach(([a, b], idx) => { const w = w0 ? a : b, l = w0 ? b : a; if (w === 6 && l === 0 && !(idx === 2 && (a >= 10 || b >= 10))) bagel[m.winner] = (bagel[m.winner] || 0) + 1; });
-  });
-  const bgMax = Math.max(0, ...Object.values(bagel));
-  if (bgMax >= 1) {
-    const ids = Object.keys(bagel).filter(id => bagel[id] === bgMax).map(Number);
-    pushExtra('EN ÇOK BAGEL (6-0 SET)', [{ name: ids.map(nameOf).join(' · '), sub: ids.length > 1 ? '(eşit)' : leagueName(lgOf(ids[0])), big: `${bgMax} bagel` }]);
-  }
+  // Sayaç tabanlı enler (hükmen maçları sayılmaz): kazananın bakış açısıyla
+  const countBy = (pred) => {
+    const c = {};
+    real.forEach(m => {
+      let s0 = 0; m.sets.forEach(([x, y]) => { if (x > y) s0++; });
+      const w0 = s0 === m.winningSets;
+      const sets = m.sets.map(([x, y]) => w0 ? [x, y] : [y, x]);   // [kazanan, kaybeden]
+      if (pred(m, sets)) c[m.winner] = (c[m.winner] || 0) + 1;
+    });
+    return c;
+  };
+  const pushCount = (label, c, unit) => {
+    const mxv = Math.max(0, ...Object.values(c));
+    if (mxv < 1) return;
+    const ids = Object.keys(c).filter(id => c[id] === mxv).map(Number);
+    pushExtra(label, [{ name: ids.map(nameOf).join(' · '), sub: ids.length > 1 ? '(eşit)' : leagueName(lgOf(ids[0])), big: `${mxv} ${unit}` }]);
+  };
+  pushCount('SET VERMEDEN KAZANAN (2-0)', countBy((m, st) => m.winningSets === 2 && m.losingSets === 0), 'maç');
+  pushCount('GERİDEN GELİP EN ÇOK KAZANAN', countBy((m, st) => st.length === 3 && st[0][0] < st[0][1]), 'maç');
+  pushCount('SÜPER TIE-BREAK GALİBİYETİ', countBy((m, st) => st.length === 3 && (st[2][0] >= 10 || st[2][1] >= 10)), 'maç');
   // En çekişmeli maç
   const close = real.filter(m => m.sets.length === 3).map(m => ({ m, d: m.sets.reduce((s, [a, b]) => s + Math.abs(a - b), 0) })).sort((a, b) => a.d - b.d);
   if (close.length) {
