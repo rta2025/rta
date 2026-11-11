@@ -7911,7 +7911,7 @@ function computeSeasonBests(code) {
     if (!arr.length) return null;
     arr.sort((a, b) => cmpKeys(a.k, b.k));
     const first = arr[0].k;
-    const group = arr.filter(x => cmpKeys(x.k, first) === 0);
+    const group = arr.filter(x => x.k[0] === first[0]);   // ana ölçüde eşit olanların hepsi, puan durumu sırasıyla
     return { v: first[0], names: group.map(x => ({ name: x.p.name, lg: x.p.lg })), p: group[0].p };
   };
   const topN = (items, keyFn, n, min) => items.map(p => ({ p, k: keyFn(p) }))
@@ -8017,7 +8017,7 @@ function buildSeasonBestsHtml(code) {
     const rows = b.table.map(r => `<tr><td style="padding:11px 6px;border-bottom:1px solid ${LINE};font-size:16px;font-weight:800;color:${ACC};white-space:nowrap;vertical-align:middle">${leagueName(r.lg).toUpperCase()}</td>${
       cell(r.wins && { names: r.wins.names, big: r.wins.v })}${cell(r.pts && { names: r.pts.names, big: r.pts.v })}${cell(r.gd && { names: r.gd.names, big: '+' + r.gd.v })}</tr>`).join('');
     html += panel(`${head('LİG LİG ENLER')}<table style="width:100%;border-collapse:collapse"><tr>${th('')}${th('EN ÇOK GALİBİYET')}${th('EN ÇOK PUAN')}${th('EN İYİ OYUN AVERAJI')}</tr>${rows}</table>
-      <div style="font-size:13px;color:${SUB};margin-top:8px">Eşitlikte puan durumundaki sıra esas alınır.</div>`);
+      <div style="font-size:13px;color:${SUB};margin-top:8px">Eşit olan oyuncuların hepsi yazılır, puan durumu sırasıyla.</div>`);
   }
 
   if (b.lists.length) {
