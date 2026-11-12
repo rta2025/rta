@@ -8193,9 +8193,17 @@ function computeSeasonBests(code) {
     const group = arr.filter(x => x.k[0] === first[0]);   // ana ölçüde eşit olanların hepsi, puan durumu sırasıyla
     return { v: first[0], names: group.map(x => ({ name: x.p.name, lg: x.p.lg })), p: group[0].p };
   };
-  const topN = (items, keyFn, n, min) => items.map(p => ({ p, k: keyFn(p) }))
-    .filter(x => x.k[0] !== null && !isNaN(x.k[0]) && (min === undefined || x.k[0] >= min))
-    .sort((a, b) => cmpKeys(a.k, b.k) || b.p.mp - a.p.mp || a.p.name.localeCompare(b.p.name, 'tr')).slice(0, n);
+  // İlk n sıra; n. sıradakiyle ana ölçüde eşit olan herkes de listelenir (kimse gizlenmez)
+  const topN = (items, keyFn, n, min) => {
+    const arr = items.map(p => ({ p, k: keyFn(p) }))
+      .filter(x => x.k[0] !== null && !isNaN(x.k[0]) && (min === undefined || x.k[0] >= min))
+      .sort((a, b) => cmpKeys(a.k, b.k) || b.p.mp - a.p.mp || a.p.name.localeCompare(b.p.name, 'tr'));
+    if (!arr.length) return [];
+    const lim = arr[Math.min(n, arr.length) - 1].k[0];
+    const out = arr.filter((x, i) => i < n || x.k[0] === lim);
+    out.forEach(x => { x.rk = arr.findIndex(y => y.k[0] === x.k[0]) + 1; });
+    return out;
+  };
 
   // Eşitlikte resmî puan durumundaki sıra (ikili averaj dahil) esas alınır
   const kWins = p => [p.mw, p.pts, -p.rank];
@@ -8213,28 +8221,38 @@ function computeSeasonBests(code) {
     });
     let pool = stats.filter(p => p.mp >= 5), minLbl = 5;
     if (!pool.length) { pool = stats.filter(p => p.mp >= 3); minLbl = 3; }
-    res.lists.push({ label: `GALİBİYET % (en az ${minLbl} maç)`, rows: topN(pool, p => [Math.round(p.rate * 100), p.gd, p.sd], 3).map(x => ({ p: x.p, big: `%${x.k[0]}` })) });
-    res.lists.push({ label: 'MAÇ BAŞINA OYUN FARKI (en az 3 maç)', rows: topN(stats.filter(p => p.nmp >= 3), p => [p.gdpm, p.rate], 3, 0.0001).map(x => ({ p: x.p, big: `+${x.k[0].toFixed(1)}` })) });
+    res.lists.push({ label: `GALİBİYET % (en az ${minLbl} maç)`, rows: topN(pool, p => [Math.round(p.rate * 100), p.gd, p.sd], 3).map(x => ({ rk: x.rk, p: x.p, big: `%${x.k[0]}` })) });
+    res.lists.push({ label: 'MAÇ BAŞINA OYUN FARKI (en az 3 maç)', rows: topN(stats.filter(p => p.nmp >= 3), p => [p.gdpm, p.rate], 3, 0.0001).map(x => ({ rk: x.rk, p: x.p, big: `+${x.k[0].toFixed(1)}` })) });
   } else {
-    res.lists.push({ label: 'EN ÇOK GALİBİYET', rows: topN(stats, kWins, 3, 1).map(x => ({ p: x.p, big: `${x.p.mw}` })) });
-    res.lists.push({ label: 'EN ÇOK PUAN', rows: topN(stats, kPts, 3, 1).map(x => ({ p: x.p, big: `${x.p.pts}` })) });
+    res.lists.push({ label: 'EN ÇOK GALİBİYET', rows: topN(stats, kWins, 3, 1).map(x => ({ rk: x.rk, p: x.p, big: `${x.p.mw}` })) });
+    res.lists.push({ label: 'EN ÇOK PUAN', rows: topN(stats, kPts, 3, 1).map(x => ({ rk: x.rk, p: x.p, big: `${x.p.pts}` })) });
     let pool = stats.filter(p => p.mp >= 5), minLbl = 5;
     if (!pool.length) { pool = stats.filter(p => p.mp >= 3); minLbl = 3; }
-    res.lists.push({ label: `GALİBİYET % (en az ${minLbl} maç)`, rows: topN(pool, p => [Math.round(p.rate * 100), p.gd, p.sd], 3).map(x => ({ p: x.p, big: `%${x.k[0]}` })) });
-    res.lists.push({ label: 'EN İYİ OYUN AVERAJI', rows: topN(stats.filter(p => p.nmp > 0), kGd, 3, 1).map(x => ({ p: x.p, big: `+${x.p.gd}` })) });
-    res.lists.push({ label: 'EN İYİ SET AVERAJI', rows: topN(stats.filter(p => p.nmp > 0), kSd, 3, 1).map(x => ({ p: x.p, big: `+${x.p.sd}` })) });
+    res.lists.push({ label: `GALİBİYET % (en az ${minLbl} maç)`, rows: topN(pool, p => [Math.round(p.rate * 100), p.gd, p.sd], 3).map(x => ({ rk: x.rk, p: x.p, big: `%${x.k[0]}` })) });
+    res.lists.push({ label: 'EN İYİ OYUN AVERAJI', rows: topN(stats.filter(p => p.nmp > 0), kGd, 3, 1).map(x => ({ rk: x.rk, p: x.p, big: `+${x.p.gd}` })) });
+    res.lists.push({ label: 'EN İYİ SET AVERAJI', rows: topN(stats.filter(p => p.nmp > 0), kSd, 3, 1).map(x => ({ rk: x.rk, p: x.p, big: `+${x.p.sd}` })) });
   }
   res.lists = res.lists.filter(l => l.rows.length);
 
-  // Öne çıkanlar
+  // Öne çıkanlar (eşit olanların hepsi yazılır)
   const pushExtra = (label, rows, big) => { if (rows.length) res.extras.push({ label, rows, big }); };
 
   // En farklı skor (eşitlerin hepsi, en çok 3)
   const diffs = real.map(m => { const g = _gameCountsWinner(m); return { m, d: g.gw - g.gl, gl: g.gl }; }).filter(x => x.d > 0)
     .sort((a, b) => b.d - a.d || a.gl - b.gl);
   if (diffs.length) {
-    const best = diffs.filter(x => x.d === diffs[0].d && x.gl === diffs[0].gl).slice(0, 3);
-    pushExtra(diffs[0].d >= 12 && diffs[0].gl === 0 ? 'DOUBLE BAGEL (6-0 / 6-0)' : 'EN FARKLI SKOR', best.map(x => ({ name: nameOf(x.m.winner), sub: `– ${nameOf(x.m.loser)} · ${leagueName(x.m.league)}`, big: _scoreWinnerView(x.m).replace(/  /g, ' / ') })));
+    if (diffs[0].d >= 12 && diffs[0].gl === 0) {
+      // Double bagel: hiçbirini gizlemeden, oyuncu başına sayıyla hepsini yaz
+      const per = {};
+      diffs.filter(x => x.d >= 12 && x.gl === 0).forEach(x => { (per[x.m.winner] = per[x.m.winner] || []).push(x.m); });
+      const rows = Object.keys(per).map(id => ({ id: +id, ms: per[id] }))
+        .sort((a, b) => b.ms.length - a.ms.length || nameOf(a.id).localeCompare(nameOf(b.id), 'tr'))
+        .map(r => ({ name: nameOf(r.id), sub: `${leagueName(r.ms[0].league)} · ${r.ms.map(m => nameOf(m.loser)).join(', ')}`, big: `${r.ms.length} kez` }));
+      pushExtra('DOUBLE BAGEL (6-0 / 6-0)', rows);
+    } else {
+      const best = diffs.filter(x => x.d === diffs[0].d && x.gl === diffs[0].gl);
+      pushExtra('EN FARKLI SKOR', best.map(x => ({ name: nameOf(x.m.winner), sub: `– ${nameOf(x.m.loser)} · ${leagueName(x.m.league)}`, big: _scoreWinnerView(x.m).replace(/  /g, ' / ') })));
+    }
   }
   // Sayaç tabanlı enler (hükmen maçları sayılmaz): kazananın bakış açısıyla
   const countBy = (pred) => {
@@ -8259,7 +8277,7 @@ function computeSeasonBests(code) {
   // En çekişmeli maç
   const close = real.filter(m => m.sets.length === 3).map(m => ({ m, d: m.sets.reduce((s, [a, b]) => s + Math.abs(a - b), 0) })).sort((a, b) => a.d - b.d);
   if (close.length) {
-    const best = close.filter(x => x.d === close[0].d).slice(0, 3);
+    const best = close.filter(x => x.d === close[0].d);
     pushExtra('EN ÇEKİŞMELİ MAÇ', best.map(x => ({ name: nameOf(x.m.winner), sub: `– ${nameOf(x.m.loser)} · ${leagueName(x.m.league)}`, big: _scoreWinnerView(x.m).replace(/  /g, ' / ') })));
   }
   // Galibiyet serisi
@@ -8321,7 +8339,7 @@ function buildSeasonBestsHtml(code) {
 
   if (b.lists.length) {
     const listHtml = b.lists.map(l => `<div><div style="font-size:14px;font-weight:800;letter-spacing:0.12em;color:${ACC};margin:8px 0 2px">${l.label}</div>${
-      l.rows.map((r, i) => `<div style="display:flex;align-items:center;padding:9px 0;border-bottom:1px solid ${LINE}"><div style="width:34px;font-size:20px;font-weight:900;color:${ACC}">${i + 1}</div><div style="flex:1;min-width:0;font-size:22px;font-weight:700;color:${TX};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.p.name)}<span style="font-size:14px;color:${SUB};font-weight:600;margin-left:8px">${leagueName(r.p.lg)}</span></div><div style="font-size:24px;font-weight:900;color:${ACC};margin-left:10px">${esc(r.big)}</div></div>`).join('')}</div>`).join('');
+      l.rows.map((r, i) => `<div style="display:flex;align-items:center;padding:9px 0;border-bottom:1px solid ${LINE}"><div style="width:34px;font-size:20px;font-weight:900;color:${ACC}">${r.rk || i + 1}</div><div style="flex:1;min-width:0;font-size:22px;font-weight:700;color:${TX};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.p.name)}<span style="font-size:14px;color:${SUB};font-weight:600;margin-left:8px">${leagueName(r.p.lg)}</span></div><div style="font-size:24px;font-weight:900;color:${ACC};margin-left:10px">${esc(r.big)}</div></div>`).join('')}</div>`).join('');
     html += panel(`${head(code ? `${scopeLabel.toUpperCase()} · İLK 3` : 'TÜM LİGLER · ORANA GÖRE İLK 3')}<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 34px">${listHtml}</div>`);
   }
 
