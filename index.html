@@ -2015,6 +2015,7 @@ body.light-mode .rc2{--rc-card:#eef3fc;--rc-card2:#e3ebf8;--rc-line:#c6d4ec;--rc
 .rc2-card.champ{border-color:var(--rc-gold);box-shadow:0 0 0 1px var(--rc-gold)}
 .rc2-card.champ .rc2-t.w{background:rgba(230,196,92,.14)}.rc2-card.champ .rc2-t.w .rc2-ts{color:var(--rc-gold)}
 .rc2-trophy{position:absolute;font-size:12px;color:var(--rc-gold);font-weight:800;letter-spacing:.12em}
+.rc2-nt{font-size:10px;color:var(--rc-mut);margin-top:4px;padding-top:4px;border-top:1px dashed var(--rc-line)}
 .rc2-note{font-size:11px;color:var(--rc-mut);margin-top:8px}
 .rc2-gbox{background:var(--rc-card);border:1px solid var(--rc-line);border-radius:12px;padding:10px 12px;margin-bottom:12px;overflow-x:auto}
 .rc2-gh{font-size:11px;letter-spacing:.14em;color:var(--rc-acc);font-weight:800;margin-bottom:6px}
@@ -7108,6 +7109,7 @@ const RC2_RAW = {
     K: ['Hatice Can Furat', 'Turushan Övgü', 'Celil Tanrıkulu'], L: ['Yaşar Mercan', 'Özge Şimşek', 'Kerem Asım Kotil']
   },
   // Eleme turlarında oyuncu değişikliği: takım -> [çıkan, giren]
+  champion: 'E',
   subs: { H: ['Muhammed Berat Özyanık', 'Fevzi Köse'] },
   // [takım, oynanan maç, kazanılan maç, set+, set-, oyun+, oyun-, tie-break, puan, çeyrek finale çıktı mı]
   groups: [
@@ -7147,7 +7149,7 @@ const RC2_RAW = {
       ['I','L',[['t','Yaşar Mercan','Burak Tuğcu','6-4 4-6 [10-6]','L'],['t','Kerem Asım Kotil','Uğur Albayrak','6-4 4-6 6-3','L']]],
       ['E','H',[['t','Ramazan Demirci','Evren Tuğcu','6-0 6-0','E'],['t','Fevzi Köse','Eray Gürsoy','6-0 6-0 WO','H'],['c','Ramazan / İlker','Evren / Burak B.','6-2 6-2','E']]]
     ],
-    f: [['L','E',[['c','Ramazan / İlker','Özge / Yaşar','6-3 6-2','E']]]]
+    f: [['L','E',[['t','Özge Şimşek','İlker Memişoğlu','7-6 0-6 [10-6]','L'],['c','Ramazan / İlker','Özge / Yaşar','6-3 6-2','E']]]]
   }
 };
 
@@ -7168,7 +7170,7 @@ function rc2BuildEntry() {
       ko: {
         qf: R.ko.qf.map(t => ({ a: t[0], b: t[1], m: mk(t[2]) })),
         sf: R.ko.sf.map(t => ({ a: t[0], b: t[1], m: mk(t[2]) })),
-        f: R.ko.f.map(t => ({ a: t[0], b: t[1], m: mk(t[2]) }))
+        f: R.ko.f.map(t => ({ a: t[0], b: t[1], m: mk(t[2]), win: R.champion }))
       }
     }
   };
@@ -7177,12 +7179,13 @@ function rc2BuildEntry() {
 function rc2AddToArchive() {
   if (!isLoggedIn()) { showToast('Yönetici girişi gerekli', 'err'); return; }
   const list = loadTournamentArchiveList();
-  if (list.some(e => e.type === 'team' && e.info && e.info.name === 'Rize Cup 2')) { showToast('Rize Cup 2 zaten arşivde', 'err'); return; }
-  const entry = rc2BuildEntry();
-  list.push(entry);
+  const fresh = rc2BuildEntry();
+  const old = list.find(e => e.type === 'team' && e.info && e.info.name === 'Rize Cup 2');
+  if (old) { old.team = fresh.team; old.champion = fresh.champion; old.info = fresh.info; }   // id ve poster korunur
+  else list.push(fresh);
   saveTournamentArchiveLocal(list);
   renderTournamentArchive();
-  showToast('Rize Cup 2 arşive eklendi 🏆', 'ok');
+  showToast(old ? 'Rize Cup 2 güncellendi 🏆' : 'Rize Cup 2 arşive eklendi 🏆', 'ok');
   if (window._sbAdmin) {
     window._sbAdmin.from('meta').update({ tournament_archive: list }).eq('id', 1)
       .then(({ error }) => { if (error) showToast('Supabase hatası: ' + error.message, 'err'); });
@@ -7196,6 +7199,18 @@ function _rc2Squad(T, c, ko) {
   const sb = (T.subs || RC2_RAW.subs || {})[c];
   if (ko && sb) ps = ps.map(n => n === sb[0] ? sb[1] : n);
   return ps.join(' · ');
+}
+function _rc2SetCount(tie) {
+  let a = 0, b = 0;
+  tie.m.forEach(x => {
+    String(x.s).split(/\s+/).forEach(tok => {
+      const m = tok.match(/^\[?(\d+)-(\d+)\]?$/); if (!m) return;
+      const wins = +m[1] > +m[2], other = x.wt === tie.a ? tie.b : tie.a;
+      const wTeam = x.wt, lTeam = other;
+      if (wins) { if (wTeam === tie.a) a++; else b++; } else { if (lTeam === tie.a) a++; else b++; }
+    });
+  });
+  return [a, b];
 }
 function _rc2Score(tie) { let a = 0, b = 0; tie.m.forEach(x => { if (x.wt === tie.a) a++; else if (x.wt === tie.b) b++; }); return [a, b]; }
 
@@ -7221,8 +7236,9 @@ function rc2MatchRows(ms, T, ctx) {
 
 function rc2TieCard(T, tie, x, y, cls, ko) {
   const [sa, sb] = _rc2Score(tie);
+  const wa = tie.win ? tie.win === tie.a : sa > sb, wb = tie.win ? tie.win === tie.b : sb > sa;
   const trow = (c, s, win) => `<div class="rc2-t ${win ? 'w' : 'l'}"><div><div class="rc2-tn">${c} Takımı</div><div class="rc2-tp">${_rc2Esc(_rc2Squad(T, c, ko))}</div></div><div class="rc2-ts">${s}</div></div>`;
-  return `<div class="rc2-card ${cls || ''}" style="left:${x}px;top:${y}px"><div class="rc2-tt">${trow(tie.a, sa, sa > sb)}${trow(tie.b, sb, sb > sa)}</div><div class="rc2-m">${rc2MatchRows(tie.m, T, [tie.a, tie.b])}</div></div>`;
+  return `<div class="rc2-card ${cls || ''}" style="left:${x}px;top:${y}px"><div class="rc2-tt">${trow(tie.a, sa, wa)}${trow(tie.b, sb, wb)}</div><div class="rc2-m">${rc2MatchRows(tie.m, T, [tie.a, tie.b])}${tie.win && sa === sb ? `<div class="rc2-nt">Maç skoru ${sa}-${sb} · set sayısı: ${tie.a} ${_rc2SetCount(tie)[0]} – ${_rc2SetCount(tie)[1]} ${tie.b}</div>` : ''}</div></div>`;
 }
 
 function rc2TreeHtml(T) {
@@ -7234,7 +7250,7 @@ function rc2TreeHtml(T) {
   const f = ko.f[0];
   if (f) {
     const [sa, sb] = _rc2Score(f);
-    const champ = sa > sb ? f.a : f.b;
+    const champ = f.win || (sa > sb ? f.a : f.b);
     h += rc2TieCard(T, f, 820, fy, 'champ', true);
     h += `<div class="rc2-trophy" style="left:820px;top:${fy - 26}px">🏆 ŞAMPİYON · ${champ} TAKIMI</div>`;
   }
@@ -7300,7 +7316,7 @@ function renderTournamentArchive() {
 
   const archive = loadTournamentArchiveList();
   const hasRc2 = archive.some(e => e.type === 'team' && e.info && e.info.name === 'Rize Cup 2');
-  const adminAdd = (isLoggedIn() && !hasRc2) ? `<div style="margin-top:10px"><button class="btn btn-sm" onclick="rc2AddToArchive()">➕ Rize Cup 2'yi arşive ekle</button></div>` : '';
+  const adminAdd = isLoggedIn() ? `<div style="margin-top:10px"><button class="btn btn-sm" onclick="rc2AddToArchive()">${hasRc2 ? '🔄 Rize Cup 2 verisini güncelle' : '➕ Rize Cup 2\'yi arşive ekle'}</button></div>` : '';
   if (!archive.length && !adminAdd) { section.style.display = 'none'; return; }
 
   section.style.display = 'block';
