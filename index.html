@@ -2708,6 +2708,13 @@ body.light-mode .rc2{--rc-card:#eef3fc;--rc-card2:#e3ebf8;--rc-line:#c6d4ec;--rc
     </div>
   </div>
 
+  <div class="sec-title" style="margin-top:28px">Sezon Sayacı</div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px">
+    <label style="font-size:0.85rem;color:var(--text-dim)">Sezon bitiş tarihi:</label>
+    <input type="date" id="season-end-input" style="padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card,transparent);color:var(--text)">
+    <button class="btn btn-blue" onclick="saveSeasonEnd()">💾 Kaydet</button>
+  </div>
+
   <div class="sec-title" style="margin-top:28px">Sezon Geçişi</div>
   <div style="background:rgba(93,201,93,0.06);border:1px solid rgba(93,201,93,0.2);border-radius:12px;padding:14px 16px;margin-bottom:16px;font-size:0.82rem;color:var(--text-dim);line-height:1.6">
     Yeni sezona geçerken sırasıyla: <strong>1)</strong> Arşiv sekmesinden "Sezon Arşivle" &nbsp;<strong>2)</strong> Play-off sonuçlarını gir &nbsp;<strong>3)</strong> aşağıdaki "Yükselme/Düşme Uygula" &nbsp;<strong>4)</strong> en son "Maçları Temizle".
@@ -3331,6 +3338,9 @@ async function loadFromSupabase() {
       }
       // Turnuva bilgisi ve turnuva arşivini de burada al (sadece Turnuvalar sekmesine
       // uğranmasına bağlı kalmadan, hangi sekmeden girilirse girilsin hazır olsun)
+      if (meta.season_dates && meta.season_dates.end) localStorage.setItem('rta_season_dates', JSON.stringify(meta.season_dates));
+      else if ('season_dates' in meta) localStorage.removeItem('rta_season_dates');
+      try { if (window._cdUpdate) window._cdUpdate(); fillSeasonEndInput(); } catch(e) {}
       if (meta.team_tournament) localStorage.setItem('rta_team_tournament', JSON.stringify(meta.team_tournament));
       else if ('team_tournament' in meta) localStorage.removeItem('rta_team_tournament');
       if (meta.tournament_info) localStorage.setItem('rta_tournament_info', JSON.stringify(meta.tournament_info));
@@ -4655,13 +4665,20 @@ function clearSpecialPlayer() {
 // SEZON SAYACI
 function initCountdown() {
   const SEASON_START = new Date(2026, 8, 4, 0, 0, 0);  // 4 Eylül 2026 — Güz Sezonu başlangıcı
-  const SEASON_END   = new Date(2026, 10, 9, 23, 59, 59); // 9 Kasım 2026 — Güz Sezonu bitişi
+  const DEFAULT_END  = new Date(2026, 10, 30, 23, 59, 59); // 30 Kasım 2026 — varsayılan bitiş
+  function getEnd() {
+    try {
+      const d = JSON.parse(localStorage.getItem('rta_season_dates') || 'null');
+      if (d && d.end) { const e = new Date(d.end + 'T23:59:59'); if (!isNaN(e)) return e; }
+    } catch(e) {}
+    return DEFAULT_END;
+  }
 
   function update() {
     const el = document.getElementById('season-countdown');
     if (!el) return;
     const now = new Date();
-    const diff = SEASON_END - now;
+    const diff = getEnd() - now;
 
     if (diff > 0) {
       // Güz Sezonu devam ediyor — bitimine kalan süre
@@ -4682,8 +4699,28 @@ function initCountdown() {
       el.title = '';
     }
   }
+  window._cdUpdate = update;
   update();
   setInterval(update, 60000);
+}
+
+function saveSeasonEnd() {
+  const v = (document.getElementById('season-end-input') || {}).value;
+  if (!v) { showToast('Bitiş tarihi seç', 'err'); return; }
+  localStorage.setItem('rta_season_dates', JSON.stringify({ end: v }));
+  if (window._cdUpdate) window._cdUpdate();
+  if (!window._sbAdmin) { showToast('Kaydedildi (sadece bu cihazda)', 'ok'); return; }
+  window._sbAdmin.from('meta').update({ season_dates: { end: v } }).eq('id', 1)
+    .then(r => {
+      if (r && r.error) showToast('Sunucuya kaydedilemedi: SQL satırını çalıştırdın mı?', 'err');
+      else showToast('Sezon bitiş tarihi kaydedildi', 'ok');
+    });
+}
+function fillSeasonEndInput() {
+  const el = document.getElementById('season-end-input'); if (!el) return;
+  let v = '2026-11-30';
+  try { const d = JSON.parse(localStorage.getItem('rta_season_dates') || 'null'); if (d && d.end) v = d.end; } catch(e) {}
+  el.value = v;
 }
 
 // ═══════════════════════════════════════════════════
@@ -9542,7 +9579,7 @@ document.getElementById('login-overlay').style.display = 'none';
 setAdminUI(false); // Oturum durumu initAuth() ile (Supabase'den) belirlenecek
 
 try { renderAll(); } catch(e) { console.error('renderAll hatası:', e); }
-try { initCountdown(); } catch(e) { console.error('initCountdown hatası:', e); }
+try { initCountdown(); fillSeasonEndInput(); } catch(e) { console.error('initCountdown hatası:', e); }
 try { initTheme(); } catch(e) { console.error('initTheme hatası:', e); }
 try { loadWeather(); } catch(e) { console.error('loadWeather hatası:', e); }
 // Açılış sayfasını belirle: önce URL hash'ine bak, yoksa son açık sayfayı geri yükle
