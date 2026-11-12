@@ -1989,6 +1989,52 @@ body.light-mode .rk-example-highlight { color: #1a2a1a; }
 .report-note{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:14px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:12.5px;color:var(--text-dim);text-align:center}
 .report-note-btn{background:rgba(93,201,93,0.12);color:var(--accent);border:1px solid rgba(93,201,93,0.35);border-radius:8px;padding:6px 14px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit}
 .report-note-btn:hover{background:rgba(93,201,93,0.2)}
+
+/* Rize Cup 2 arşiv görünümü (mavi tema) */
+.rc2{--rc-card:#141e33;--rc-card2:#0f1729;--rc-line:#22314f;--rc-acc:#8fb8ff;--rc-mut:#6f82a6;--rc-txt:#e6edf8;--rc-lose:#93a4c4;--rc-win:rgba(110,168,255,.12);--rc-gold:#e6c45c;color:var(--rc-txt)}
+body.light-mode .rc2{--rc-card:#eef3fc;--rc-card2:#e3ebf8;--rc-line:#c6d4ec;--rc-acc:#2e63c8;--rc-mut:#5c6f93;--rc-txt:#16233f;--rc-lose:#5c6f93;--rc-win:rgba(46,99,200,.12);--rc-gold:#b8901f}
+.rc2-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.rc2-tabbtn{background:var(--rc-card);border:1px solid var(--rc-line);color:var(--rc-mut);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+.rc2-tabbtn.on{background:var(--rc-acc);border-color:var(--rc-acc);color:#0b1426}
+.rc2-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px}
+.rc2-tree{position:relative;width:1180px;height:850px}
+.rc2-svg{position:absolute;left:0;top:0;pointer-events:none;stroke:var(--rc-line)}
+.rc2-colh{position:absolute;top:0;font-size:11px;letter-spacing:.14em;color:var(--rc-mut);font-weight:700}
+.rc2-card{position:absolute;width:350px;background:var(--rc-card);border:1px solid var(--rc-line);border-radius:12px;overflow:hidden}
+.rc2-t{display:flex;justify-content:space-between;align-items:center;padding:8px 12px}
+.rc2-t+.rc2-t{border-top:1px solid var(--rc-line)}
+.rc2-tn{font-size:14px;font-weight:700}.rc2-t.l .rc2-tn{color:var(--rc-lose)}
+.rc2-tp{font-size:10.5px;color:var(--rc-mut);margin-top:1px}
+.rc2-ts{font-size:19px;font-weight:900;color:var(--rc-mut);min-width:20px;text-align:right}
+.rc2-t.w{background:var(--rc-win)}.rc2-t.w .rc2-ts{color:var(--rc-acc)}
+.rc2-m{padding:6px 12px;border-top:1px solid var(--rc-line);background:var(--rc-card2)}
+.rc2-r{display:flex;align-items:baseline;gap:8px;font-size:11.5px;padding:3px 0}
+.rc2-r i{font-style:normal;font-size:9.5px;color:var(--rc-mut);font-weight:700;width:34px;letter-spacing:.06em;flex-shrink:0}
+.rc2-nm{flex:1;color:var(--rc-lose);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rc2-nm b{color:var(--rc-txt);font-weight:700}
+.rc2-sc{font-weight:700;white-space:nowrap}.rc2-sc u{text-decoration:none;font-size:9px;color:var(--rc-mut);letter-spacing:.06em;margin-left:3px}
+.rc2-card.champ{border-color:var(--rc-gold);box-shadow:0 0 0 1px var(--rc-gold)}
+.rc2-card.champ .rc2-t.w{background:rgba(230,196,92,.14)}.rc2-card.champ .rc2-t.w .rc2-ts{color:var(--rc-gold)}
+.rc2-trophy{position:absolute;font-size:12px;color:var(--rc-gold);font-weight:800;letter-spacing:.12em}
+.rc2-note{font-size:11px;color:var(--rc-mut);margin-top:8px}
+.rc2-gbox{background:var(--rc-card);border:1px solid var(--rc-line);border-radius:12px;padding:10px 12px;margin-bottom:12px;overflow-x:auto}
+.rc2-gh{font-size:11px;letter-spacing:.14em;color:var(--rc-acc);font-weight:800;margin-bottom:6px}
+.rc2-gtab{width:100%;border-collapse:collapse;font-size:12px}
+.rc2-gtab th{font-size:9.5px;letter-spacing:.08em;color:var(--rc-mut);text-align:center;padding:4px 4px;font-weight:700}
+.rc2-gtab th:nth-child(2){text-align:left}
+.rc2-gtab td{padding:7px 4px;border-top:1px solid var(--rc-line);text-align:center;white-space:nowrap}
+.rc2-gtab td:nth-child(2){text-align:left;white-space:normal}
+.rc2-gtab tr.x td{color:var(--rc-mut)}
+.rc2-gtab tr.q td:first-child{color:var(--rc-acc);font-weight:800}
+.rc2-gt{font-weight:700;font-size:13px}.rc2-gp{font-size:10px;color:var(--rc-mut);margin-top:1px}
+.rc2-chk{color:var(--rc-acc);font-size:11px}.rc2-pts{font-weight:900;color:var(--rc-acc)}
+.rc2-gtab tr.x .rc2-pts{color:var(--rc-mut)}
+.rc2-det{background:var(--rc-card);border:1px solid var(--rc-line);border-radius:12px;margin-bottom:10px;overflow:hidden}
+.rc2-det summary{padding:11px 14px;font-weight:700;font-size:13px;cursor:pointer;color:var(--rc-txt)}
+.rc2-wk{font-size:10px;letter-spacing:.14em;color:var(--rc-acc);font-weight:800;padding:8px 14px 4px}
+.rc2-tie{margin:0 10px 10px;border:1px solid var(--rc-line);border-radius:10px;overflow:hidden}
+.rc2-tieh{display:flex;justify-content:space-between;align-items:center;padding:7px 12px;font-size:12px;font-weight:700;color:var(--rc-lose)}
+.rc2-tieh .win{color:var(--rc-txt)}.rc2-tieh b{color:var(--rc-acc);font-size:15px}
+#archived-poster-box input[type=text]{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 10px;font-size:12px;font-family:inherit}
 </style>
 
 <!-- Supabase SDK -->
@@ -3021,6 +3067,7 @@ Tayfun Selek vs Derya Özdemir
       </div>
       <div id="archived-poster-box" style="margin-bottom:16px"></div>
       <div class="bracket-wrap"><div class="bracket" id="archived-bracket-container"></div></div>
+      <div id="archived-team-container" style="display:none"></div>
     </div>
   </div>
 
@@ -5360,6 +5407,7 @@ function setAdminUI(isAdmin) {
   });
   document.getElementById('admin-badge').classList.toggle('visible', isAdmin);
   if (typeof renderTeamTournament === 'function') renderTeamTournament();
+  if (typeof renderTournamentArchive === 'function') renderTournamentArchive();
   document.getElementById('logout-btn').classList.toggle('visible', isAdmin);
   // login-trigger-btn kaldırıldı (tenis topu çift tık ile giriş aktif)
 }
@@ -7047,27 +7095,212 @@ function _renderActiveTournamentCardDisplay() {
   }
 }
 
+// ═══════════════════════════════════════════════════
+// RIZE CUP 2 (takım turnuvası) – ARŞİV KAYDI VE GÖRÜNÜMÜ
+// ═══════════════════════════════════════════════════
+const RC2_RAW = {
+  teams: {
+    A: ['Furkan Toprak', 'Ali Kemal Okumuş', 'Burçin Bedel'], B: ['Ersin Kayadayı', 'Orçun Yılmaz', 'Adem Doğru'],
+    C: ['Samet Okumuş', 'Edip Kazım Aydın', 'Melisa Çulhacıoğlu'], D: ['Şeref Tüylüoğlu', 'Mehmet Hacıömeroğlu', 'Emine Özgür'],
+    E: ['Ramazan Demirci', 'İlker Memişoğlu', 'Eray Gürsoy'], F: ['Ferhat Tosun', 'Akif Afacanlar', 'Ensar Özer'],
+    G: ['İbrahim Köse', 'Gökhan Çelik', 'Havvanur Karaman'], H: ['Evren Tuğcu', 'Burak Bingöl', 'Muhammed Berat Özyanık'],
+    I: ['Burak Tuğcu', 'Tacettin Sulu', 'Uğur Albayrak'], J: ['Rıza Tüylüoğlu', 'Metin Bıçakçı', 'Fevzi Köse'],
+    K: ['Hatice Can Furat', 'Turushan Övgü', 'Celil Tanrıkulu'], L: ['Yaşar Mercan', 'Özge Şimşek', 'Kerem Asım Kotil']
+  },
+  // Eleme turlarında oyuncu değişikliği: takım -> [çıkan, giren]
+  subs: { H: ['Muhammed Berat Özyanık', 'Fevzi Köse'] },
+  // [takım, oynanan maç, kazanılan maç, set+, set-, oyun+, oyun-, tie-break, puan, çeyrek finale çıktı mı]
+  groups: [
+    [['H', 9, 7, 14, 6, 103, 70, 2, 19, 1], ['D', 9, 3, 10, 11, 97, 97, 1, 13, 1], ['C', 9, 5, 10, 11, 87, 89, 2, 12, 1], ['G', 9, 3, 8, 13, 67, 97, 2, 10, 0]],
+    [['E', 9, 6, 12, 7, 80, 72, 2, 17, 1], ['L', 9, 5, 11, 8, 83, 63, 0, 16, 1], ['K', 9, 4, 8, 11, 69, 80, 1, 11, 1], ['A', 9, 3, 8, 13, 79, 96, 2, 10, 0]],
+    [['I', 9, 7, 15, 5, 92, 57, 1, 20, 1], ['B', 9, 3, 10, 13, 96, 100, 1, 12, 1], ['F', 9, 4, 9, 12, 69, 92, 1, 11, 0], ['J', 9, 4, 10, 13, 91, 97, 1, 11, 0]]
+  ],
+  // [grup, hafta, takım1, takım2, [[t=tek/c=çift, kazanan, kaybeden, skor, kazanan takım], ...]]
+  ties: [
+    [1,1,'C','D',[['t','Şeref Tüylüoğlu','Samet Okumuş','7-6 6-1','D'],['t','Mehmet Hacıömeroğlu','Edip Kazım Aydın','6-3 7-5','D'],['c','Samet / Melisa','Şeref / Emine','4-6 6-4 6-0','C']]],
+    [1,1,'G','H',[['t','Evren Tuğcu','İbrahim Köse','6-4 6-4','H'],['t','Burak Bingöl','Gökhan Çelik','6-1 6-3','H'],['c','Evren / Berat','İbrahim / Havvanur','6-0 6-2','H']]],
+    [1,2,'D','G',[['t','Şeref Tüylüoğlu','İbrahim Köse','6-1 6-1','D'],['t','Havvanur Karaman','Emine Özgür','7-6 3-6 [10-5]','G'],['c','Gökhan / Havvanur','Mehmet / Emine','6-4 6-3','G']]],
+    [1,2,'C','H',[['t','Samet Okumuş','Evren Tuğcu','6-2 6-4','C'],['t','Melisa Çulhacıoğlu','Muhammed Berat Özyanık','6-4 6-3','C'],['c','Burak B. / Berat','Edip / Melisa','6-1 6-1','H']]],
+    [1,3,'D','H',[['t','Burak Bingöl','Mehmet Hacıömeroğlu','6-2 7-5','H'],['t','Muhammed Berat Özyanık','Emine Özgür','4-6 6-2 [10-7]','H'],['c','Evren / Burak B.','Şeref / Mehmet','5-7 6-2 7-6','H']]],
+    [1,3,'C','G',[['t','Gökhan Çelik','Edip Kazım Aydın','6-4 7-5','G'],['t','Melisa Çulhacıoğlu','Havvanur Karaman','6-0 4-6 [10-6]','C'],['c','Samet / Edip','İbrahim / Gökhan','3-6 6-3 [10-8]','C']]],
+    [2,1,'A','E',[['t','Ramazan Demirci','Furkan Toprak','6-1 6-2','E'],['t','İlker Yasin Memişoğlu','Ali Kemal Okumuş','7-5 7-6','E'],['c','Ramazan / Eray','Furkan / Burçin','6-2 6-7 [10-5]','E']]],
+    [2,1,'L','K',[['t','Yaşar Mercan','Hatice Can Furat','6-1 6-1','L'],['t','Turushan Övgü','Özge Şimşek','6-2 6-4','K'],['c','Yaşar / Kerem','Hatice / Celil','6-1 6-1','L']]],
+    [2,2,'E','L',[['t','Ramazan Demirci','Yaşar Mercan','6-0 6-2','E'],['t','Kerem Asım Kotil','Eray Gürsoy','6-0 6-0 WO','L'],['c','Özge / Kerem','İlker / Eray','6-1 6-4','L']]],
+    [2,2,'A','K',[['t','Furkan Toprak','Hatice Can Furat','6-4 6-4','A'],['t','Celil Tanrıkulu','Burçin Bedel','7-5 2-6 [10-3]','K'],['c','Turushan / Celil','Ali Kemal / Burçin','6-1 6-2','K']]],
+    [2,3,'E','K',[['t','İlker Memişoğlu','Turushan Övgü','6-3 6-4','E'],['t','Celil Tanrıkulu','Eray Gürsoy','6-0 6-0 WO','K'],['c','Ramazan / İlker','Hatice / Turushan','6-1 6-3','E']]],
+    [2,3,'A','L',[['t','Ali Kemal Okumuş','Özge Şimşek','5-7 6-0 [10-4]','A'],['t','Kerem Asım Kotil','Burçin Bedel','7-5 6-1','L'],['c','Furkan / Ali Kemal','Yaşar / Özge','6-3 6-4','A']]],
+    [3,1,'B','F',[['t','Ferhat Tosun','Ersin Kayadayı','3-6 6-2 6-2','F'],['t','Orçun Yılmaz','Akif Afacanlar','7-5 3-6 [10-8]','B'],['c','Ersin / Adem','Ferhat / Ensar','6-3 6-1','B']]],
+    [3,1,'I','J',[['t','Burak Tuğcu','Rıza Tüylüoğlu','6-0 6-0','I'],['t','Tacettin Sulu','Metin Bıçakçı','2-6 6-2 [10-5]','I'],['c','Burak T. / Uğur','Rıza / Fevzi','7-6 7-5','I']]],
+    [3,2,'F','I',[['t','Ferhat Tosun','Burak Tuğcu','6-2 6-3','F'],['t','Uğur Albayrak','Ensar Özer','6-1 6-0','I'],['c','Tacettin / Uğur','Akif / Ensar','6-1 6-2','I']]],
+    [3,2,'B','J',[['t','Rıza Tüylüoğlu','Ersin Kayadayı','7-6 1-6 6-3','J'],['t','Fevzi Köse','Adem Doğru','6-3 3-6 6-3','J'],['c','Metin / Fevzi','Orçun / Adem','6-2 1-6 6-4','J']]],
+    [3,3,'F','J',[['t','Akif Afacanlar','Metin Bıçakçı','7-5 3-6 [10-1]','F'],['t','Fevzi Köse','Ensar Özer','6-0 6-0','J'],['c','Ferhat / Akif','Rıza / Metin','6-3 6-4','F']]],
+    [3,3,'B','I',[['t','Tacettin Sulu','Orçun Yılmaz','6-4 6-2','I'],['t','Uğur Albayrak','Adem Doğru','6-2 6-2','I'],['c','Ersin / Orçun','Burak T. / Tacettin','6-4 6-0','B']]]
+  ],
+  ko: {
+    qf: [
+      ['I','C',[['t','Burak Tuğcu','Samet Okumuş','6-3 6-2','I'],['t','Tacettin Sulu','Edip Kazım Aydın','2-1','I']]],
+      ['L','B',[['t','Yaşar Mercan','Ersin Kayadayı','4-6 7-6 [10-8]','L'],['t','Özge Şimşek','Orçun Yılmaz','6-7 6-4 [10-5]','L']]],
+      ['E','D',[['t','Ramazan Demirci','Şeref Tüylüoğlu','6-4 6-3','E'],['t','İlker Memişoğlu','Mehmet Hacıömeroğlu','6-4 1-6 [10-4]','E']]],
+      ['H','K',[['t','Hatice Can Furat','Evren Tuğcu','6-0 3-6 6-4','K'],['t','Burak Bingöl','Turushan Övgü','3-6 6-1 6-2','H'],['c','Evren / Fevzi','Hatice / Celil','6-3 3-6 6-1','H']]]
+    ],
+    sf: [
+      ['I','L',[['t','Yaşar Mercan','Burak Tuğcu','6-4 4-6 [10-6]','L'],['t','Kerem Asım Kotil','Uğur Albayrak','6-4 4-6 6-3','L']]],
+      ['E','H',[['t','Ramazan Demirci','Evren Tuğcu','6-0 6-0','E'],['t','Fevzi Köse','Eray Gürsoy','6-0 6-0 WO','H'],['c','Ramazan / İlker','Evren / Burak B.','6-2 6-2','E']]]
+    ],
+    f: [['L','E',[['c','Ramazan / İlker','Özge / Yaşar','6-3 6-2','E']]]]
+  }
+};
+
+function rc2BuildEntry() {
+  const R = RC2_RAW;
+  const mk = ms => ms.map(x => { const wo = /\sWO$/.test(x[3]); return { k: x[0], w: x[1], l: x[2], s: x[3].replace(/\sWO$/, ''), wo, wt: x[4] }; });
+  return {
+    id: Date.now(),
+    type: 'team',
+    info: { name: 'Rize Cup 2', sub: 'Takım turnuvası' },
+    archivedDate: null,
+    champion: 'E',
+    team: {
+      teams: R.teams,
+      subs: R.subs,
+      groups: R.groups,
+      ties: R.ties.map(t => ({ g: t[0], wk: t[1], a: t[2], b: t[3], m: mk(t[4]) })),
+      ko: {
+        qf: R.ko.qf.map(t => ({ a: t[0], b: t[1], m: mk(t[2]) })),
+        sf: R.ko.sf.map(t => ({ a: t[0], b: t[1], m: mk(t[2]) })),
+        f: R.ko.f.map(t => ({ a: t[0], b: t[1], m: mk(t[2]) }))
+      }
+    }
+  };
+}
+
+function rc2AddToArchive() {
+  if (!isLoggedIn()) { showToast('Yönetici girişi gerekli', 'err'); return; }
+  const list = loadTournamentArchiveList();
+  if (list.some(e => e.type === 'team' && e.info && e.info.name === 'Rize Cup 2')) { showToast('Rize Cup 2 zaten arşivde', 'err'); return; }
+  const entry = rc2BuildEntry();
+  list.push(entry);
+  saveTournamentArchiveLocal(list);
+  renderTournamentArchive();
+  showToast('Rize Cup 2 arşive eklendi 🏆', 'ok');
+  if (window._sbAdmin) {
+    window._sbAdmin.from('meta').update({ tournament_archive: list }).eq('id', 1)
+      .then(({ error }) => { if (error) showToast('Supabase hatası: ' + error.message, 'err'); });
+  }
+}
+
+function _rc2Esc(t) { return String(t == null ? '' : t).replace(/[<>&"]/g, ''); }
+function _rc2Short(n) { const p = String(n).trim().split(/\s+/); if (p.length < 2) return n; const last = p.pop(); return p.join(' ') + ' ' + last[0] + '.'; }
+function _rc2Squad(T, c, ko) {
+  let ps = (T.teams[c] || []).slice();
+  const sb = (T.subs || RC2_RAW.subs || {})[c];
+  if (ko && sb) ps = ps.map(n => n === sb[0] ? sb[1] : n);
+  return ps.map(_rc2Short).join(' · ');
+}
+function _rc2Score(tie) { let a = 0, b = 0; tie.m.forEach(x => { if (x.wt === tie.a) a++; else if (x.wt === tie.b) b++; }); return [a, b]; }
+
+function rc2MatchRows(ms) {
+  return ms.map(x => `<div class="rc2-r"><i>${x.k === 'c' ? 'ÇİFT' : 'TEK'}</i><div class="rc2-nm"><b>${_rc2Esc(x.w)}</b> – ${_rc2Esc(x.l)}</div><div class="rc2-sc">${_rc2Esc(x.s)}${x.wo ? ' <u>WO</u>' : ''}</div></div>`).join('');
+}
+
+function rc2TieCard(T, tie, x, y, cls, ko) {
+  const [sa, sb] = _rc2Score(tie);
+  const trow = (c, s, win) => `<div class="rc2-t ${win ? 'w' : 'l'}"><div><div class="rc2-tn">${c} Takımı</div><div class="rc2-tp">${_rc2Esc(_rc2Squad(T, c, ko))}</div></div><div class="rc2-ts">${s}</div></div>`;
+  return `<div class="rc2-card ${cls || ''}" style="left:${x}px;top:${y}px"><div class="rc2-tt">${trow(tie.a, sa, sa > sb)}${trow(tie.b, sb, sb > sa)}</div><div class="rc2-m">${rc2MatchRows(tie.m)}</div></div>`;
+}
+
+function rc2TreeHtml(T) {
+  const ko = T.ko;
+  const qy = [24, 222, 420, 618], sy = [123, 519], fy = 321;
+  let h = '<div class="rc2-colh" style="left:0">ÇEYREK FİNAL</div><div class="rc2-colh" style="left:410px">YARI FİNAL</div><div class="rc2-colh" style="left:820px">FİNAL</div>';
+  ko.qf.forEach((t, i) => { h += rc2TieCard(T, t, 0, qy[i], '', true); });
+  ko.sf.forEach((t, i) => { h += rc2TieCard(T, t, 410, sy[i], '', true); });
+  const f = ko.f[0];
+  if (f) {
+    const [sa, sb] = _rc2Score(f);
+    const champ = sa > sb ? f.a : f.b;
+    h += rc2TieCard(T, f, 820, fy, 'champ', true);
+    h += `<div class="rc2-trophy" style="left:820px;top:${fy - 26}px">🏆 ŞAMPİYON · ${champ} TAKIMI</div>`;
+  }
+  return `<div class="rc2-scroll"><div class="rc2-tree" id="rc2-tree">${h}</div></div>`;
+}
+
+// Bağlantı çizgilerini kartların gerçek konumuna göre çizer (sekme görünür olduğunda çağrılır)
+function rc2DrawLines() {
+  const tree = document.getElementById('rc2-tree');
+  if (!tree || !tree.offsetParent) return;
+  const cards = [...tree.querySelectorAll('.rc2-card')];
+  if (cards.length < 7) return;
+  const mid = c => c.offsetTop + c.querySelector('.rc2-tt').offsetHeight / 2;
+  const W = 350;
+  let sv = `<svg class="rc2-svg" width="${tree.scrollWidth}" height="${tree.scrollHeight}" fill="none" stroke-width="2">`;
+  [[0, 4], [1, 4], [2, 5], [3, 5]].forEach(([a, b]) => { sv += `<path d="M${W} ${mid(cards[a])} H${W + 30} V${mid(cards[b])} H410"/>`; });
+  [[4, 6], [5, 6]].forEach(([a, b]) => { sv += `<path d="M${410 + W} ${mid(cards[a])} H${410 + W + 30} V${mid(cards[b])} H820"/>`; });
+  tree.querySelectorAll('.rc2-svg').forEach(s => s.remove());
+  tree.insertAdjacentHTML('beforeend', sv + '</svg>');
+}
+
+function rc2GroupsHtml(T) {
+  return T.groups.map((g, gi) => {
+    const rows = g.map((r, i) => `<tr class="${r[9] ? 'q' : 'x'}"><td>${i + 1}</td><td><div class="rc2-gt">${r[0]} Takımı${r[9] ? ' <span class="rc2-chk">✓</span>' : ''}</div><div class="rc2-gp">${_rc2Esc(_rc2Squad(T, r[0]))}</div></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}-${r[4]}</td><td>${r[5]}-${r[6]}</td><td class="rc2-pts">${r[8]}</td></tr>`).join('');
+    return `<div class="rc2-gbox"><div class="rc2-gh">${gi + 1}. GRUP</div><table class="rc2-gtab"><tr><th>#</th><th>TAKIM</th><th>M</th><th>G</th><th>SET</th><th>OYUN</th><th>PUAN</th></tr>${rows}</table></div>`;
+  }).join('') + '<div class="rc2-note">✓ Çeyrek finale çıkan takımlar</div>';
+}
+
+function rc2MatchesHtml(T) {
+  return [1, 2, 3].map(g => {
+    const ties = T.ties.filter(t => t.g === g);
+    const body = [1, 2, 3].map(wk => {
+      const inner = ties.filter(t => t.wk === wk).map(t => {
+        const [sa, sb] = _rc2Score(t);
+        return `<div class="rc2-tie"><div class="rc2-tieh"><span class="${sa > sb ? 'win' : ''}">${t.a} Takımı</span><b>${sa} – ${sb}</b><span class="${sb > sa ? 'win' : ''}">${t.b} Takımı</span></div><div class="rc2-m">${rc2MatchRows(t.m)}</div></div>`;
+      }).join('');
+      return `<div class="rc2-wk">${wk}. HAFTA</div>${inner}`;
+    }).join('');
+    return `<details class="rc2-det"><summary>${g}. Grup maçları</summary>${body}</details>`;
+  }).join('');
+}
+
+function rc2Tab(name) {
+  document.querySelectorAll('.rc2-pane').forEach(p => p.style.display = p.dataset.pane === name ? 'block' : 'none');
+  document.querySelectorAll('.rc2-tabbtn').forEach(b => b.classList.toggle('on', b.dataset.tab === name));
+  if (name === 'tree') rc2DrawLines();
+}
+
+function rc2ViewHtml(entry) {
+  const T = entry.team;
+  return `<div class="rc2">
+    <div class="rc2-tabs"><button class="rc2-tabbtn on" data-tab="tree" onclick="rc2Tab('tree')">Eleme Ağacı</button><button class="rc2-tabbtn" data-tab="groups" onclick="rc2Tab('groups')">Gruplar</button><button class="rc2-tabbtn" data-tab="matches" onclick="rc2Tab('matches')">Maçlar</button></div>
+    <div class="rc2-pane" data-pane="tree">${rc2TreeHtml(T)}<div class="rc2-note">Ağacı yana kaydırarak görebilirsin · H takımında eleme turlarında Muhammed Berat Özyanık yerine Fevzi Köse oynadı</div></div>
+    <div class="rc2-pane" data-pane="groups" style="display:none">${rc2GroupsHtml(T)}</div>
+    <div class="rc2-pane" data-pane="matches" style="display:none">${rc2MatchesHtml(T)}</div>
+  </div>`;
+}
+
 function renderTournamentArchive() {
   const section = document.getElementById('tournament-archive-section');
   const list = document.getElementById('tournament-archive-list');
   if (!section || !list) return;
 
   const archive = loadTournamentArchiveList();
-  if (!archive.length) { section.style.display = 'none'; return; }
+  const hasRc2 = archive.some(e => e.type === 'team' && e.info && e.info.name === 'Rize Cup 2');
+  const adminAdd = (isLoggedIn() && !hasRc2) ? `<div style="margin-top:10px"><button class="btn btn-sm" onclick="rc2AddToArchive()">➕ Rize Cup 2'yi arşive ekle</button></div>` : '';
+  if (!archive.length && !adminAdd) { section.style.display = 'none'; return; }
 
   section.style.display = 'block';
   list.innerHTML = archive.map(entry => {
-    const champ = entry.bracket?.matches?.[31]?.winner;
+    const champ = entry.type === 'team' ? (entry.champion ? entry.champion + ' Takımı' : '') : entry.bracket?.matches?.[31]?.winner;
+    const dateLine = entry.archivedDate ? `<div style="font-size:11px;color:var(--text-muted);margin-top:2px">📅 ${entry.archivedDate}</div>` : (entry.info.sub ? `<div style="font-size:11px;color:var(--text-muted);margin-top:2px">${entry.info.sub}</div>` : '');
     return `<div style="background:var(--surface);border-radius:10px;padding:14px 16px;cursor:pointer" onclick="viewArchivedTournament(${entry.id})">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div>
           <div style="font-weight:600;color:var(--text);font-size:13px">${entry.info.name}</div>
-          <div style="font-size:11px;color:var(--text-muted);margin-top:2px">📅 ${entry.archivedDate}</div>
+          ${dateLine}
         </div>
         ${champ ? `<div style="text-align:right"><div style="font-size:10px;color:var(--gold)">🏆 ŞAMPİYON</div><div style="font-size:12px;color:var(--gold);font-weight:600">${champ}</div></div>` : ''}
       </div>
     </div>`;
-  }).join('');
+  }).join('') + adminAdd;
 }
 
 function _escapePosterUrl(str) { return _esc(str); }
@@ -7075,18 +7308,30 @@ function _escapePosterUrl(str) { return _esc(str); }
 function viewArchivedTournament(id) {
   const archive = loadTournamentArchiveList();
   const entry = archive.find(e => e.id === id);
-  if (!entry || !entry.bracket) { showToast('Bu turnuvaya ait ağaç verisi bulunamadı', 'err'); return; }
+  if (!entry || (!entry.bracket && !entry.team)) { showToast('Bu turnuvaya ait ağaç verisi bulunamadı', 'err'); return; }
 
   const view = document.getElementById('archived-bracket-view');
   const container = document.getElementById('archived-bracket-container');
   const title = document.getElementById('archived-bracket-title');
   const posterBox = document.getElementById('archived-poster-box');
+  const teamBox = document.getElementById('archived-team-container');
   if (!view || !container) return;
 
-  title.textContent = `🏆 ${entry.info.name} — Turnuva Ağacı`;
-  container.innerHTML = buildBracketHtml(entry.bracket) + '<div id="archived-third-place-box"></div>';
-  const tpBox = document.getElementById('archived-third-place-box');
-  if (tpBox && entry.thirdPlace) tpBox.innerHTML = buildThirdPlaceHtml(entry.thirdPlace);
+  if (entry.team) {
+    title.textContent = `🏆 ${entry.info.name}`;
+    container.parentElement.style.display = 'none';
+    teamBox.style.display = 'block';
+    teamBox.innerHTML = rc2ViewHtml(entry);
+    view.style.display = 'block';
+    rc2Tab('tree');
+  } else {
+    title.textContent = `🏆 ${entry.info.name} — Turnuva Ağacı`;
+    container.parentElement.style.display = '';
+    teamBox.style.display = 'none';
+    container.innerHTML = buildBracketHtml(entry.bracket) + '<div id="archived-third-place-box"></div>';
+    const tpBox = document.getElementById('archived-third-place-box');
+    if (tpBox && entry.thirdPlace) tpBox.innerHTML = buildThirdPlaceHtml(entry.thirdPlace);
+  }
 
   if (posterBox) {
     const isAdmin = isLoggedIn();
