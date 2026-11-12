@@ -7212,7 +7212,9 @@ function _rc2SetCount(tie) {
   });
   return [a, b];
 }
-function _rc2Score(tie) { let a = 0, b = 0; tie.m.forEach(x => { if (x.wt === tie.a) a++; else if (x.wt === tie.b) b++; }); return [a, b]; }
+// Eleme turlarında (çeyrek, yarı, final) tek maç 1 puan, çift maçı 1,5 puan; gruplarda her maç 1
+function _rc2Score(tie, ko) { let a = 0, b = 0; tie.m.forEach(x => { const v = ko && x.k === 'c' ? 1.5 : 1; if (x.wt === tie.a) a += v; else if (x.wt === tie.b) b += v; }); return [a, b]; }
+function _rc2Fmt(n) { return String(n).replace('.', ','); }
 
 // Kısaltılmış isimleri (Samet / Melisa, Burak B. / Berat) kadrolardaki tam isme çevirir
 function _rc2Full(T, part, ctx) {
@@ -7235,10 +7237,10 @@ function rc2MatchRows(ms, T, ctx) {
 }
 
 function rc2TieCard(T, tie, x, y, cls, ko) {
-  const [sa, sb] = _rc2Score(tie);
-  const wa = tie.win ? tie.win === tie.a : sa > sb, wb = tie.win ? tie.win === tie.b : sb > sa;
-  const trow = (c, s, win) => `<div class="rc2-t ${win ? 'w' : 'l'}"><div><div class="rc2-tn">${c} Takımı</div><div class="rc2-tp">${_rc2Esc(_rc2Squad(T, c, ko))}</div></div><div class="rc2-ts">${s}</div></div>`;
-  return `<div class="rc2-card ${cls || ''}" style="left:${x}px;top:${y}px"><div class="rc2-tt">${trow(tie.a, sa, wa)}${trow(tie.b, sb, wb)}</div><div class="rc2-m">${rc2MatchRows(tie.m, T, [tie.a, tie.b])}${tie.win && sa === sb ? `<div class="rc2-nt">Maç skoru ${sa}-${sb} · set sayısı: ${tie.a} ${_rc2SetCount(tie)[0]} – ${_rc2SetCount(tie)[1]} ${tie.b}</div>` : ''}</div></div>`;
+  const [sa, sb] = _rc2Score(tie, ko);
+  const wa = sa > sb, wb = sb > sa;
+  const trow = (c, s, win) => `<div class="rc2-t ${win ? 'w' : 'l'}"><div><div class="rc2-tn">${c} Takımı</div><div class="rc2-tp">${_rc2Esc(_rc2Squad(T, c, ko))}</div></div><div class="rc2-ts">${_rc2Fmt(s)}</div></div>`;
+  return `<div class="rc2-card ${cls || ''}" style="left:${x}px;top:${y}px"><div class="rc2-tt">${trow(tie.a, sa, wa)}${trow(tie.b, sb, wb)}</div><div class="rc2-m">${rc2MatchRows(tie.m, T, [tie.a, tie.b])}</div></div>`;
 }
 
 function rc2TreeHtml(T) {
@@ -7249,8 +7251,8 @@ function rc2TreeHtml(T) {
   ko.sf.forEach((t, i) => { h += rc2TieCard(T, t, 410, sy[i], '', true); });
   const f = ko.f[0];
   if (f) {
-    const [sa, sb] = _rc2Score(f);
-    const champ = f.win || (sa > sb ? f.a : f.b);
+    const [sa, sb] = _rc2Score(f, true);
+    const champ = sa > sb ? f.a : f.b;
     h += rc2TieCard(T, f, 820, fy, 'champ', true);
     h += `<div class="rc2-trophy" style="left:820px;top:${fy - 26}px">🏆 ŞAMPİYON · ${champ} TAKIMI</div>`;
   }
@@ -7303,7 +7305,7 @@ function rc2ViewHtml(entry) {
   const T = entry.team;
   return `<div class="rc2">
     <div class="rc2-tabs"><button class="rc2-tabbtn on" data-tab="tree" onclick="rc2Tab('tree')">Eleme Ağacı</button><button class="rc2-tabbtn" data-tab="groups" onclick="rc2Tab('groups')">Gruplar</button><button class="rc2-tabbtn" data-tab="matches" onclick="rc2Tab('matches')">Maçlar</button></div>
-    <div class="rc2-pane" data-pane="tree">${rc2TreeHtml(T)}<div class="rc2-note">Ağacı yana kaydırarak görebilirsin · H takımında eleme turlarında Muhammed Berat Özyanık yerine Fevzi Köse oynadı</div></div>
+    <div class="rc2-pane" data-pane="tree">${rc2TreeHtml(T)}<div class="rc2-note">Eleme turlarında tek maç 1, çift maç 1,5 puan sayılır. Ağacı yana kaydırarak görebilirsin · H takımında eleme turlarında Muhammed Berat Özyanık yerine Fevzi Köse oynadı</div></div>
     <div class="rc2-pane" data-pane="groups" style="display:none">${rc2GroupsHtml(T)}</div>
     <div class="rc2-pane" data-pane="matches" style="display:none">${rc2MatchesHtml(T)}</div>
   </div>`;
