@@ -4655,8 +4655,7 @@ function clearSpecialPlayer() {
 // SEZON SAYACI
 function initCountdown() {
   const SEASON_START = new Date(2026, 8, 4, 0, 0, 0);  // 4 Eylül 2026 — Güz Sezonu başlangıcı
-  const SEASON_DAYS  = 90;                             // Sezon süresi
-  const SEASON_END   = new Date(SEASON_START.getTime() + SEASON_DAYS * 86400000);
+  const SEASON_END   = new Date(2026, 10, 9, 23, 59, 59); // 9 Kasım 2026 — Güz Sezonu bitişi
 
   function update() {
     const el = document.getElementById('season-countdown');
@@ -8194,13 +8193,13 @@ function computeSeasonBests(code) {
     return { v: first[0], names: group.map(x => ({ name: x.p.name, lg: x.p.lg })), p: group[0].p };
   };
   // İlk n sıra; n. sıradakiyle ana ölçüde eşit olan herkes de listelenir (kimse gizlenmez)
-  const topN = (items, keyFn, n, min) => {
+  const topN = (items, keyFn, n, min, exact) => {
     const arr = items.map(p => ({ p, k: keyFn(p) }))
       .filter(x => x.k[0] !== null && !isNaN(x.k[0]) && (min === undefined || x.k[0] >= min))
       .sort((a, b) => cmpKeys(a.k, b.k) || b.p.mp - a.p.mp || a.p.name.localeCompare(b.p.name, 'tr'));
     if (!arr.length) return [];
     const lim = arr[Math.min(n, arr.length) - 1].k[0];
-    const out = arr.filter((x, i) => i < n || x.k[0] === lim);
+    const out = exact ? arr.slice(0, n) : arr.filter((x, i) => i < n || x.k[0] === lim);
     out.forEach(x => { x.rk = arr.findIndex(y => y.k[0] === x.k[0]) + 1; });
     return out;
   };
@@ -8221,8 +8220,8 @@ function computeSeasonBests(code) {
     });
     let pool = stats.filter(p => p.mp >= 5), minLbl = 5;
     if (!pool.length) { pool = stats.filter(p => p.mp >= 3); minLbl = 3; }
-    res.lists.push({ label: `GALİBİYET % (en az ${minLbl} maç)`, rows: topN(pool, p => [Math.round(p.rate * 100), p.gd, p.sd], 3).map(x => ({ rk: x.rk, p: x.p, big: `%${x.k[0]}` })) });
-    res.lists.push({ label: 'MAÇ BAŞINA OYUN FARKI (en az 3 maç)', rows: topN(stats.filter(p => p.nmp >= 3), p => [p.gdpm, p.rate], 3, 0.0001).map(x => ({ rk: x.rk, p: x.p, big: `+${x.k[0].toFixed(1)}` })) });
+    res.lists.push({ label: `GALİBİYET % (en az ${minLbl} maç)`, rows: topN(pool, p => [Math.round(p.rate * 100), p.mp, p.gd, p.sd], 3, undefined, true).map(x => ({ rk: x.rk, p: x.p, big: `%${x.k[0]}` })) });
+    res.lists.push({ label: 'MAÇ BAŞINA OYUN FARKI (en az 3 maç)', rows: topN(stats.filter(p => p.nmp >= 3), p => [p.gdpm, p.mp, p.rate], 3, 0.0001, true).map(x => ({ rk: x.rk, p: x.p, big: `+${x.k[0].toFixed(1)}` })) });
   } else {
     res.lists.push({ label: 'EN ÇOK GALİBİYET', rows: topN(stats, kWins, 3, 1).map(x => ({ rk: x.rk, p: x.p, big: `${x.p.mw}` })) });
     res.lists.push({ label: 'EN ÇOK PUAN', rows: topN(stats, kPts, 3, 1).map(x => ({ rk: x.rk, p: x.p, big: `${x.p.pts}` })) });
@@ -8340,7 +8339,7 @@ function buildSeasonBestsHtml(code) {
   if (b.lists.length) {
     const listHtml = b.lists.map(l => `<div><div style="font-size:14px;font-weight:800;letter-spacing:0.12em;color:${ACC};margin:8px 0 2px">${l.label}</div>${
       l.rows.map((r, i) => `<div style="display:flex;align-items:center;padding:9px 0;border-bottom:1px solid ${LINE}"><div style="width:34px;font-size:20px;font-weight:900;color:${ACC}">${r.rk || i + 1}</div><div style="flex:1;min-width:0;font-size:22px;font-weight:700;color:${TX};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.p.name)}<span style="font-size:14px;color:${SUB};font-weight:600;margin-left:8px">${leagueName(r.p.lg)}</span></div><div style="font-size:24px;font-weight:900;color:${ACC};margin-left:10px">${esc(r.big)}</div></div>`).join('')}</div>`).join('');
-    html += panel(`${head(code ? `${scopeLabel.toUpperCase()} · İLK 3` : 'TÜM LİGLER · ORANA GÖRE İLK 3')}<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 34px">${listHtml}</div>`);
+    html += panel(`${head(code ? `${scopeLabel.toUpperCase()} · ENLER` : 'TÜM LİGLER · ORANA GÖRE İLK 3')}<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 34px">${listHtml}</div>${code ? '' : `<div style="font-size:13px;color:${SUB};margin-top:8px">Eşitlikte daha çok maç oynayan öne geçer.</div>`}`);
   }
 
   if (b.extras.length) {
