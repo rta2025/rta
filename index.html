@@ -1997,7 +1997,7 @@ body.light-mode .rc2{--rc-card:#eef3fc;--rc-card2:#e3ebf8;--rc-line:#c6d4ec;--rc
 .rc2-tabbtn{background:var(--rc-card);border:1px solid var(--rc-line);color:var(--rc-mut);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
 .rc2-tabbtn.on{background:var(--rc-acc);border-color:var(--rc-acc);color:#0b1426}
 .rc2-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px}
-.rc2-tree{position:relative;width:1180px;height:850px}
+.rc2-tree{position:relative;width:1180px;height:990px}
 .rc2-svg{position:absolute;left:0;top:0;pointer-events:none;stroke:var(--rc-line)}
 .rc2-colh{position:absolute;top:0;font-size:11px;letter-spacing:.14em;color:var(--rc-mut);font-weight:700}
 .rc2-card{position:absolute;width:350px;background:var(--rc-card);border:1px solid var(--rc-line);border-radius:12px;overflow:hidden}
@@ -2009,9 +2009,9 @@ body.light-mode .rc2{--rc-card:#eef3fc;--rc-card2:#e3ebf8;--rc-line:#c6d4ec;--rc
 .rc2-t.w{background:var(--rc-win)}.rc2-t.w .rc2-ts{color:var(--rc-acc)}
 .rc2-m{padding:6px 12px;border-top:1px solid var(--rc-line);background:var(--rc-card2)}
 .rc2-r{display:flex;align-items:baseline;gap:8px;font-size:11.5px;padding:3px 0}
-.rc2-r i{font-style:normal;font-size:9.5px;color:var(--rc-mut);font-weight:700;width:34px;letter-spacing:.06em;flex-shrink:0}
-.rc2-nm{flex:1;color:var(--rc-lose);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rc2-nm b{color:var(--rc-txt);font-weight:700}
-.rc2-sc{font-weight:700;white-space:nowrap}.rc2-sc u{text-decoration:none;font-size:9px;color:var(--rc-mut);letter-spacing:.06em;margin-left:3px}
+.rc2-r{align-items:flex-start}.rc2-r i{font-style:normal;font-size:9.5px;color:var(--rc-mut);font-weight:700;width:34px;letter-spacing:.06em;flex-shrink:0}
+.rc2-nm{flex:1;color:var(--rc-lose);min-width:0;line-height:1.35}.rc2-nm b{color:var(--rc-txt);font-weight:700}
+.rc2-sc{font-weight:700;white-space:nowrap;text-align:right}.rc2-sc u{text-decoration:none;font-size:9px;color:var(--rc-mut);letter-spacing:.06em;margin-left:3px}
 .rc2-card.champ{border-color:var(--rc-gold);box-shadow:0 0 0 1px var(--rc-gold)}
 .rc2-card.champ .rc2-t.w{background:rgba(230,196,92,.14)}.rc2-card.champ .rc2-t.w .rc2-ts{color:var(--rc-gold)}
 .rc2-trophy{position:absolute;font-size:12px;color:var(--rc-gold);font-weight:800;letter-spacing:.12em}
@@ -7195,23 +7195,39 @@ function _rc2Squad(T, c, ko) {
   let ps = (T.teams[c] || []).slice();
   const sb = (T.subs || RC2_RAW.subs || {})[c];
   if (ko && sb) ps = ps.map(n => n === sb[0] ? sb[1] : n);
-  return ps.map(_rc2Short).join(' · ');
+  return ps.join(' · ');
 }
 function _rc2Score(tie) { let a = 0, b = 0; tie.m.forEach(x => { if (x.wt === tie.a) a++; else if (x.wt === tie.b) b++; }); return [a, b]; }
 
-function rc2MatchRows(ms) {
-  return ms.map(x => `<div class="rc2-r"><i>${x.k === 'c' ? 'ÇİFT' : 'TEK'}</i><div class="rc2-nm"><b>${_rc2Esc(x.w)}</b> – ${_rc2Esc(x.l)}</div><div class="rc2-sc">${_rc2Esc(x.s)}${x.wo ? ' <u>WO</u>' : ''}</div></div>`).join('');
+// Kısaltılmış isimleri (Samet / Melisa, Burak B. / Berat) kadrolardaki tam isme çevirir
+function _rc2Full(T, part, ctx) {
+  const p = part.trim();
+  if (!p) return p;
+  const pools = [];
+  (ctx || []).forEach(c => (T.teams[c] || []).forEach(n => pools.push(n)));
+  Object.keys(T.teams).forEach(c => T.teams[c].forEach(n => pools.push(n)));
+  const m = p.match(/^(.+?)\s+(\S)\.$/);
+  const toks = n => n.split(/\s+/);
+  let hit = null;
+  if (m) hit = pools.find(n => { const t = toks(n); return t[0] === m[1] && t[t.length - 1][0] === m[2]; });
+  if (!hit && p.includes(' ')) { const pt = toks(p); hit = pools.find(n => { const t = toks(n); return t[0] === pt[0] && t[t.length - 1] === pt[pt.length - 1]; }); }
+  if (!hit && !p.includes(' ')) hit = pools.find(n => toks(n).includes(p));
+  return hit || p;
+}
+function _rc2Names(T, str, ctx) { return String(str).split(' / ').map(x => _rc2Full(T, x, ctx)).join(' / '); }
+function rc2MatchRows(ms, T, ctx) {
+  return ms.map(x => `<div class="rc2-r"><i>${x.k === 'c' ? 'ÇİFT' : 'TEK'}</i><div class="rc2-nm"><b>${_rc2Esc(_rc2Names(T, x.w, ctx))}</b> – ${_rc2Esc(_rc2Names(T, x.l, ctx))}</div><div class="rc2-sc">${_rc2Esc(x.s)}${x.wo ? ' <u>WO</u>' : ''}</div></div>`).join('');
 }
 
 function rc2TieCard(T, tie, x, y, cls, ko) {
   const [sa, sb] = _rc2Score(tie);
   const trow = (c, s, win) => `<div class="rc2-t ${win ? 'w' : 'l'}"><div><div class="rc2-tn">${c} Takımı</div><div class="rc2-tp">${_rc2Esc(_rc2Squad(T, c, ko))}</div></div><div class="rc2-ts">${s}</div></div>`;
-  return `<div class="rc2-card ${cls || ''}" style="left:${x}px;top:${y}px"><div class="rc2-tt">${trow(tie.a, sa, sa > sb)}${trow(tie.b, sb, sb > sa)}</div><div class="rc2-m">${rc2MatchRows(tie.m)}</div></div>`;
+  return `<div class="rc2-card ${cls || ''}" style="left:${x}px;top:${y}px"><div class="rc2-tt">${trow(tie.a, sa, sa > sb)}${trow(tie.b, sb, sb > sa)}</div><div class="rc2-m">${rc2MatchRows(tie.m, T, [tie.a, tie.b])}</div></div>`;
 }
 
 function rc2TreeHtml(T) {
   const ko = T.ko;
-  const qy = [24, 222, 420, 618], sy = [123, 519], fy = 321;
+  const qy = [24, 254, 484, 714], sy = [139, 599], fy = 369;
   let h = '<div class="rc2-colh" style="left:0">ÇEYREK FİNAL</div><div class="rc2-colh" style="left:410px">YARI FİNAL</div><div class="rc2-colh" style="left:820px">FİNAL</div>';
   ko.qf.forEach((t, i) => { h += rc2TieCard(T, t, 0, qy[i], '', true); });
   ko.sf.forEach((t, i) => { h += rc2TieCard(T, t, 410, sy[i], '', true); });
@@ -7253,7 +7269,7 @@ function rc2MatchesHtml(T) {
     const body = [1, 2, 3].map(wk => {
       const inner = ties.filter(t => t.wk === wk).map(t => {
         const [sa, sb] = _rc2Score(t);
-        return `<div class="rc2-tie"><div class="rc2-tieh"><span class="${sa > sb ? 'win' : ''}">${t.a} Takımı</span><b>${sa} – ${sb}</b><span class="${sb > sa ? 'win' : ''}">${t.b} Takımı</span></div><div class="rc2-m">${rc2MatchRows(t.m)}</div></div>`;
+        return `<div class="rc2-tie"><div class="rc2-tieh"><span class="${sa > sb ? 'win' : ''}">${t.a} Takımı</span><b>${sa} – ${sb}</b><span class="${sb > sa ? 'win' : ''}">${t.b} Takımı</span></div><div class="rc2-m">${rc2MatchRows(t.m, T, [t.a, t.b])}</div></div>`;
       }).join('');
       return `<div class="rc2-wk">${wk}. HAFTA</div>${inner}`;
     }).join('');
