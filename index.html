@@ -8247,7 +8247,7 @@ function computeSeasonBests(code) {
       diffs.filter(x => x.d >= 12 && x.gl === 0).forEach(x => { (per[x.m.winner] = per[x.m.winner] || []).push(x.m); });
       const rows = Object.keys(per).map(id => ({ id: +id, ms: per[id] }))
         .sort((a, b) => b.ms.length - a.ms.length || nameOf(a.id).localeCompare(nameOf(b.id), 'tr'))
-        .map(r => ({ name: nameOf(r.id), sub: `${leagueName(r.ms[0].league)} · ${r.ms.map(m => nameOf(m.loser)).join(', ')}`, big: `${r.ms.length} kez` }));
+        .map(r => ({ name: nameOf(r.id), sub: leagueName(r.ms[0].league), big: `${r.ms.length} kez` }));
       pushExtra('DOUBLE BAGEL (6-0 / 6-0)', rows);
     } else {
       const best = diffs.filter(x => x.d === diffs[0].d && x.gl === diffs[0].gl);
