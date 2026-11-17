@@ -4505,7 +4505,7 @@ function renderFeaturedMatch() {
 
   const now = new Date();
   const weekAgo = new Date(now - 7 * 86400000);
-  const recent = state.matches.filter(m => new Date(m.date) >= weekAgo && !isRetiredMatch(m));
+  const recent = state.matches.filter(m => new Date(m.date) >= weekAgo && !isWoMatch(m));
   if (!recent.length) { el.innerHTML = ''; return; }
 
   const threeSet = recent.filter(m => m.sets && m.sets.length === 3);
@@ -4573,7 +4573,7 @@ function renderPlayerOfWeek() {
   // Normal haftanın oyuncusu hesabı
   const now = new Date();
   const weekAgo = new Date(now - 7 * 86400000);
-  const recent = state.matches.filter(m => new Date(m.date) >= weekAgo && !isRetiredMatch(m));
+  const recent = state.matches.filter(m => new Date(m.date) >= weekAgo && !isWoMatch(m));
   if (recent.length < 2) { el.innerHTML = ''; return; }
 
   const stats = {};
