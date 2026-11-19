@@ -6019,7 +6019,7 @@ function _renderArchiveList() {
                 <span class="po-vs-txt">VS</span>
                 <span class="po-loser">${po.loser}</span>
               </div>
-              <span class="po-score">${po.scoreStr}</span>
+              <span class="po-score">${poScoreText(po)}</span>
             </div>
             <div class="po-note"><span>📌</span><span>${po.note}</span></div>
           </div>`
@@ -6384,6 +6384,13 @@ function buildPoNote(type, winner, loser, challenger) {
       return `🔒 ${winner} (3.Lig 9.) 5.Lig 1.si ${loser}'i yendi → 3. Lig'de kaldı.`;
     }
   }
+}
+
+// Play-off skoru kazananın bakış açısıyla gösterilir (setler 1. oyuncu-2. oyuncu sırasıyla saklanır)
+function poScoreText(po) {
+  const sets = po.sets || [];
+  if (!sets.length || !po.playerA || po.winner === po.playerA) return po.scoreStr;
+  return sets.map(([a, b]) => `${b}-${a}`).join(' ');
 }
 
 function submitPlayoff() {
