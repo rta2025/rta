@@ -3992,7 +3992,7 @@ function updatePlayerDropdowns() {
   refreshWoWinner();
 }
 
-// Hükmen galip listesi: ligdeki diğer oyuncular; mağlupla zaten maçı olanların yanına "(maç var)" yazılır
+// Hükmen galip listesi: ligde mağlup oyuncuyla henüz maçı olmayan rakipler
 function refreshWoWinner() {
   const lg = document.getElementById('hl').value;
   const loser = parseInt(document.getElementById('hp').value);
@@ -4001,9 +4001,11 @@ function refreshWoWinner() {
   const prev = sel.value;
   const played = new Set(state.matches.filter(m => m.league === lg && (m.winner === loser || m.loser === loser))
     .map(m => m.winner === loser ? m.loser : m.winner));
-  const list = state.players.filter(p => p.league === lg && p.id !== loser)
-    .sort((a, b) => (played.has(a.id) - played.has(b.id)) || a.name.localeCompare(b.name, 'tr'));
-  sel.innerHTML = list.map(p => `<option value="${p.id}">${p.name}${played.has(p.id) ? ' (maç var)' : ''}</option>`).join('');
+  const list = state.players.filter(p => p.league === lg && p.id !== loser && !played.has(p.id))
+    .sort((a, b) => a.name.localeCompare(b.name, 'tr'));
+  sel.innerHTML = list.length
+    ? list.map(p => `<option value="${p.id}">${p.name}</option>`).join('')
+    : '<option value="">Maç yapmadığı rakip kalmadı</option>';
   if (prev && list.some(p => String(p.id) === prev)) sel.value = prev;
 }
 
@@ -4167,7 +4169,7 @@ function submitWalkover() {
   if (!others.length) { showToast('Ligde başka oyuncu yok!', 'err'); return; }
 
   const wPlayer = state.players.find(p => p.id === parseInt(document.getElementById('hw').value) && p.league === league);
-  if (!wPlayer) { showToast('Galip oyuncuyu seç!', 'err'); return; }
+  if (!wPlayer) { showToast('Seçilebilecek rakip yok: bu oyuncu ligde herkesle oynamış.', 'err'); return; }
   const already = state.matches.some(m => m.league === league &&
     ((m.winner === wPlayer.id && m.loser === loser) || (m.winner === loser && m.loser === wPlayer.id)));
   if (already && !confirm('Bu iki oyuncunun ligde zaten bir maçı var. Yine de hükmen eklensin mi?')) return;
