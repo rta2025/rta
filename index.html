@@ -3241,51 +3241,82 @@ function loadState() {
   try { const d = localStorage.getItem(SK); return d ? JSON.parse(d) : null; } catch { return null; }
 }
 
+// Supabase istemcisi ağ/izin hatalarında exception FIRLATMAZ, {error} döndürür.
+// Daha önce bu hata görmezden geliniyordu: ekranda "kazandı" yazıyor ama kayıt sunucuya gitmiyordu.
+function _sbOk(res, what) {
+  if (res && res.error) throw new Error(what + ': ' + (res.error.message || res.error.code || 'bilinmeyen hata'));
+  return res;
+}
+
+async function _saveStateOnce() {
+  const sb = window._sbAdmin;
+  // Tüm veriyi await'ten ÖNCE kopyala: kayıt sürerken gelen bir "yenile" olayı
+  // state'i değiştirse bile yeni girilen maç kaybolmasın.
+  const metaRow = { id: 1, next_player_id: state.nextPlayerId, next_match_id: state.nextMatchId };
+  const playerRows = state.players.map(p => ({
+    id: p.id, name: p.name, league: p.league, photo_url: p.photo_url || null, gender: p.gender || 'M'
+  }));
+  const matchRows = state.matches.map(m => ({
+    id:           m.id,
+    league:       m.league,
+    winner:       m.winner,
+    loser:        m.loser,
+    match_date:   m.date,
+    score:        m.score,
+    sets_json:    JSON.stringify(m.sets || []),
+    winning_sets: m.winningSets,
+    losing_sets:  m.losingSets,
+    wpts:         m.wpts,
+    lpts:         m.lpts,
+    walkover:     m.walkover || false
+  }));
+  _sbOk(await sb.from('meta').upsert(metaRow), 'meta');
+  if (playerRows.length) _sbOk(await sb.from('players').upsert(playerRows), 'players');
+  if (matchRows.length) {
+    _sbOk(await sb.from('matches').upsert(matchRows), 'matches');
+  } else {
+    // Maç listesi boşsa (ör. "Maçları Temizle"), Supabase'deki eski
+    // maçları da gerçekten sil — yoksa sayfa yenilenince geri gelirler.
+    _sbOk(await sb.from('matches').delete().gte('id', 0), 'matches-delete');
+  }
+}
+
 async function saveState() {
   localStorage.setItem(SK, JSON.stringify(state));
   if (!window._sbReady) return true; // Supabase henüz hazır değilse yerel kayıt yeterli sayılır
-  const sb = window._sbAdmin;
+  window._pendingSaves = (window._pendingSaves || 0) + 1;
+  window._unsavedChanges = true;
+  let lastErr = null;
   try {
-    await sb.from('meta').upsert({
-      id: 1,
-      next_player_id: state.nextPlayerId,
-      next_match_id:  state.nextMatchId
-    });
-    if (state.players.length) {
-      await sb.from('players').upsert(
-        state.players.map(p => ({
-          id: p.id, name: p.name, league: p.league, photo_url: p.photo_url || null, gender: p.gender || 'M'
-        }))
-      );
+    for (let i = 0; i < 3; i++) {
+      try {
+        await _saveStateOnce();
+        if (window._pendingSaves <= 1) window._unsavedChanges = false;
+        return true;
+      } catch (e) {
+        lastErr = e;
+        console.warn('Supabase write error (deneme ' + (i + 1) + '):', e);
+        await new Promise(r => setTimeout(r, 900 * (i + 1)));
+      }
     }
-    if (state.matches.length) {
-      await sb.from('matches').upsert(
-        state.matches.map(m => ({
-          id:           m.id,
-          league:       m.league,
-          winner:       m.winner,
-          loser:        m.loser,
-          match_date:   m.date,
-          score:        m.score,
-          sets_json:    JSON.stringify(m.sets || []),
-          winning_sets: m.winningSets,
-          losing_sets:  m.losingSets,
-          wpts:         m.wpts,
-          lpts:         m.lpts,
-          walkover:     m.walkover || false
-        }))
-      );
-    } else {
-      // Maç listesi boşsa (ör. "Maçları Temizle"), Supabase'deki eski
-      // maçları da gerçekten sil — yoksa sayfa yenilenince geri gelirler.
-      await sb.from('matches').delete().gte('id', 0);
-    }
-    return true;
-  } catch(e) {
-    console.warn('Supabase write error:', e);
+    window._lastSaveError = lastErr && lastErr.message;
     return false;
+  } finally {
+    window._pendingSaves--;
   }
 }
+
+// Kayıt başarısız olduysa arka planda 15 sn'de bir otomatik yeniden dene
+setInterval(async () => {
+  if (window._unsavedChanges && !window._pendingSaves) {
+    const ok = await saveState();
+    if (ok && typeof showToast === 'function') showToast('✅ Bekleyen kayıt sunucuya gönderildi');
+  }
+}, 15000);
+
+window.addEventListener('beforeunload', e => {
+  if (window._unsavedChanges) { e.preventDefault(); e.returnValue = ''; }
+});
 
 async function sbDeleteMatch(id) {
   if (!window._sbReady) return;
@@ -3302,6 +3333,9 @@ async function sbDeletePlayer(id) {
 
 async function loadFromSupabase() {
   if (!window._sbReady) return false;
+  // Kayıt sürerken ya da sunucuya gitmemiş değişiklik varken sunucu verisiyle ÜZERİNE YAZMA
+  // (yeni girilen maçın silinmesinin sebebi buydu).
+  if (window._pendingSaves > 0 || window._unsavedChanges) return true;
   const sb = window._sb;
   try {
     const [{ data: players }, { data: matches }, { data: meta }, { data: ranking }, { data: archives }, { data: playoffs }, { data: photos }, { data: gAlbums }, { data: gPhotos }] = await Promise.all([
@@ -4147,7 +4181,7 @@ async function submitMatch() {
 
   saveState().then(ok => {
     if (!ok) {
-      showToast('⚠️ Kaydedilemedi! İnternet bağlantını kontrol edip tekrar dene.', 'err');
+      showToast('⚠️ Sunucuya kaydedilemedi! Sayfayı KAPATMA, 15 sn içinde otomatik tekrar denenecek. ' + (window._lastSaveError || ''), 'err');
     } else {
       showToast(`✅ ${playerName(winner)} kazandı! (${wpts} puan)` + (ignoredThirdSet ? ' — ⚠️ maç 2-0 bittiği için 3. set yok sayıldı' : ''));
     }
@@ -4187,7 +4221,7 @@ function submitWalkover() {
 
   saveState().then(ok => {
     if (!ok) {
-      showToast('⚠️ Kaydedilemedi! İnternet bağlantını kontrol edip tekrar dene.', 'err');
+      showToast('⚠️ Sunucuya kaydedilemedi! Sayfayı KAPATMA, 15 sn içinde otomatik tekrar denenecek. ' + (window._lastSaveError || ''), 'err');
     } else {
       showToast(`🚫 Hükmen: ${playerName(wPlayer.id)} kazandı (4 puan)`);
     }
@@ -6453,7 +6487,7 @@ function submitPlayoff() {
 
   sbUpsertPlayoff(entry).then(ok => {
     if (!ok) {
-      showToast('⚠️ Kaydedilemedi! İnternet bağlantını kontrol edip tekrar dene.', 'err');
+      showToast('⚠️ Sunucuya kaydedilemedi! Sayfayı KAPATMA, 15 sn içinde otomatik tekrar denenecek. ' + (window._lastSaveError || ''), 'err');
     } else {
       showToast(`✅ Play-off sonucu kaydedildi! ${winner} kazandı.`);
     }
@@ -9472,7 +9506,7 @@ function showToast(msg, type = 'ok') {
   t.textContent = msg;
   t.className = 'toast show' + (type === 'err' ? ' err' : '');
   clearTimeout(t._timer);
-  t._timer = setTimeout(() => t.classList.remove('show'), 3000);
+  t._timer = setTimeout(() => t.classList.remove('show'), type === 'err' ? 7000 : 3000);
 }
 
 // ═══════════════════════════════════════════════════
